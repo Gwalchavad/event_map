@@ -1,0 +1,9 @@
+{% extends base %}
+{% load ows %}
+{% load i18n %}
+
+{% block title %}{% trans 'Page Not Found' %} | {{ OWS_SITE_NAME }}{% endblock title %}
+
+{% block content %}
+  {{ verbiage.error404 }}
+{% endblock %}

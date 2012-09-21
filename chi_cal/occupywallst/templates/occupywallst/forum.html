@@ -1,0 +1,76 @@
+{% extends base %}
+{% load ows i18n l10n %}
+{% block body_class %}{{ block.super }} forum-bubbling-page forum-page{% endblock %}
+{% block title %}{% trans 'Public Forum' %} | {{ OWS_SITE_NAME }}{% endblock title %}
+
+{% block nav %}
+  {{ block.super }}
+  {% include "occupywallst/forum_nav.html" %}
+{% endblock nav %}
+
+{% block content %}
+  <table style="width:100%"><tbody><tr><td id="left">
+    <h1>{% trans 'Public Forum' %} -
+      <a class="primary" href="http://occupywallst.org/forum/moderating-policies-will-be-reposted-somewhere-pro/">{% trans 'Read the Rules Before Posting' %}</a>
+      <a href="#" class="newthreadlink">{% trans 'post' %}</a></h1>
+    <div class="newthreadform" style="display:none">
+      <div>
+        <label for="title">{% trans 'title' %}</label><br />
+        <input class="title" id="title" maxlength="255" size="60" />
+      </div>
+      <div>
+        <label for="content">{% trans 'content' %}</label><br />
+        <textarea class="content" id="content" rows="7" cols="70"></textarea>
+      </div>
+      <div>
+        <button class="save">{% trans 'post thread' %}</button>
+        <img class="loader" src="{{ MEDIA_URL }}img/ajax-loader.gif"
+             width="16" height="16" />
+        <span class="error"></span>
+        <a href="http://occupywallst.org/forum/moderating-policies-will-be-reposted-somewhere-pro/">Read the Rules</a>
+      </div>
+    </div>
+    <section id="thread-list">
+      {% for article in articles %}
+        {% include "occupywallst/forumpost_synopsis.html" %}
+      {% endfor %}
+    </section>
+    <p style="text-align:center">
+      <img alt="loading..." id="loady" src="{{ MEDIA_URL }}img/ajax-loader-32.gif" width="32" height="32" />
+    </p>
+  </td><td id="right">
+    <section id="recents">
+      <h2 style="margin-bottom:0.5em">{% trans 'Best Comments Today' %}</h2>
+      {% if not bests %}
+        <p>{% trans "None Found :'(" %}</p>
+      {% endif %}
+      {% for best in bests %}
+        <div class="item clickdiv recent-comment">
+          <div class="title">
+            <a class="primary" title="{% trans 'View Comment Thread' %}"
+               href="{{ best.get_forum_url }}">{{ best.content|synopsis }}</a>
+          </div>
+          <div class="info">
+{% blocktrans with karma=best.karma|localize timesince=best.published|timesince_short username=best.user|userlink ukarma=best.user.userinfo.karma|localize %}
+{{ karma }} points {{ timesince }} ago by {{ username }} ({{ ukarma }})
+{% endblocktrans %}
+          </div>
+        </div>
+      {% endfor %}
+      <h2 style="margin:0.5em 0">{% trans 'Recent Comments' %}</h2>
+      {% for recent in recents %}
+        <div class="item clickdiv recent-comment">
+          <div class="title">
+            <a class="primary" title="{% trans 'View Comment Thread' %}"
+               href="{{ recent.get_forum_url }}">{{ recent.content|synopsis }}</a>
+          </div>
+          <div class="info">
+{% blocktrans with karma=recent.karma|localize timesince=recent.published|timesince_short username=recent.user|userlink ukarma=recent.user.userinfo.karma|localize %}
+{{ karma }} points {{ timesince }} ago by {{ username }} ({{ ukarma }})
+{% endblocktrans %}
+          </div>
+        </div>
+      {% endfor %}
+    </section>
+  </td></tr></tbody></table>
+{% endblock content %}

@@ -1,0 +1,11 @@
+  <section class="modal hide" id="login">
+    <h1>{% trans 'Login' %}</h1>
+    <br />
+    <form action="." method="post">{% csrf_token %}
+      <table class="formtable">
+        {{ form.as_table }}
+      </table>
+      <p><input type="submit" value="{% trans 'Login' %}" /></p>
+    </form>
+  </section>
+
