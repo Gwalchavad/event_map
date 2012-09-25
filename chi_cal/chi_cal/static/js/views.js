@@ -1,3 +1,11 @@
+Backbone.View.prototype.close = function () {
+    if (this.beforeClose) {
+        this.beforeClose();
+    }
+    this.remove();
+    this.unbind();
+};
+
 var Cal_BarView = Backbone.View.extend({
     tagName: "div",
     className: "replace span3",

@@ -2,10 +2,7 @@ from django.http import Http404, HttpResponse
 import json
 import time
 
-
-
 def cal_time(dt):
-    #hour off?
     return jstime(dt)
     #return time.strftime("%Y-%m-%d %H:%M",dt.timetuple())
     

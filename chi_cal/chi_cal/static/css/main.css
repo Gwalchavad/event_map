@@ -1,28 +1,32 @@
-           html{
-                height: 100%;            
-            }
-            body{
-                height: 100%;              
-            }
-            #map{
-                height:100%;
-            }
-            #top{
-				height:39px;
-			}
-            .overflow{
-				overflow-x: auto;
-			}
-			#event_list li div{
-				height: 22px;
-                top: 10px;
-                position: relative;
-                width: 162px;
-                left: 10px;
-                background: rgba(255, 255, 2555, 0.89);
-                display: inline;
-                padding: 5px;
-			}
+html{
+    height: 100%;            
+}
+body{
+    height: 100%;              
+}
+#map{
+    height:100%;
+}
+#top{
+    height:39px;
+}
+.overflow{
+    overflow-x: auto;
+}
+.open{
+    padding:10px;
+}
+
+#event_list li div{
+    height: 22px;
+    top: 10px;
+    position: relative;
+    width: 162px;
+    left: 10px;
+    background: rgba(255, 255, 2555, 0.89);
+    display: inline;
+    padding: 5px;
+}
 #event_list_top_date{            
     position: fixed;
     height: 16px;

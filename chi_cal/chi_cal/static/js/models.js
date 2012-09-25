@@ -46,7 +46,10 @@ window.Event = Backbone.Model.extend({
 
 window.EventCollection = Backbone.Collection.extend({
     model: Event,
-    url: "/api/events"
+    url: "/api/events",
+    comparator: function(event) {
+      return event.get("start_date");
+    }
 });
 
 

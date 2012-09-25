@@ -14,14 +14,14 @@
             <div class="span5">
                 <ul class="nav" id="event_list_month">
                     {{#each months}}
-                    <li style="height:{{height}}px">{{month}}</li>
+                    <li id="month_{{month}}" style="height:{{height}}px">{{month}}</li>
                     {{/each}}
                 </ul>
             </div>
             <div class="span5">
                 <ul class="nav" id="event_list_day">
                     {{#each days}}
-                    <li style="height:{{height}}px">{{day}}</li>
+                    <li id="day_{{day}}" style="height:{{height}}px">{{day}}</li>
                     {{/each}}
                 </ul>
             </div>
@@ -30,11 +30,7 @@
     <div class="span9">
     <ul id="event_list" class="nav">
       {{#each events}}
-        <li class="event_item">
-            <div>{{this.start_time }} - {{this.end_time }}
-                <a  href="#/event/{{ id }}">{{ this.title }}</a>
-            </div>
-        </li>
+        {{> uli}}
       {{/each}}
     </ul>
     </div>

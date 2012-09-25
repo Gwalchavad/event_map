@@ -19,7 +19,7 @@ from chi_cal import utils, forms, models as db
 
 def index(request):
     begin = datetime.now()
-    events = db.Event.objects.filter(is_event=True, is_deleted=False, start_date__gte=begin).order_by('-start_date')[:10]
+    events = db.Event.objects.filter(is_event=True, is_deleted=False, start_date__gte=begin).order_by('start_date')[:10]
     response = [{
                 'id':event.id,
                 "title":event.title,

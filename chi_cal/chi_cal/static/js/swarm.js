@@ -49,9 +49,9 @@
            dataType:'jsonp',
         }).done(function(data){ 
             var latlng = data.results[0].locations[0].latLng;
-            if(props.bounds.contains(latlng)){
+            if(props.bounds.contains([latlng.lat,latlng.lng])){
                 var newCenter = new L.LatLng(latlng.lat,latlng.lng);           
-                map.setView(newCenter,13,false);
+                Swarm.map.setView(newCenter,13,false);
                 marker.setLatLng(newCenter);
                 if(callback.onSuccess){
 					callback.onSuccess(latlng.lat,latlng.lng);
