@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="span9">
-    <ul id="event_list" class="nav">
+    <ul id="event_list">
       {{#each events}}
         {{> uli}}
       {{/each}}

@@ -113,7 +113,6 @@ var EventAddView = Backbone.View.extend({
                 $('#id_start_date').datetimepicker('option', 'maxDate', new Date(end.getTime()));
             }
         });
-
         return this;
     },
     geocode: function() {
@@ -200,19 +199,20 @@ var AppView = Backbone.View.extend({
             });
         });
 
-        $(window).on('resize', {
-            height: this.height
-        }, function(event) {
-            event.data.height = $(window).height() - $("#top").height();
-            $(".setheight").height(event.data.height);
+        $(window).on('resize', function(){
+            this.height = $(window).height() - $("#top").height();
+            $("#heightStyle").replaceWith(Handlebars.loadedTemps["app_css_template"]({height: this.height}));
+           
         });
-
+        
+        this.height = $(window).height() - $("#top").height();
         //static render
         this.$el.append(Handlebars.loadedTemps["login_template"](null));
         this.$el.append(Handlebars.loadedTemps["markdown_template"](null));
         this.$el.append(Handlebars.loadedTemps["sign_up_template"](null));
+        this.$el.append(Handlebars.loadedTemps["app_css_template"]({height: this.height}));
         //start the map with the div the proper size
-        $(window).resize();
+
         Swarm.int_map(self.options.map_settings);
         self.render();
     },
@@ -290,8 +290,8 @@ var AppView = Backbone.View.extend({
 });
 
 Backbone.View.prototype.close = function() {
-    if (this.beforeClose) {
-        this.beforeClose();
+    if (this.onClose) {
+        this.onClose();
     }
     this.remove();
     this.unbind();

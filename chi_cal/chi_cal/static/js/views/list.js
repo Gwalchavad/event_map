@@ -10,6 +10,7 @@ var EventsListView = Backbone.View.extend({
     updateOffsetPastEvents:-10,
     moreEvents:true,
     morePastEvents:true,
+    position:{left:0,top:0},
     events: {
         "scroll":"onScroll",
         "click .event_item": "onClick"
@@ -21,19 +22,28 @@ var EventsListView = Backbone.View.extend({
         self = this;
         self.updateOffset = self.model.length;
         //bind
-        $(window).on('resize', this.genarateColorsAndMonths);
+        $(window).on('resize', this.onResize);
         self.model.on('add', function(event) {
             self.onAdd(event);
         });
-        //
-        
-       
         
         this.model.forEach(function(model,key) { 
             self.onAdd(model);
         });
+
         self.fetchMoreEvents(1);
         self.fetchMoreEvents(-1);
+ 
+        
+    },
+    onScroll: function(e) {
+        //if at the bottom get more events
+        if (self.moreEvents &&  (self.el.scrollHeight - self.$el.scrollTop() < (self.$el.outerHeight() + 2))) {
+            self.fetchMoreEvents(1);
+        }else if(self.morePastEvents && (self.$el.scrollTop() == 0)){
+            self.fetchMoreEvents(-1);
+        }        
+        self.genarateColorsAndMonths();
     },
     onAdd:function(model){
         var _start_date = new Date(model.get("start_date"));
@@ -79,7 +89,18 @@ var EventsListView = Backbone.View.extend({
             $("#day_"+day).height(height + 20);
         }
     },
-    render: function() {
+    onResize: function(){
+        self.position.left = $("#event_list").position().left; 
+        self.position.top = $("#EventsListView").position().top; 
+        self.genarateColorsAndMonths(true);
+    },
+    onDOMadd:function(){
+        self.onResize();
+    },
+    onClose:function(){
+        $(window).off('resize', this.onResize);
+    },
+    render: function(){
         //clear the map layers
         var day = false;
         var per_day = false;
@@ -138,12 +159,11 @@ var EventsListView = Backbone.View.extend({
                 add: true,
                 success: function(evt, request) {
                     self.render();
-                    $(window).resize();
+                    self.genarateColorsAndMonths(true);
                     self.updateOffset += self.numOfEventsToFetch;
                     if(request.length == 0){
                         self.moreEvents = false;    
                     }
-                    //self.moreEvent
                 }
             });        
         }else{
@@ -154,89 +174,68 @@ var EventsListView = Backbone.View.extend({
                 },
                 add: true,
                 success: function(evt, request) {
-                    //self.onAdd()
-                    //self.render();
-                    $(window).resize();
+                    self.render();
+                    //remove later
+                    self.genarateColorsAndMonths(true);
                     self.updateOffsetPastEvents -= self.numOfEventsToFetch;
                     if(request.length == 0){
                         self.morePastEvents = false;    
                     }
-                    //self.moreEvent
                 }
             });   
         }
     },
-
-    onScroll: function(e) {
-        //if at the bottom get more events
-        if (self.moreEvents &&  (self.el.scrollHeight - self.$el.scrollTop() < (self.$el.outerHeight() + 2))) {
-            self.fetchMoreEvents(1);
-        }else if(self.morePastEvents && (self.$el.scrollTop() == 0)){
-            self.fetchMoreEvents(-1);
-        }        
-        self.genarateColorsAndMonths();
-        
-    },
-    genarateColorsAndMonths:function(){
-        var tolerence = .2;
-        var offset = self.$el.scrollTop() / self.height + tolerence;
-        offset = Math.floor(offset); 
-
-            if(self.$el.height() < $("#event_list").height()){
-                var visbleHeight = self.$el.height();
-            }else{
-                //when there not enought events to scroll
-                var visbleHeight = $("#event_list").height();
-            }
-        var numberOfEl = Math.ceil(visbleHeight / self.height);
-
-        //set month on side bar
-        _start_date = self.model.models[offset].get("start_date");
-        month = _start_date.getMonth(); 
-        $("#event_list_top_month").text(self.month2letter(month));
-        //set day on side bar
-        day = _start_date.getDate();
-        $("#event_list_top_day").text(day);
-        //set colors
-        for (var i = offset; i < numberOfEl + offset; ++i) {
-            //bring the maker to the front if it exist
-            //sometimes it doesn't becauase numberOfEl uses ceil.
-            var model = self.model.models[i];
-            if(model){
-                var H = ((i - offset) / numberOfEl) * 360;
+    genarateColorsAndMonths:function(regenrate){
+        var topVisbleEl = document.elementFromPoint(  self.position.left,  self.position.top+10);
+        //have we moved enought to change colors?
+        if(self.topVisbleEl !=topVisbleEl || regenrate){
+            self.topVisbleEl = topVisbleEl;
+            //set map icons that are not in the current view
+            var bottomVisbleEl = document.elementFromPoint( 
+                self.position.left, 
+                self.position.top+$("#EventsListView").height()-20
+            );
+            var topIndex = $("#event_list").children().index(topVisbleEl);            
+            var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
+            var numberOfEl = bottomIndex - topIndex+1;
+            //set month on side bar
+            _start_date = self.model.models[topIndex].get("start_date");
+            month = _start_date.getMonth(); 
+            $("#event_list_top_month").text(self.month2letter(month));
+            //set day on side bar
+            day = _start_date.getDate();
+            $("#event_list_top_day").text(day);
+            
+            //zIndexOffset            
+            $(".viewed").each(function(index,el){
+                var id = el.id.replace(/icon-/,"");
+                var model = self.model.get(id);
+                if(model.get("start_date") < _start_date ){
+                    H = 0;
+                }else{
+                    H = (numberOfEl-1 / numberOfEl) * 360; 
+                }
+                
+                $(el).find(".svgForeground")
+                .css("stroke","grey")  
+                .css("fill-opacity",0.4)
+                .css("fill", "hsl(" + H + ",100%, 50%)");
+                
+                self.markers[id].setZIndexOffset(-100);
+            });            
+            //add color
+            for(var i= topIndex; i <= bottomIndex; ++i){
+                var model = self.model.models[i];
+                var H = ((i-topIndex) / numberOfEl) * 360;
                 $($(".event_item")[i]).css("background-color", "hsl(" + H + ",100%, 50%)"); 
                 $("#icon-"+model.get("id"))
-                .html($('#svg svg').clone())
-                .find(".svgForeground")
-                .css("fill", "hsl(" + H + ",100%, 50%)");
+                    .addClass("viewed")
+                    .html($('#svg svg').clone())
+                    .find(".svgForeground")
+                    .css("fill", "hsl(" + H + ",100%, 50%)");
                 self.markers[model.get("id")].setZIndexOffset(1000);
-  
             }
-        } 
-        //scolling down
-        var onepast = offset-1;
-        if($(".event_item")[onepast]){
-            var model = self.model.models[onepast];
-            $('#icon-'+model.get("id"))
-            .find(".svgForeground")
-            .css("stroke","grey")  
-            .css("fill-opacity",0.4)
-            .css("fill","grey");
-            //zIndexOffset
-            self.markers[model.get("id")].setZIndexOffset(-100);  
         }
-        //scolling up
-        var onefuture = numberOfEl + offset;
-        if($(".event_item")[onefuture]){
-            var model = self.model.models[onefuture];
-            $('#icon-'+model.get("id"))
-            .find(".svgForeground")
-            .css("stroke","none")
-            .css("fill-opacity",0.4)
-            .css("fill","blue");    
-            self.markers[model.get("id")].setZIndexOffset(-100);       
-        }
-        self.scrolltop = self.$el.scrollTop();
     },
     month2letter:function(num){
         var m_names = new Array("J", "F", "M", 
@@ -244,8 +243,5 @@ var EventsListView = Backbone.View.extend({
         "O", "N", "D"); 
         
         return m_names[num];
-    },
-    beforeClose:function(){
-        $(window).off('resize', this.genarateColorsAndMonths);
     }
 });

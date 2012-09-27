@@ -4,9 +4,6 @@ html{
 body{
     height: 100%;              
 }
-#map{
-    height:100%;
-}
 #top{
     height:39px;
 }
@@ -16,7 +13,10 @@ body{
 .open{
     padding:10px;
 }
-
+#event_list{
+    margin-left: 0;
+    list-style: none;
+}
 #event_list li div{
     height: 22px;
     top: 10px;

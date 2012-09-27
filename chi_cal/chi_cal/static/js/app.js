@@ -40,9 +40,9 @@ var AppRouter = Backbone.Router.extend({
             model: this.eventList
         });
         
-        this.showView([EventList,new Cal_BarView()]);
+        this.showView([new Cal_BarView(),EventList]);
 
-        $(window).resize();
+        //$(window).resize();
     },
     eventDetails: function(id) {
         var self = this;
@@ -108,6 +108,7 @@ var AppRouter = Backbone.Router.extend({
         }
     },
     showView: function(views) {
+        //close last view
         $('.replace').remove();
         if(this.currentView instanceof Array){
             this.currentView.forEach(function(view){
@@ -118,14 +119,22 @@ var AppRouter = Backbone.Router.extend({
             if (this.currentView)
                 this.currentView.close(); 
         }
+        //open new view
         if(views instanceof Array){
+            var fragment = document.createDocumentFragment();
             views.forEach(function(view){
-                $("#main").prepend(view.render().el);
+                fragment.appendChild(view.render().el);
+            });
+            $("#main").prepend(fragment);
+            views.forEach(function(view){
+                if(view.onDOMadd)
+                    view.onDOMadd();   
             });
         }else{
             $("#main").prepend(views.render().el);
+            if(view.onDOMadd)
+                    view.onDOMadd();
         }
-        $(window).resize();
         this.currentView = views;
         return views;
     }
@@ -143,7 +152,7 @@ $(function() {
     'cal_bar', 
     'sign_up', 
     'event_list',
-    'uli_partial'
+    'app_css'
     ], function() {
         //load map
         $.ajax({
