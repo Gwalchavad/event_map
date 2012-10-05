@@ -41,8 +41,6 @@ var AppRouter = Backbone.Router.extend({
         });
         
         this.showView([new Cal_BarView(),EventList]);
-
-        //$(window).resize();
     },
     eventDetails: function(id) {
         var self = this;
@@ -51,10 +49,8 @@ var AppRouter = Backbone.Router.extend({
             var eventView = new EventView({
                 model: self.event
             });
-
             this.showView(eventView);
-            //$('.replace').replaceWith();
-            $(window).resize();
+
         } else {
             self.event = new Event({
                 id: id
@@ -132,8 +128,8 @@ var AppRouter = Backbone.Router.extend({
             });
         }else{
             $("#main").prepend(views.render().el);
-            if(view.onDOMadd)
-                    view.onDOMadd();
+            if(views.onDOMadd)
+                    views.onDOMadd();
         }
         this.currentView = views;
         return views;
@@ -152,6 +148,8 @@ $(function() {
     'cal_bar', 
     'sign_up', 
     'event_list',
+    'item_open',
+    'item_closed',
     'app_css'
     ], function() {
         //load map

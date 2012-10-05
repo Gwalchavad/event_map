@@ -39,9 +39,7 @@
 						<input id="id_street" class="input-medium" type="text" placeholder="Steet" name="location" maxlength="255" value="{{location}}">					
 						<div class="input-append">
 							<input class="input-mini" id="id_city" type="text" value="{{settings.city}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
-							
-						</div>	
-						
+						</div>
 					</div></br>	
 					<input id="id_venue" placeholder="venue e.g. 'mom's house'"  type="text" name="venue" maxlength="255" value="{{venue}}">
 					<span class="help-block">The address of the event and the name of the venue</span>

@@ -12,16 +12,16 @@
         </div>
         <div class="row-fluid">
             <div class="span5">
-                <ul class="nav" id="event_list_month">
+                <ul  id="event_list_month">
                     {{#each months}}
                     <li id="month_{{month}}" style="height:{{height}}px">{{month}}</li>
                     {{/each}}
                 </ul>
             </div>
             <div class="span5">
-                <ul class="nav" id="event_list_day">
+                <ul  id="event_list_day">
                     {{#each days}}
-                    <li id="day_{{day}}" style="height:{{height}}px">{{day}}</li>
+                        <li id="day_{{day}}_{{month}}" style="height:{{height}}px">{{day}}</li>
                     {{/each}}
                 </ul>
             </div>
@@ -30,8 +30,16 @@
     <div class="span9">
     <ul id="event_list">
       {{#each events}}
-        {{> uli}}
+        <li id="event_{{id}}" class="event_item">
+            <div class="list_item_container">
+                <div class="openIndt" style="">[+]</div>
+                <div class="list_item_content" >
+                    {{start_time }} - {{end_time }} <a href="#/event/{{ id }}">{{ this.title }}</a>
+                </div>
+            </div>
+        </li>
       {{/each}}
     </ul>
     </div>
 </div>
+
