@@ -1,0 +1,3 @@
+{{#each months}}
+    <li id="month_{{month}}" style="height:{{height}}px">{{month}}</li>
+{{/each}}

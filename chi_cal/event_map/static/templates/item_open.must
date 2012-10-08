@@ -1,0 +1,11 @@
+
+    <div class="openIndt">[-]</div>
+    <div class="list_item_content" style="top: -3px; padding: 0px 7px;">
+        <div><a href="#/event/{{id}}">{{titleOpen}}</a>
+        {{#if contentOpen}} | <a href="#/event/{{id}}">{{contentOpen}}</a>{{/if}}
+        </div>
+        <div>{{start_time }} - {{end_time }} <b>At</b>
+         {{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}
+        </div>
+        <div class="itemControlls">Going?/Spam</div>
+    </div>

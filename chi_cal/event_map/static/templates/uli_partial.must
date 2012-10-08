@@ -1,0 +1,7 @@
+
+        <li class="event_item">
+            <div>{{this.start_time }} - {{this.end_time }}
+                <a  href="#/event/{{ id }}">{{ this.title }}</a>
+            </div>
+        </li>
+

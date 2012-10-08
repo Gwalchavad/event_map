@@ -1,0 +1,13 @@
+<nav id="mainNav">
+			<ul class="nav">
+				{{#if authenticated}}
+					<li> <a id="user">{{username}}</a></li>
+                    <li> <a id="logout">LOGOUT</a></li>                
+                {{else}}
+                    <li> <a id="login">LOGIN</a></li>                          
+                {{/if}}				
+				<li><a id="id_addevent" href="#addevent" title="Add your event" href="">ADD EVENT</a></li>
+				<li><a id="id_addevent" href="#addevent" title="Add your event" href="">ABOUT</a></li>
+			</ul>	
+		<a class="brand" href="#">Chi_Cal</a>
+</nav>

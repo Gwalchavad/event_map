@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Linux https://github.com/w3c/tidy-html5/tree/68a9e74">
+  <meta charset="utf-8">
+
+  <title></title><!-- <link rel="shortcut icon" href="img/bull16.png" /> -->
+  <meta name="description" content="">
+    <link href="/static/css/main.css" rel="stylesheet">
+  <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+   <link rel="stylesheet" href="/static/css/jquery-ui-1.8.21.custom.css">    
+         
+
+	<script type="text/javascript" src="/static/js/lib/jquery.js"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery-ui-1.8.21.custom.min.js"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery-ui-timepicker-addon.js"></script>
+	<script type="text/javascript" src="/static/js/lib/jquery-ui-sliderAccess.js"></script>
+    <!-- <script type="text/javascript" src="/static/js/lib/jquery.scrollTo.min.js "></script>  --->
+    
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.css" />
+	<script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.js"></script>
+
+  <script type="text/javascript" src="/static/bootstrap/js/bootstrap.js"></script>
+
+  <script type="text/javascript" src="/static/js/lib/handlebars.js"></script>
+  <script type="text/javascript" src="/static/js/lib/underscore.js"></script>  
+  <script type="text/javascript" src="/static/js/lib/backbone.js"></script>
+  <script type="text/javascript" src="/static/js/lib/Backbone.ModelBinder.min.js"></script>
+  <script type="text/javascript" src="/static/js/lib/Backbone.CollectionBinder.min.js"></script>
+  
+  
+  <script type="text/javascript" src="/static/js/swarm.js"></script>
+	<script type="text/javascript" src="/static/js/utils.js"></script>
+      <script type="text/javascript"  src="/static/js/app.js"></script>      
+      <script type="text/javascript"  src="/static/js/models.js"></script>
+      <script type="text/javascript"  src="/static/js/views.js"></script> 
+    <script type="text/javascript"  src="/static/js/views/list.js"></script> 
+
+</head>
+
+<body> 
+	<div class="row-fluid">
+		 <div id="nav" class="span1">
+				<nav id="mainNav">
+			
+				</nav>
+		</div>
+		<div class="span9">
+			<div class="row-fluid" id="main">
+				<div class="span7 replace"></div>
+				<div id="map" class="span3 setheight"></div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var init_events = {{events|safe|escape}};
+        var init_user = {{session|safe|escape}};
+  </script>
+  <div class="hide" id="svg">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+
+   id="svg4238"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="maker.svg">
+  <defs
+     id="defs4240">
+    <filter
+       inkscape:collect="always"
+       id="filter3824"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.0775"
+         id="feGaussianBlur3826" />
+    </filter>
+  </defs>
+  
+  <metadata
+     id="metadata4243">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+        <g
+            class="layer1"
+            style="fill:#c8b7b7;display:inline;filter:url(#filter3824)"
+            >
+          <path
+             transform="scale(1.2)"
+             class="svgForeground"
+             d="m 16.325825,11.12277 c 0,3.5 -5,9.5 -6.5,11.5 -1.5,-2 -6.5,-8 -6.5,-11.5 0,-3.5 3.27126,-6.5 6.5,-6.5 3.22874,0 6.5,3 6.5,6.5 z"
+             style="color:#000000;fill:#c8b7b7;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-opacity:0.7;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+            <g class="circleMarker"
+                style="display: none;" 
+                transform="matrix(1.4084361,0,0,1.4084361,-2.03608,-2.8184129)">
+                <circle 
+                    cx="9.8041811" 
+                    cy="11.591675" r="2.9"
+                    fill="white";  
+                    style="fill-opacity:.8;" />
+            </g>
+        </g>
+</svg>
+
+  </div>
+</body>
+</html>
