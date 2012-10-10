@@ -35,14 +35,6 @@ body{
     float:left; 
     position: relative;
 }
-#event_list_top_date{            
-    position: fixed;
-    height: 16px;
-    overflow: hidden;
-    width: 40px;
-    background: white;
-    font-size:20px;
-}
 .openIndt{
     float:left; 
     position: relative; 

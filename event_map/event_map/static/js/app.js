@@ -42,7 +42,7 @@ var AppRouter = Backbone.Router.extend({
         
         this.showView([new Cal_BarView(),EventList]);
     },
-    eventDetails: function(id) {
+    eventDetails: function(id){
         var self = this;
         self.event = self.eventList.get(id);
         if (self.event) {
@@ -67,7 +67,7 @@ var AppRouter = Backbone.Router.extend({
             });
         }
     },
-    addevent: function(id) {
+    addevent: function(id){
         //edit an evet
         var self = this;
         if (id) {
@@ -90,7 +90,7 @@ var AppRouter = Backbone.Router.extend({
                     }));
                 });
             }
-        } else {
+        }else{
             //create a new event
             newEventView = new EventAddView({
                 model: new Event()

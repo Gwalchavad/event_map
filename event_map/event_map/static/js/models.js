@@ -85,7 +85,7 @@ window.EventCollection = Backbone.Collection.extend({
     morePastEvents: true,
     url: "/api/events",
     comparator: function(event) {
-      return event.get("start_date");
+      return event.get("start_date").getTime() + 1/event.get("id");
     }
 });
 

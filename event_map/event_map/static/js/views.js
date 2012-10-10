@@ -12,7 +12,6 @@ var Cal_BarView = Backbone.View.extend({
     id: "calender",
     initialize: function() {
         this.render();
-        this.$el.find("#datepicker").datepicker();
     },
     render: function() {
         this.$el.append(Handlebars.loadedTemps["cal_bar_template"](null));
@@ -190,27 +189,26 @@ var AppView = Backbone.View.extend({
     },
 
     initialize: function(map_setting) {
-        //set map hieght
         var self = this;
-
         this.model.on("error", function(model, errors) {
             _.each(errors, function(error, key) {
                 $("#" + key + "_error").show().html(error);
             });
         });
-
         $(window).on('resize', function(){
-            this.height = $(window).height() - $("#top").height();
-            $("#heightStyle").replaceWith(Handlebars.loadedTemps["app_css_template"]({height: this.height}));
+            this.height = $(window).height();
+            this.topHeight = $(window).height()- $(".top").height();
+            $("#heightStyle").replaceWith(Handlebars.loadedTemps["app_css_template"]({height: this.height,topHeight:this.topHeight}));
            
         });
-        
-        this.height = $(window).height() - $("#top").height();
         //static render
         this.$el.append(Handlebars.loadedTemps["login_template"](null));
         this.$el.append(Handlebars.loadedTemps["markdown_template"](null));
         this.$el.append(Handlebars.loadedTemps["sign_up_template"](null));
-        this.$el.append(Handlebars.loadedTemps["app_css_template"]({height: this.height}));
+        this.height = $(window).height();
+        //60 height of header
+        this.topHeight = $(window).height()- 60;
+        this.$el.append(Handlebars.loadedTemps["app_css_template"]({height: this.height,topHeight: this.topHeight}));
         //start the map with the div the proper size
 
         Swarm.int_map(self.options.map_settings);

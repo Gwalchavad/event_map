@@ -1,7 +1,7 @@
 var EventsListView = Backbone.View.extend({
     tagName: "div",
-    className: "replace span4 overflow setheight",
-    id: "EventsListView",
+    className: "span4",
+    id: "",
     height: 40,
     scrolltop: 0,
     markers: [],
@@ -21,10 +21,10 @@ var EventsListView = Backbone.View.extend({
         },
     },
     events: {
-        "scroll": "onScroll",
+
         "click .event_item": "onClick",
         "mouseenter .event_item": "onMouseenter",
-        "mouseleave .event_item": "onMouseleave"
+        "mouseleave .event_item": "onMouseleave",
     },
     initialize: function() {
         Swarm.group.clearLayers();
@@ -54,9 +54,9 @@ var EventsListView = Backbone.View.extend({
     },
     onScroll: function(e) {
         //if at the bottom get more events
-        if (self.el.scrollHeight - self.$el.scrollTop() < (self.$el.outerHeight() + 2)) {
+        if ($("#EventsListView")[0].scrollHeight - $("#EventsListView").scrollTop() < ($("#EventsListView").outerHeight() + 2)) {
             self.fetchMoreEvents();
-        } else if (self.$el.scrollTop() == 0){
+        } else if ($("#EventsListView").scrollTop() == 0){
             self.fetchMoreEvents(true);
         }
         self.genarateColorsAndMonths();
@@ -179,6 +179,7 @@ var EventsListView = Backbone.View.extend({
     },
     onDOMadd: function() {
         self.onResize();
+        $("#EventsListView").scroll(self.onScroll);
     },
     onClose: function() {
         $(window).off('resize', this.onResize);
@@ -186,12 +187,20 @@ var EventsListView = Backbone.View.extend({
     render: function(eventModels, prepend) {
         var adjustHeightOnMonthDays = function(oldEdgeDate, newEdgeDate){
             if (oldEdgeDate.getFullYear() == newEdgeDate.getFullYear() && oldEdgeDate.getMonth() == newEdgeDate.getMonth()) {
-                var firstMonth = months.shift();
+                if(prepend){
+                    var firstMonth = months.pop();              
+                }else{
+                    var firstMonth = months.shift();
+                }
                 $("#month_" + firstMonth.month).height(
                     $("#month_" + firstMonth.month).height() + firstMonth.height);
                 //check day
                 if (oldEdgeDate.getDate() == newEdgeDate.getDate()) {
-                    var firstDay = days.shift();
+                    if(prepend){
+                        var firstDay = days.pop(); 
+                    }else{
+                       var firstDay = days.shift(); 
+                    }
                     var firstDayEl = "#day_" + firstDay.day + "_" + firstDay.month;
                     $(firstDayEl).height(
                     $(firstDayEl).height() + firstDay.height);
@@ -272,7 +281,8 @@ var EventsListView = Backbone.View.extend({
                     }
                 }
                 months.push({
-                    month: current_date.getMonth()
+                    month: current_date.getMonth(),
+                    letter: self.month2letter(current_date.getMonth())
                 });
                 days.push({
                     day: current_date.getDate(),
@@ -373,7 +383,9 @@ var EventsListView = Backbone.View.extend({
         var topVisbleEl = document.elementFromPoint(self.position.left+.5, self.position.top + 20);
         //have we moved enought to change colors?
         if (self.topVisbleEl != topVisbleEl || regenrate) {
+         
             self.topVisbleEl = topVisbleEl;
+
             //set map icons that are not in the current view
             var bottomPos = self.isListFull() ? $("#EventsListView").height() :  $("#event_list").height();
             //add tolerance
@@ -381,14 +393,9 @@ var EventsListView = Backbone.View.extend({
             var bottomVisbleEl = document.elementFromPoint(self.position.left,self.position.top + bottomPos);
             var topIndex = $("#event_list").children().index(topVisbleEl);
             var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
+            var _start_date = self.model.models[topIndex].get("start_date");
+             self.setMonthDay(_start_date);  
             var numberOfEl = bottomIndex - topIndex + 1;
-            //set month on side bar
-            _start_date = self.model.models[topIndex].get("start_date");
-            month = _start_date.getMonth();
-            $("#event_list_top_month").text(self.month2letter(month));
-            //set day on side bar
-            day = _start_date.getDate();
-            $("#event_list_top_day").text(day);
             //set the color to white for all over elements
             $(".event_item").css("background-color","white");
             //set up event icons
@@ -408,7 +415,7 @@ var EventsListView = Backbone.View.extend({
             for (var i = topIndex; i <= bottomIndex; ++i) {
                 var model = self.model.models[i];
                 var H = ((i - topIndex) / numberOfEl) * 360;
-                $($(".event_item")[i]).css("background-color", "hsl(" + H + ",100%, 50%)");
+                $("#event_"+ model.get("id")).css("background-color", "hsl(" + H + ",100%, 50%)");
 
                 if (!$("#icon-" + model.get("id")).hasClass("viewed")) {
                     $("#icon-" + model.get("id")).html($('#svg svg').clone());
@@ -418,6 +425,16 @@ var EventsListView = Backbone.View.extend({
                 self.markers[model.get("id")].setZIndexOffset(1000);
             }
         }
+    },
+    setMonthDay:function(date){
+        //set month on side bar
+
+        month = date.getMonth();
+        day = date.getDate();
+        $("#topMonthLetter").text(self.month2letter(month)+day);
+        //set day on side bar
+        $("#topYear").text(date.getFullYear());       
+        
     },
     scrollTo:function(id){
         var targetOffset = $("#EventsListView").scrollTop()  - $("#EventsListView").position().top + $("#event_"+id).position().top;
