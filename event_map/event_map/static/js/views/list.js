@@ -79,7 +79,6 @@ var EventsListView = Backbone.View.extend({
             modelID: model.get("id")
         });
         marker.bindPopup("<span>" + "<h3>" + model.get("title") + "</h3>" + model.get("start_time") + "-" + model.get("end_time") + "</span>");
-        //marker.setZIndexOffset(100);
         Swarm.group.addLayer(marker);
 
         marker.on("click", self.onMarkerClick);
@@ -91,8 +90,8 @@ var EventsListView = Backbone.View.extend({
         }
         self.lastClickedMarkerEvent = e.target.options.modelID;
         //come after the closing the last event
-        if (!$(event.currentTarget).hasClass("open")) {
-            if (!$(event.currentTarget.children).hasClass("viewing")) {
+        if (!$(this._icon.children).hasClass("open")) {
+            if (!$(this._icon.children).hasClass("viewing")) {
                 //$("#event_53").position().top()
                 self.scrollTo(e.target.options.modelID);
             }
@@ -409,20 +408,19 @@ var EventsListView = Backbone.View.extend({
                     H = (numberOfEl - 1 / numberOfEl) * 360;
                 }
                 $(el).find(".svgForeground").css("stroke", "grey").css("fill-opacity", 0.4).css("fill", "hsl(" + H + ",100%, 50%)");
-                self.markers[id].setZIndexOffset(-100);
+                self.markers[id].setZIndexOffset(-10);
             });
             //add color event items
             for (var i = topIndex; i <= bottomIndex; ++i) {
-                var model = self.model.models[i];
+                //var model = self.model.models[i];
+                var id = $(".event_item")[i].id.replace(/event_/, "");
                 var H = ((i - topIndex) / numberOfEl) * 360;
-                $("#event_"+ model.get("id")).css("background-color", "hsl(" + H + ",100%, 50%)");
-
-                if (!$("#icon-" + model.get("id")).hasClass("viewed")) {
-                    $("#icon-" + model.get("id")).html($('#svg svg').clone());
+                $("#event_"+ id).css("background-color", "hsl(" + H + ",100%, 50%)");
+                if (!$("#icon-" +id).hasClass("viewed")) {
+                    $("#icon-" + id).html($('#svg svg').clone());
                 }
-
-                $("#icon-" + model.get("id")).addClass("viewed").addClass("viewing").find(".svgForeground").css("fill", "hsl(" + H + ",100%, 50%)").css("fill-opacity", 1).css("stroke", "black");
-                self.markers[model.get("id")].setZIndexOffset(1000);
+                $("#icon-" + id).addClass("viewed").addClass("viewing").find(".svgForeground").css("fill", "hsl(" + H + ",100%, 50%)").css("fill-opacity", 1).css("stroke", "black");
+                self.markers[id].setZIndexOffset(10);
             }
         }
     },
