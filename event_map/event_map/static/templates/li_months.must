@@ -1,3 +1,5 @@
 {{#each months}}
-    <li id="month_{{month}}" style="height:{{height}}px">{{month}}</li>
+    <li id="month_{{month}}" style="height:{{height}}px">
+        <div class="rot-neg-90 verticalMonth">{{letter}}</div>
+    </li>
 {{/each}}

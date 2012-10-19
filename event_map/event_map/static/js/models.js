@@ -1,7 +1,5 @@
 window.Event = Backbone.Model.extend({
-
     urlRoot: "/api/event",
-
     defaults: {
 		title:"",
 		start_date:"",
@@ -13,14 +11,19 @@ window.Event = Backbone.Model.extend({
         location_point:""
     },
     initialize: function () {
+        this.computeTimes();
+        this.on("change",this.computeTimes);
+    },    
+    computeTimes:function(){
         var _start_date = new Date(this.get("start_date"));
         this.set("start_date", _start_date);
         var _end_date = new Date(this.get("end_date"));
         this.set("end_date", _end_date);
         //remove the spaces in time
         this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));
-        this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));
-    },    
+        this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));       
+    },
+    
     computeCloseValues:function(){
         //the lenght the title is on the list when the event is closed
         var trimmedTitleLength = 42;
@@ -78,17 +81,98 @@ window.Event = Backbone.Model.extend({
 
 window.EventCollection = Backbone.Collection.extend({
     model: Event,
-    numOfEventsToFetch: 10,
-    updateOffset: 10,
-    updateOffsetPastEvents: -10,
-    moreEvents: true,
-    morePastEvents: true,
+    defaults:{
+        futureEvents:{
+            numOfEventsToFetch:10,
+            more:true,
+            updateOffset:10
+        },
+        pastEvents:{
+            numOfEventsToFetch:-10,
+            more:true,
+            updateOffset:-10
+        },
+    },
     url: "/api/events",
+    initialize: function (models,options) {
+        this._attributes = {};
+        $.extend(true,this._attributes,this.defaults);
+        if(models){
+            //this assumes that incoming initail models are in order
+            this._attributes.data = {start:models[0].attributes.start_date.toJSON()};
+            this._attributes.futureEvents.updateOffset = models.length;
+        }
+        if(options)
+            $.extend(true,this._attributes,options);
+        this.on("reset",function(models){
+            $.extend(true,this._attributes,this.defaults);
+            this._attributes.futureEvents.updateOffset = models.length;
+        });
+    },
     comparator: function(event) {
       return event.get("start_date").getTime() + 1/event.get("id");
+    },
+    //Setting attributes on a collection
+    //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js  
+    attr: function(prop, value) {
+        if (value === undefined) {
+            return this._attributes[prop]
+        } else {
+            this._attributes[prop] = value;
+        }
+    },
+
+    //forward fetch
+    ffetch:function(options){
+        options.forward = true;
+        this._fetch(options);
+    },
+    //reverse fetch
+    rfetch: function(options){
+        options.forward = false;
+        this._fetch(options);
+    },
+    _fetch:function(options){
+        var options = options ? _.clone(options) : {};
+        var self = this;
+        if(typeof options.forward === "undefined" || options.forward){
+            var eventSettings = this._attributes.futureEvents;
+        }else{
+            var eventSettings = this._attributes.pastEvents;
+        }
+        var successCallback = function(evt, request) {
+            if(request.length != 0){
+                events=request.map(function(event){
+                    event = new Event(event);
+                    return event;
+                });      
+                eventSettings.updateOffset += eventSettings.numOfEventsToFetch;  
+                if(options.successCallback)
+                    options.successCallback(events);
+            }
+            if (request.length < Math.abs(eventSettings.numOfEventsToFetch)){
+                eventSettings.more = false;
+            }
+        };
+        if(eventSettings.more){
+            data = {
+                n: Math.abs(eventSettings.numOfEventsToFetch),
+                offset: eventSettings.updateOffset,
+            };
+            if(this._attributes.data)
+                _.extend(data, this._attributes.data);              
+            
+            if(options.data)
+                _.extend(data, options.data);
+                
+            this.fetch({
+                data:data,
+                add: true,
+                success: successCallback
+            });
+        }        
     }
 });
-
 
 window.UserModel = Backbone.Model.extend({
     url: "/api/session",
@@ -126,5 +210,8 @@ window.UserModel = Backbone.Model.extend({
 		if(Object.keys(errors).length > 0){
 			return errors;
 		}
-    }
-});   
+    },
+
+});  
+
+

@@ -10,11 +10,13 @@ from django.contrib.auth import authenticate, logout, login as auth_login
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from datetime import datetime, timedelta, date
+import dateutil.parser
 import itertools
 
 import json
 import calendar
 from event_map import utils, forms, models as db
+from event_map.utils import json_api_errors, ApiException
 
 
 def index(request):
@@ -132,25 +134,35 @@ class events(View):
     offset is the strating index
     
     """
-    def get(self, request, *args, **kwargs):
-      
+    @method_decorator(json_api_errors)
+    def get(self, request, *args, **kwargs):        
         events = db.Event.objects.order_by('start_date')
-
-        if request.GET.get('begin_date'):
+        if request.GET.get('start'):
             #change to use actully date 
-            begin = datetime.datetime.strptime(request.GET.get('begin_date'), "%d%m%Y").date()
+            try:
+                begin = dateutil.parser.parse(request.GET.get('start'))
+            except ValueError:
+                raise ApiException("Invalid ISO date","start",401)
+                 
         else:
             begin = datetime.now()
          
         if request.GET.get('modified'):
-            mod_date = datetime.datetime.strptime(request.GET.get('modified'), "%d%m%Y").date()
-            events = events.filter(date_modified_gte=mod_date)
+            try:
+                mod_date = dateutil.parser.parse(request.GET.get('modified'))
+            except ValueError:
+                raise ApiException("Invalid ISO date","modified",401)
+                
+            events = events.filter(date_modified__gte=mod_date)
+        
+        if request.GET.get('user'):
+            events = events.select_related("author").filter(author__username=request.GET.get('user'))
             
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
         else: 
             offset = 0
-            
+
         if request.GET.get('n'):
             end =  int(request.GET.get('n'))
             #1 , 

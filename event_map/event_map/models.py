@@ -16,6 +16,8 @@ class Event(Article):
     uuid = UUIDField(auto=True)
 
     date_modified = models.DateTimeField(auto_now=True)
+    
+    date_created = models.DateTimeField(auto_now_add=True)
 
     start_date = models.DateTimeField( help_text="""
         What Date is this event Happening On?""")

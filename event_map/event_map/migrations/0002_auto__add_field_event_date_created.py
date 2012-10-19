@@ -8,27 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Event'
-        db.create_table('chi_cal_event', (
-            ('article_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['occupywallst.Article'], unique=True, primary_key=True)),
-            ('uuid', self.gf('uuidfield.fields.UUIDField')(unique=True, max_length=32, blank=True)),
-            ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('start_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('location', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('city', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('venue', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('link', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('organization', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('contact_info', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('location_point', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('chi_cal', ['Event'])
+        # Adding field 'Event.date_created'
+        db.add_column('event_map_event', 'date_created',
+                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2012, 10, 13, 0, 0), blank=True),
+                      keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting model 'Event'
-        db.delete_table('chi_cal_event')
+        # Deleting field 'Event.date_created'
+        db.delete_column('event_map_event', 'date_created')
 
 
     models = {
@@ -61,11 +49,19 @@ class Migration(SchemaMigration):
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
             'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         },
-        'chi_cal.event': {
+        'contenttypes.contenttype': {
+            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
+            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+        },
+        'event_map.event': {
             'Meta': {'object_name': 'Event', '_ormbases': ['occupywallst.Article']},
             'article_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['occupywallst.Article']", 'unique': 'True', 'primary_key': 'True'}),
             'city': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'contact_info': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'end_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'link': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
@@ -75,13 +71,6 @@ class Migration(SchemaMigration):
             'start_date': ('django.db.models.fields.DateTimeField', [], {}),
             'uuid': ('uuidfield.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'blank': 'True'}),
             'venue': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
-        },
-        'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         'occupywallst.article': {
             'Meta': {'object_name': 'Article'},
@@ -102,4 +91,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['chi_cal']
+    complete_apps = ['event_map']

@@ -4,8 +4,12 @@ html{
 body{
     height: 100%;              
 }
-#top{
-    height:39px;
+.top{
+    height:60px
+}
+.top_text{
+    font-size: 44px;
+    padding-top: 17px;
 }
 .overflow{
     overflow-x: auto;
@@ -23,6 +27,17 @@ body{
     margin-left: 0;
 }
 
+#topWeekLetter{
+    font-size: 27px;
+    padding-top: 18px;
+}
+#event_list_top_date{
+    background-color: white;
+}
+.selected_day{
+    color:white;
+    background-color:#333;
+}
 .list_item_container{
     position: relative;
     top: 6px;
@@ -42,8 +57,27 @@ body{
     width: 17px;
     margin-right: 3px;
 }
-
+.verticalMonth{
+    margin-top: -17px;
+    font-size: 23px;
+    z-index: -10;
+    float: left;
+}
+.monthFixed{
+    position:fixed;
+}
+.relative{
+    position: relative;
+}
 h2{
     line-height: 15px;
 }
-
+.rot-neg-90{
+    -moz-transform:rotate(-270deg); 
+    -moz-transform-origin: bottom left;
+    -webkit-transform: rotate(-270deg);
+    -webkit-transform-origin: bottom left;
+    -o-transform: rotate(-270deg);
+    -o-transform-origin:  bottom left;
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+}

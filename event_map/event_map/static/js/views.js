@@ -6,15 +6,15 @@ Backbone.View.prototype.close = function () {
     this.unbind();
 };
 
-var Cal_BarView = Backbone.View.extend({
+var ListOptionView = Backbone.View.extend({
     tagName: "div",
     className: "replace span3",
     id: "calender",
     initialize: function() {
-        this.render();
+
     },
     render: function() {
-        this.$el.append(Handlebars.loadedTemps["cal_bar_template"](null));
+        this.$el.append(Handlebars.loadedTemps["list_option_template"](null));
         return this;
     },
 });
@@ -56,7 +56,14 @@ var EventAddView = Backbone.View.extend({
 
     initialize: function() {
         //validation error handling
-        this.model.on("error", function(model, errors) {
+        if(this.options.eventId){
+            this.event = this.model.get(id); 
+        }else{
+            this.event = new Event();
+            self.newEvent = true;
+        }
+        
+        this.event.on("error", function(model, errors) {
             _.each(errors, function(error, key) {
                 $("#" + key + "_error").show().html(error);
             });
@@ -125,21 +132,24 @@ var EventAddView = Backbone.View.extend({
             }
         });
     },
-    add_event: function(e) {
+    add_event: function(e){
         self = this;
         //override the na
         e.preventDefault();
         //hide error messages
         $(".label").hide();
-
-        promise = this.model.save(Utils.form2object("#event_add_form"));
+        this.event.set(Utils.form2object("#event_add_form"));
+        promise = this.event.save();
         if (promise) {
             promise.error(function(response) {
                 throw new Error("Server Error:" + response);
             });
             promise.success(function(response) {
+                //if new event then add to event list
+                if (!self.options.eventId)     
+                    self.model.add(self.event);
                 Swarm.remove_marker();
-                app.navigate('event/' + self.model.id, {
+                app.navigate('event/' + self.event.id, {
                     trigger: true
                 });
             });

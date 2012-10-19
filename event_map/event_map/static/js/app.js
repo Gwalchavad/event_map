@@ -16,6 +16,8 @@ var AppRouter = Backbone.Router.extend({
         "event/add": "addEvent",
         "event/:id": "eventDetails",
         "editevent/:id": "addevent",
+        "user/:user": "viewUser",
+        "group/:group":"viewGroup",
         "addevent": "addevent",
         "about": "about"
     },
@@ -32,15 +34,14 @@ var AppRouter = Backbone.Router.extend({
         });
         this.eventList = new EventCollection();
         this.eventList.reset(init_events);
-
     },
-    list: function(date) {
+    list: function(date){
         //create a event list
         EventList = new EventsListView({
             model: this.eventList
         });
         
-        this.showView([new Cal_BarView(),EventList]);
+        this.showView([new ListOptionView(),EventList]);
     },
     eventDetails: function(id){
         var self = this;
@@ -74,11 +75,14 @@ var AppRouter = Backbone.Router.extend({
             self.event = this.eventList.get(id);
             if (self.event) {
                 self.showView(new EventAddView({
-                    model: self.event
+                    model: self.event,
+                    eventId:id
+                    
                 }));
             } else {
                 self.event = new Event({
                     id: id
+                   
                 });
                 request = self.event.fetch();
                 request.error(function() {
@@ -86,17 +90,49 @@ var AppRouter = Backbone.Router.extend({
                 });
                 request.success(function(data) {
                     self.showView(new EventAddView({
-                        model: self.event
+                        model: self.event,
+                        eventId:id
                     }));
                 });
             }
         }else{
             //create a new event
             newEventView = new EventAddView({
-                model: new Event()
+                model:this.eventList,
+                eventId:id
             });
             self.showView(newEventView);
         }
+    },
+    viewUser:function(user){
+        var self = this;
+        var UserEventList = new EventCollection(
+            this.eventList.where({author:user}),
+            {
+                data:{user:user}
+            }
+        );
+       
+        var EventList = new EventsListView({
+            model:UserEventList,
+     
+        });
+                            
+        this.showView([new ListOptionView(),EventList]);                     
+    },
+    viewGroup:function(group){
+        this.eventList.reset();
+        this.eventList.fetch({
+            data: {
+                group:group
+            }
+        });
+        EventList = new EventsListView({
+            model: this.eventList,
+            group:group
+        });
+        
+        this.showView([new ListOptionView(),EventList]);          
     },
     about: function() {
         if (!this.aboutView) {
@@ -145,14 +181,15 @@ $(function() {
     'event_add', 
     'left_side', 
     'markdown', 
-    'cal_bar', 
+    'list_option', 
     'sign_up', 
     'event_list',
     'item_open',
     'item_closed',
     'app_css',
     'li_days',
-    'li_months'
+    'li_months',
+    'event_list_empty'
     ], function() {
         //load map
         $.ajax({

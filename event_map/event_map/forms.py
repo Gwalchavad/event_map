@@ -4,27 +4,44 @@ from django.forms.models import modelformset_factory
 from event_map import models as db
 from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User
+import dateutil.parser
 
 class EventForm(forms.ModelForm):
     class Meta:
         model = db.Event
-        fields = ( 'title','start_date','end_date','organization','link','contact_info','location','venue', 'content','city')
+        fields = ( 'title','organization','link','contact_info','location','venue', 'content','city')
+    
+    start_date =  forms.CharField(required=True)
+    end_date = forms.CharField(required=True)
     lat = forms.FloatField(required=False,widget=forms.HiddenInput)
     lng = forms.FloatField(required=False,widget=forms.HiddenInput)
+             
+    def clean_start_date(self):
+        try:
+            start_date = dateutil.parser.parse(self.data.get('start_date'))
+        except ValueError:
+            raise forms.ValidationError("Invalid ISO date for start_date")
+        return start_date
+     
+    def clean_end_date(self):
+        try:
+            end_date = dateutil.parser.parse(self.data.get('end_date'))
+        except ValueError:
+            raise forms.ValidationError("Invalid ISO date for end_date")
+        return end_date           
     
     def __init__(self, user, *args, **kwargs):
-        self.user = user
-        super(EventForm, self).__init__(*args, **kwargs)    
-    
-    def clean_title(self):
-        title = self.data.get('title')
-        return title
 
+        self.user = user
+        super(EventForm, self).__init__(*args, **kwargs)   
+        
     def save(self, *args, **kwargs):
         model = super(EventForm, self).save(commit=False)
-        
+
         if self.cleaned_data['lng'] and self.cleaned_data['lat']:
             model.location_point = Point(self.cleaned_data['lng'],self.cleaned_data['lat'])
+        model.start_date = self.cleaned_data['start_date']
+        model.end_date = self.cleaned_data['end_date']
         model.author = self.user           
         model.published = datetime.now()
         model.is_event = True
