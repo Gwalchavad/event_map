@@ -175,6 +175,17 @@ window.EventCollection = Backbone.Collection.extend({
 });
 
 window.UserModel = Backbone.Model.extend({
+    urlRoot:"/api/user",
+    defaults: {
+        username: "",
+        description: "",
+    },
+    getTitle:function(){
+        return this.get("username");
+    },
+})
+
+window.SessionModel = Backbone.Model.extend({
     url: "/api/session",
     defaults: {
         authenticated: false,
@@ -182,6 +193,8 @@ window.UserModel = Backbone.Model.extend({
         password: "",
         email: ""
     },
+    //used to generate the title on list infromation
+
     logout: function(){
         loggedin = false;
         username = "";

@@ -3,7 +3,6 @@ var EventsListView = Backbone.View.extend({
     className: "span4",
     id: "",
     height: 40,
-    scrolltop: 0,
     markers: [],
     position: {
         left: 0,
@@ -28,7 +27,7 @@ var EventsListView = Backbone.View.extend({
         Swarm.group.clearLayers();
         var self = this;
         //bind
-        $(window).on('resize',self ,this.onResize);
+        $(window).on('resize.'+this.cid,this ,this.onResize);
         //process events that are added by fetching
         self.model.on('add', function(event) {
             self.onAdd(event);
@@ -49,13 +48,28 @@ var EventsListView = Backbone.View.extend({
         });
         Swarm.group.addTo(Swarm.map);
         //fetch more events
-        // self.fetchMoreEvents(true);
+        //self.fetchMoreEvents(true);
         //self.fetchMoreEvents();  
         
     },
+    onDOMadd: function() {
+        var self = this;
+        self.onResize();
+        //bind the scroll event
+        //then trigger a scroll to load more events
+        $("#EventsListView").scroll(self,self.onScroll).scroll();
+    },
     onScroll: function(e) {
         //if at the bottom get more events
-        if ($("#EventsListView")[0].scrollHeight - $("#EventsListView").scrollTop() < ($("#EventsListView").outerHeight() + 2)) {
+        var regenrate = false;
+        if ($("#EventsListView").scrollTop() == 0){
+            e.data.model.rfetch({successCallback:function(events){
+                e.data.render(events,true);
+                scrollPosistion = events.length*e.data.height;
+                $("#EventsListView").scrollTop(scrollPosistion);  
+                regenrate= true;
+            }});
+        } else if ($("#EventsListView")[0].scrollHeight - $("#EventsListView").scrollTop() < ($("#EventsListView").outerHeight() + 2)) {
             e.data.model.ffetch({successCallback:function(events){
                 var options = {};
                 if(e.data.options.user){
@@ -63,20 +77,12 @@ var EventsListView = Backbone.View.extend({
                         user:e.data.options.user
                     }
                 }
-                
                 e.data.render(events);
-                e.data.genarateColorsAndMonths(true);
+                regenrate= true;
             }});
-            //self.fetchMoreEvents();
-        } else if ($("#EventsListView").scrollTop() == 0){
-            e.data.model.rfetch({successCallback:function(events){
-                e.data.render(events,true);
-                scrollPosistion = events.length*e.data.height;
-                $("#EventsListView").scrollTop(scrollPosistion);  
-                e.data.genarateColorsAndMonths(true);
-            }});
-        }
-        e.data.genarateColorsAndMonths();
+        }  
+        e.data.setMonthSideBarPosition();
+        e.data.genarateColorsAndMonths(regenrate);
     },
     onAdd: function(model) {
         var self = this;
@@ -215,13 +221,8 @@ var EventsListView = Backbone.View.extend({
         }
         
     },
-    onDOMadd: function() {
-        var self = this;
-        self.onResize();
-        $("#EventsListView").scroll(self,self.onScroll);
-    },
     onClose: function() {
-        $(window).off('resize', this.onResize);
+        $(window).off('resize.'+this.cid, this.onResize);
     },
     render: function(eventModels, prepend) {
         var self = this;
@@ -234,8 +235,10 @@ var EventsListView = Backbone.View.extend({
                     var firstMonth = months.shift();
                 }
                 //update the last months height
-                $("#month_" + firstMonth.month).height(
-                    $("#month_" + firstMonth.month).height() + firstMonth.height);
+                var newHeight = $("#month_" + firstMonth.month).height() + firstMonth.height;
+                $("#month_" + firstMonth.month).height(newHeight);
+                var monthText = self.month2FullNameOrLetter(firstMonth.month,newHeight);
+                $("#month_" + firstMonth.month).children().text(monthText[0]);
                 //check day
                 if (oldEdgeDate.getDate() == newEdgeDate.getDate()) {
                     if(prepend){
@@ -376,7 +379,6 @@ var EventsListView = Backbone.View.extend({
     },
     genarateColorsAndMonths: function(regenrate) {
         var self = this;
-        self.setMonthSideBarPosition();
         var topVisbleEl = document.elementFromPoint(self.position.left+.5, self.position.top + 20);
         //have we moved enought to change colors?
         if (self.topVisbleEl != topVisbleEl || regenrate) {
@@ -484,12 +486,13 @@ var EventsListView = Backbone.View.extend({
     month2FullNameOrLetter:function(monthNum,elHeight){
         var self = this;
         var number0fChar = elHeight/10;
-        if(number0fChar < 6){
+        if(number0fChar < 10){
             return [self.month2letter(monthNum)];
         }else{
             var m_names = new Array(["January",7],["Febuary",7],["March",5],["April",5],["May",3],["June",4],["July",4],["August",6],["September",9],["October",7],["November",8],["December",8]);
             month = m_names[monthNum];
-            month[0] = month[0].slice(0,number0fChar);
+
+            //month[0] = month[0].slice(0,number0fChar);
             return [month[0],true];
         }
     }

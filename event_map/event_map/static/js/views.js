@@ -1,20 +1,57 @@
 Backbone.View.prototype.close = function () {
-    if (this.beforeClose) {
-        this.beforeClose();
+    _.each(this.children,function(child){
+       child.close();     
+    });
+    
+    if (this.onClose) {
+        this.onClose();
     }
     this.remove();
     this.unbind();
 };
+Backbone.View.prototype.children = [];
+Backbone.View.prototype.addChild = function (child) {
+    this.children.push(child);
+};
+Backbone.View.prototype.renderAll = function (child) {
+    this.render();
+    _.each(this.children,function(child){
+        if(child.render){
+            if(this.childrenEl){
+                $(this.childrenEL).appendTo(child.render());
+            }else{
+                this.$el.appendTo(child.render());               
+            }
+        }
+    });
+    return this.el;
+};
+
 
 var ListOptionView = Backbone.View.extend({
     tagName: "div",
     className: "replace span3",
     id: "calender",
+    childrenEL: "#listOptionPanels",
     initialize: function() {
 
     },
     render: function() {
-        this.$el.append(Handlebars.loadedTemps["list_option_template"](null));
+        if(this.model){
+            if(this.model.get("username") == app.user.get("username")){
+                var title = "MY EVENTS"
+            }else{
+                var title = this.model.getTitle();
+            }
+        }else{
+            var title = "ALL EVENT";
+        }
+        
+        this.$el.append(
+            Handlebars.loadedTemps["list_option_template"](
+                {title:title, allow_add:true}
+            )
+        );
         return this;
     },
 });
@@ -245,7 +282,6 @@ var AppView = Backbone.View.extend({
                 self.render();
             }
         });
-
     },
     login: function(e) {
         self = this;
@@ -271,9 +307,8 @@ var AppView = Backbone.View.extend({
         self = this;
         e.preventDefault();
         $(".label").hide();
-        promise = this.model.save(Utils.form2object("#SignUpForm"), {
-            url: "/api/user"
-        });
+        var NewUser = new UserModel(Utils.form2object("#SignUpForm")),
+            promise = NewUser.save();
 
         if (promise) {
             promise.error(function(response) {
@@ -297,10 +332,4 @@ var AppView = Backbone.View.extend({
     }
 });
 
-Backbone.View.prototype.close = function() {
-    if (this.onClose) {
-        this.onClose();
-    }
-    this.remove();
-    this.unbind();
-};
+

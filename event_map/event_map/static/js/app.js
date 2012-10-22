@@ -21,11 +21,10 @@ var AppRouter = Backbone.Router.extend({
         "addevent": "addevent",
         "about": "about"
     },
-
     initialize: function(options) {
         var self = this;
         //check session
-        self.user = new UserModel(init_user);
+        self.user = new SessionModel(init_user);
         //self.user.reset;
         //start app
         self.appView = new AppView({
@@ -77,12 +76,10 @@ var AppRouter = Backbone.Router.extend({
                 self.showView(new EventAddView({
                     model: self.event,
                     eventId:id
-                    
                 }));
             } else {
                 self.event = new Event({
                     id: id
-                   
                 });
                 request = self.event.fetch();
                 request.error(function() {
@@ -112,13 +109,16 @@ var AppRouter = Backbone.Router.extend({
                 data:{user:user}
             }
         );
-       
         var EventList = new EventsListView({
-            model:UserEventList,
-     
+            model:UserEventList
         });
-                            
-        this.showView([new ListOptionView(),EventList]);                     
+        var user = new UserModel({username:user});
+        //user.fetch();
+        var information = new ListOptionView({
+            model:user
+        });
+        
+        this.showView([information,EventList]);                     
     },
     viewGroup:function(group){
         this.eventList.reset();
@@ -141,15 +141,17 @@ var AppRouter = Backbone.Router.extend({
     },
     showView: function(views) {
         //close last view
-        $('.replace').remove();
+        //$('.replace').remove();
         if(this.currentView instanceof Array){
             this.currentView.forEach(function(view){
-                if(view)
-                    view.close();    
+                if(view){
+                    view.close();  
+                }
             });
         }else{
-            if (this.currentView)
-                this.currentView.close(); 
+            if (this.currentView){
+                this.currentView.close();
+            }
         }
         //open new view
         if(views instanceof Array){
