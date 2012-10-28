@@ -19,15 +19,16 @@ Requirements
 ------------
 geodjango
 
-[redis](http://redis.io/)
-pip install 'python-dateutil < 2.0'
-pip install django-celery
-pip install -U celery-with-redis
+[redis](http://redis.io/)  
+pip install 'python-dateutil < 2.0'  
+pip install django-celery  
+pip install -U celery-with-redis  
 
 
 Implementation
 --------------
-Backend: geodjango
-Frontend: backbonejs 
+Backend: geodjango  
+Frontend: backbonejs   
 
 [API](https://github.com/wanderer/event_map/wiki/API)
+----------------------------------------------------
