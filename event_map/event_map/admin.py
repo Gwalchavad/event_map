@@ -11,4 +11,6 @@ class GeoAdmin(OSMGeoAdmin):
     map_height = 500
 
 admin.site.register(db.Event, GeoAdmin)
-
+admin.site.register(db.Group)
+admin.site.register(db.Feed)
+admin.site.register(db.Subscription)

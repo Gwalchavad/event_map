@@ -12,7 +12,6 @@ from django.utils.decorators import method_decorator
 from datetime import datetime, timedelta, date
 import dateutil.parser
 import itertools
-
 import json
 import calendar
 from event_map import utils, forms, models as db

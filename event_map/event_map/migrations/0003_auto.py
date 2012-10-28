@@ -8,27 +8,18 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Event'
-        db.create_table('event_map_event', (
-            ('article_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['occupywallst.Article'], unique=True, primary_key=True)),
-            ('uuid', self.gf('uuidfield.fields.UUIDField')(unique=True, max_length=32, blank=True)),
-            ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('start_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('location', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('city', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('venue', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('link', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('organization', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('contact_info', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('location_point', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
+        # Adding M2M table for field groups on 'Event'
+        db.create_table('event_map_event_groups', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('event', models.ForeignKey(orm['event_map.event'], null=False)),
+            ('group', models.ForeignKey(orm['event_map.group'], null=False))
         ))
-        db.send_create_signal('event_map', ['Event'])
+        db.create_unique('event_map_event_groups', ['event_id', 'group_id'])
 
 
     def backwards(self, orm):
-        # Deleting model 'Event'
-        db.delete_table('event_map_event')
+        # Removing M2M table for field groups on 'Event'
+        db.delete_table('event_map_event_groups')
 
 
     models = {
@@ -73,8 +64,10 @@ class Migration(SchemaMigration):
             'article_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['occupywallst.Article']", 'unique': 'True', 'primary_key': 'True'}),
             'city': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'contact_info': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'end_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.Group']", 'symmetrical': 'False'}),
             'link': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'location': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'location_point': ('django.contrib.gis.db.models.fields.PointField', [], {'null': 'True', 'blank': 'True'}),
@@ -82,6 +75,25 @@ class Migration(SchemaMigration):
             'start_date': ('django.db.models.fields.DateTimeField', [], {}),
             'uuid': ('uuidfield.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'blank': 'True'}),
             'venue': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
+        },
+        'event_map.feed': {
+            'Meta': {'object_name': 'Feed', '_ormbases': ['event_map.Group']},
+            'group_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.Group']", 'unique': 'True', 'primary_key': 'True'}),
+            'source': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
+            'source_type': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'})
+        },
+        'event_map.group': {
+            'Meta': {'object_name': 'Group'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'through': "orm['event_map.Subscription']", 'symmetrical': 'False'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'event_map.subscription': {
+            'Meta': {'object_name': 'Subscription'},
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.Group']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
         'occupywallst.article': {
             'Meta': {'object_name': 'Article'},

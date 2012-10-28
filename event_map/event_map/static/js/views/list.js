@@ -46,45 +46,45 @@ var EventsListView = Backbone.View.extend({
             $(event.popup._source._icon).find(".circleMarker").show();
             $(event.popup._source._icon ).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
         });
-        Swarm.group.addTo(Swarm.map);
-        //fetch more events
-        //self.fetchMoreEvents(true);
-        //self.fetchMoreEvents();  
-        
+        Swarm.group.addTo(Swarm.map);    
+    
     },
-    onDOMadd: function() {
+    onDOMadd: function(){
         var self = this;
         self.onResize();
         //bind the scroll event
         //then trigger a scroll to load more events
-        $("#EventsListView").scroll(self,self.onScroll).scroll();
+        $("#EventsListView").on("scroll."+this.cid,self,self.onScroll);
+        this.backFetch();  
+        this.forwardFetch();  
     },
-    onScroll: function(e) {
+    onScroll:function(e){
         //if at the bottom get more events
-        var regenrate = false;
         if ($("#EventsListView").scrollTop() == 0){
-            e.data.model.rfetch({successCallback:function(events){
-                e.data.render(events,true);
-                scrollPosistion = events.length*e.data.height;
-                $("#EventsListView").scrollTop(scrollPosistion);  
-                regenrate= true;
-            }});
+            e.data.backFetch(e.data);
         } else if ($("#EventsListView")[0].scrollHeight - $("#EventsListView").scrollTop() < ($("#EventsListView").outerHeight() + 2)) {
-            e.data.model.ffetch({successCallback:function(events){
-                var options = {};
-                if(e.data.options.user){
-                    options.data = {
-                        user:e.data.options.user
-                    }
-                }
-                e.data.render(events);
-                regenrate= true;
-            }});
-        }  
+            e.data.forwardFetch(e.data);
+        }
+        e.data.genarateColorsAndMonths();           
         e.data.setMonthSideBarPosition();
-        e.data.genarateColorsAndMonths(regenrate);
     },
-    onAdd: function(model) {
+    backFetch: function(context){
+        self = context ? context : this;
+        self.model.rfetch({successCallback:function(events){
+            self.render(events,true);
+            scrollPosistion = events.length*self.height;
+            $("#EventsListView").scrollTop(scrollPosistion); 
+            self.genarateColorsAndMonths(true);
+        }});        
+    },
+    forwardFetch: function(context){
+        self = context ? context : this;
+        self.model.ffetch({successCallback:function(events){
+            self.render(events);
+            self.genarateColorsAndMonths(true);
+        }});        
+    },
+    onAdd: function(model){
         var self = this;
         //compute the vaules for open and close 
         //this is also compute on render becuase model appended are not
@@ -108,7 +108,7 @@ var EventsListView = Backbone.View.extend({
         marker.bindPopup("<span>" + "<h3>" + model.get("title") + "</h3>" + model.get("start_time") + "-" + model.get("end_time") + "</span>");
         Swarm.group.addLayer(marker);
 
-        marker.on("click", self.onMarkerClick);
+        marker.on("click", self.onMarkerClick,this);
         this.markers[model.get("id")] = marker;
     },
     onMarkerClick: function(e) {
@@ -118,8 +118,8 @@ var EventsListView = Backbone.View.extend({
         }
         self.lastClickedMarkerEvent = e.target.options.modelID;
         //come after the closing the last event
-        if (!$(this._icon.children).hasClass("open")) {
-            if (!$(this._icon.children).hasClass("viewing")) {
+        if (!$(e.target._icon.children).hasClass("open")) {
+            if (!$(e.target._icon.children).hasClass("viewing")) {
                 //$("#event_53").position().top()
                 self.scrollTo(e.target.options.modelID);
             }
@@ -134,7 +134,6 @@ var EventsListView = Backbone.View.extend({
             self.eventItemClose(id);
             self.markers[id].closePopup();
         } else {
-
             self.eventItemOpen(id);
             //open maker
             self.markers[id].openPopup();
@@ -223,6 +222,7 @@ var EventsListView = Backbone.View.extend({
     },
     onClose: function() {
         $(window).off('resize.'+this.cid, this.onResize);
+        $("#EventsListView").off("scroll."+this.cid,self,self.onScroll).scroll();
     },
     render: function(eventModels, prepend) {
         var self = this;
@@ -379,13 +379,13 @@ var EventsListView = Backbone.View.extend({
     },
     genarateColorsAndMonths: function(regenrate) {
         var self = this;
+        var colorRange = 240;
         var topVisbleEl = document.elementFromPoint(self.position.left+.5, self.position.top + 20);
         //have we moved enought to change colors?
-        if (self.topVisbleEl != topVisbleEl || regenrate) {
-
+        if (topVisbleEl.className == "event_item" &&  self.topVisbleEl != topVisbleEl || regenrate) {
+            self.topVisbleEl = topVisbleEl;
             var topModelId = topVisbleEl.id.replace(/event_/,"");
             var top_start_date = self.model.get(topModelId).get("start_date");         
-            self.topVisbleEl = topVisbleEl;
             self.setMonthDay(top_start_date);
             self.setDay(top_start_date);
             //set map icons that are not in the current view
@@ -397,7 +397,7 @@ var EventsListView = Backbone.View.extend({
             var topIndex = $("#event_list").children().index(topVisbleEl);   
             var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
 
-            var numberOfEl = bottomIndex - topIndex + 1;
+            
             //set the color to white for all over elements
             $(".event_item").css("background-color","white");
             //set up event icons
@@ -408,16 +408,17 @@ var EventsListView = Backbone.View.extend({
                 if (model.get("start_date") < top_start_date) {
                     H = 0;
                 } else {
-                    H =  180;
+                    H =  colorRange;
                 }
                 $(el).find(".svgForeground").css("stroke", "grey").css("fill-opacity", 0.4).css("fill", "hsl(" + H + ",100%, 50%)");
                 self.markers[id].setZIndexOffset(-10);
             });
             //add color event items
-            for (var i = topIndex; i <= bottomIndex; ++i) {
+            var numberOfEl = bottomIndex - topIndex;
+            for (var i = 0; i <= numberOfEl; ++i) {
                 //var model = self.model.models[i];
-                var id = $(".event_item")[i].id.replace(/event_/, "");
-                var H = ((i - topIndex) / numberOfEl) * 180;
+                var id = $(".event_item")[i+topIndex].id.replace(/event_/, "");
+                var H = (i / numberOfEl) * colorRange;
                 $("#event_"+ id).css("background-color", "hsl(" + H + ",100%, 50%)");
                 if (!$("#icon-" +id).hasClass("viewed")) {
                     $("#icon-" + id).html($('#svg svg').clone());

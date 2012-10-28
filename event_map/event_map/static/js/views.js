@@ -37,19 +37,24 @@ var ListOptionView = Backbone.View.extend({
 
     },
     render: function() {
+        var editable = null;
+        //if any user, group or feed is being viewed
         if(this.model){
-            if(this.model.get("username") == app.user.get("username")){
+            if(this.model.getTitle() == app.user.get("username")){
                 var title = "MY EVENTS"
+                editable = true;
             }else{
                 var title = this.model.getTitle();
             }
         }else{
+            //else all things are being viewed
             var title = "ALL EVENT";
+            editable = true;
         }
         
         this.$el.append(
             Handlebars.loadedTemps["list_option_template"](
-                {title:title, allow_add:true}
+                {title:title, allow_add:editable}
             )
         );
         return this;

@@ -1,5 +1,9 @@
 # Django settings for event_map project.
 
+# Do you want to run celery? this controlls all of modules that pull data from extranal sources.
+ENABLE_CELERY = True
+BROKER_URL = 'redis://localhost:6379/0'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 APPEND_SLASH = False
@@ -133,6 +137,11 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+if ENABLE_CELERY:
+    INSTALLED_APPS += ('djcelery',)
+    import djcelery
+    djcelery.setup_loader()
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

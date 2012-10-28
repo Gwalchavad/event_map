@@ -13,7 +13,7 @@ window.Event = Backbone.Model.extend({
     initialize: function () {
         this.computeTimes();
         this.on("change",this.computeTimes);
-    },    
+    },
     computeTimes:function(){
         var _start_date = new Date(this.get("start_date"));
         this.set("start_date", _start_date);
@@ -23,7 +23,7 @@ window.Event = Backbone.Model.extend({
         this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));
         this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));       
     },
-    
+
     computeCloseValues:function(){
         //the lenght the title is on the list when the event is closed
         var trimmedTitleLength = 42;
@@ -31,7 +31,7 @@ window.Event = Backbone.Model.extend({
             this.set("titleClose",this.get("title").slice(0,trimmedTitleLength)+"...");
         }else{
             this.set("titleClose",this.get("title"));
-        }       
+        }
     },
     computeOpenValues:function(){
         //the length of the content and the title when a event on the list is open
@@ -48,7 +48,7 @@ window.Event = Backbone.Model.extend({
             }else{
                 this.set("contentOpen",this.get("content"));
             }
-        }        
+        }
     },
     validate: function(attrs) {
 		var errors = new Object();
@@ -63,20 +63,18 @@ window.Event = Backbone.Model.extend({
 		}
 		if(attrs.content == ""){
 			errors['content'] = "remind me agian, why should should I come?";
-		}		
+		}
 		if(attrs.street == ""){
 			errors['location'] =  "where's the party at bro?";
 		}
 		if(attrs.lat == "" || attrs.lng == ""  ){
 			errors['latlng'] = "drag the maker somewhere";
-		}	
+		}
 		//count keys
 		if(Object.keys(errors).length > 0){
 			return errors;
 		}
-		
 	}
-	    
 });
 
 window.EventCollection = Backbone.Collection.extend({
@@ -97,7 +95,7 @@ window.EventCollection = Backbone.Collection.extend({
     initialize: function (models,options) {
         this._attributes = {};
         $.extend(true,this._attributes,this.defaults);
-        if(models){
+        if(models && models.length != 0){
             //this assumes that incoming initail models are in order
             this._attributes.data = {start:models[0].attributes.start_date.toJSON()};
             this._attributes.futureEvents.updateOffset = models.length;

@@ -8,15 +8,28 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Event.date_created'
-        db.add_column('event_map_event', 'date_created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2012, 10, 13, 0, 0), blank=True),
-                      keep_default=False)
+        # Adding model 'Event'
+        db.create_table('event_map_event', (
+            ('article_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['occupywallst.Article'], unique=True, primary_key=True)),
+            ('uuid', self.gf('uuidfield.fields.UUIDField')(unique=True, max_length=32, blank=True)),
+            ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
+            ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('start_date', self.gf('django.db.models.fields.DateTimeField')()),
+            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('location', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('city', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('venue', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('link', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('organization', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('contact_info', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('location_point', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
+        ))
+        db.send_create_signal('event_map', ['Event'])
 
 
     def backwards(self, orm):
-        # Deleting field 'Event.date_created'
-        db.delete_column('event_map_event', 'date_created')
+        # Deleting model 'Event'
+        db.delete_table('event_map_event')
 
 
     models = {

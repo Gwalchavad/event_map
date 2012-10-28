@@ -8,15 +8,40 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Event.date_created'
-        db.add_column('event_map_event', 'date_created',
-                      self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2012, 10, 13, 0, 0), blank=True),
-                      keep_default=False)
+        # Adding model 'Feed'
+        db.create_table('event_map_feed', (
+            ('group_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['event_map.Group'], unique=True, primary_key=True)),
+            ('source', self.gf('django.db.models.fields.URLField')(max_length=200)),
+            ('source_type', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+        ))
+        db.send_create_signal('event_map', ['Feed'])
+
+        # Adding model 'Group'
+        db.create_table('event_map_group', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+        ))
+        db.send_create_signal('event_map', ['Group'])
+
+        # Adding model 'Subscription'
+        db.create_table('event_map_subscription', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.Group'])),
+            ('public', self.gf('django.db.models.fields.BooleanField')(default=True)),
+        ))
+        db.send_create_signal('event_map', ['Subscription'])
 
 
     def backwards(self, orm):
-        # Deleting field 'Event.date_created'
-        db.delete_column('event_map_event', 'date_created')
+        # Deleting model 'Feed'
+        db.delete_table('event_map_feed')
+
+        # Deleting model 'Group'
+        db.delete_table('event_map_group')
+
+        # Deleting model 'Subscription'
+        db.delete_table('event_map_subscription')
 
 
     models = {
@@ -71,6 +96,25 @@ class Migration(SchemaMigration):
             'start_date': ('django.db.models.fields.DateTimeField', [], {}),
             'uuid': ('uuidfield.fields.UUIDField', [], {'unique': 'True', 'max_length': '32', 'blank': 'True'}),
             'venue': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
+        },
+        'event_map.feed': {
+            'Meta': {'object_name': 'Feed', '_ormbases': ['event_map.Group']},
+            'group_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.Group']", 'unique': 'True', 'primary_key': 'True'}),
+            'source': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
+            'source_type': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'})
+        },
+        'event_map.group': {
+            'Meta': {'object_name': 'Group'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'through': "orm['event_map.Subscription']", 'symmetrical': 'False'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'event_map.subscription': {
+            'Meta': {'object_name': 'Subscription'},
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.Group']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
         'occupywallst.article': {
             'Meta': {'object_name': 'Article'},

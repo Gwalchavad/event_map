@@ -2,21 +2,33 @@ from django.contrib.gis.db import models
 from django.db.models import Q
 from occupywallst.models import Article
 from uuidfield import UUIDField
+from django.contrib.auth.models import User
+
+class Group(models.Model):
+    name =  models.CharField(max_length=255, help_text="""
+        the name of the group""")
+    members = models.ManyToManyField(User, through='Subscription')
+    def __unicode__(self):
+        return self.name
+
+class Feed(Group):
+    source = models.URLField()
+    source_type =  models.CharField(null=True, blank=True, max_length=255)
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User)
+    group = models.ForeignKey(Group)
+    public = models.BooleanField(default=True)
+    def __unicode__(self):
+        return  self.user.username + " --> "+ self.group.name
 
 class Event(Article):
     """Events!"""
-    #maybe should be put in article
-
-    class Meta:
-        permissions = (
-            ("edit", "Can Edit the Event"),
-            ("delete", "Can Delete the Event")
-        )
     #convert to hide how many events?   
     uuid = UUIDField(auto=True)
 
     date_modified = models.DateTimeField(auto_now=True)
-    
+
     date_created = models.DateTimeField(auto_now_add=True)
 
     start_date = models.DateTimeField( help_text="""
@@ -32,16 +44,17 @@ class Event(Article):
     link = models.CharField(null=True, max_length=255, blank=True,  help_text="""
         a link to other infomation on the event""")
     organization = models.CharField(null=True, max_length=255, blank=True,  help_text="""
-        The name Of the organization or group that is putting on the event""")    
+        The name Of the organization or group that is putting on the event""")
     contact_info = models.CharField(null=True, max_length=255, blank=True,  help_text="""
-        Get more info by contacting this email/phone number""")    
-    
+        Get more info by contacting this email/phone number""")
+
     location_point = models.PointField(null=True, blank=True, help_text="""
         Aproximate coordinates of where the event will happen""")
+    groups = models.ManyToManyField(Group)
 
     def __unicode__(self):
-        return self.title       
-    
+        return self.title
+
     def save(self, *args, **kwargs):
         self.is_event = True
-        return super(Event, self).save(*args, **kwargs) 
+        return super(Event, self).save(*args, **kwargs)
