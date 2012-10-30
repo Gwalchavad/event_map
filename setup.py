@@ -2,10 +2,6 @@
 # http://diveintopython3.org/packaging.html
 # http://wiki.python.org/moin/CheeseShopTutorial
 # http://pypi.python.org/pypi?:action=list_classifiers
-
-from ez_setup import use_setuptools
-use_setuptools(version='0.6c11')
-
 import os
 from setuptools import setup
 
