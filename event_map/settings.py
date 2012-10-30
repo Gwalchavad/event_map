@@ -1,5 +1,3 @@
-# Django settings for event_map project.
-
 # Do you want to run celery? this controlls all of modules that pull data from extranal sources.
 ENABLE_CELERY = True
 BROKER_URL = 'redis://localhost:6379/0'
@@ -16,7 +14,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'calendar',                      # Or path to database file if using sqlite3.
+        'NAME': '',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -171,3 +169,8 @@ LOGGING = {
         },
     }
 }
+# Django settings for event_map project.
+try:
+   from settings_local import *
+except ImportError, e:
+   pass

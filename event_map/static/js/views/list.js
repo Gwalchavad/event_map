@@ -339,7 +339,6 @@ var EventsListView = Backbone.View.extend({
                 }
                 months.push({
                     month: current_date.getMonth(),
-                    //letter: self.month2letter(current_date.getMonth())
                 });
                 days.push({
                     day: current_date.getDate(),
@@ -382,7 +381,7 @@ var EventsListView = Backbone.View.extend({
         var colorRange = 240;
         var topVisbleEl = document.elementFromPoint(self.position.left+.5, self.position.top + 20);
         //have we moved enought to change colors?
-        if (topVisbleEl.className == "event_item" &&  self.topVisbleEl != topVisbleEl || regenrate) {
+        if (topVisbleEl.className == "event_item" &&  (self.topVisbleEl != topVisbleEl || regenrate)) {
             self.topVisbleEl = topVisbleEl;
             var topModelId = topVisbleEl.id.replace(/event_/,"");
             var top_start_date = self.model.get(topModelId).get("start_date");         
