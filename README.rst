@@ -1,3 +1,5 @@
+.. http://restpreviewer.nirvake.org/
+
 event_map
 =========
 Aggregating and sharing events in time and space
@@ -13,21 +15,21 @@ Planned Features
 *   RSS import
 *   Groups
 *   Embedding
-*   see [backbuner on trello](https://trello.com/board/event-map/500ac773cef1324c50149d2c)
+*   see `backbuner on trello <https://trello.com/board/event-map/500ac773cef1324c50149d2c>`_
 
 Installation 
 ------------
-You can use this script if your box is debain based.  
-``wget -qO- --no-check-certificate https://raw.github.com/wanderer/event_map/master/setup.sh | sudo bash``  
-source activate  
-``source ./(project name)/bin/activate``  
-then go to the root (project name/event_map) folder and run  
-``./manage syncedb --all``  
+| You can use this script if your box is debain based.
+| ``wget -qO- --no-check-certificate https://raw.github.com/wanderer/event_map/master/setup.sh | sudo bash``  
+| source activate  
+| ``source ./(project name)/bin/activate``  
+| then go to the root (project name/event_map) folder and run  
+| ``./manage syncedb --all``  
 
 Implementation
 --------------
 Backend: geodjango  
 Frontend: backbonejs   
 
-[API](https://github.com/wanderer/event_map/wiki/API)
-----------------------------------------------------
+`API <https://github.com/wanderer/event_map/wiki/API>`_
+-------------------------------------------------------
