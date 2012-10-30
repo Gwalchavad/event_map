@@ -15,15 +15,14 @@ Planned Features
 *   Embedding
 *   see [backbuner on trello](https://trello.com/board/event-map/500ac773cef1324c50149d2c)
 
-Requirements 
+Installation 
 ------------
-geodjango
-
-[redis](http://redis.io/)  
-pip install 'python-dateutil < 2.0'  
-pip install django-celery  
-pip install -U celery-with-redis  
-
+You can use this script if your box is debain based. 
+``wget -qO- --no-check-certificate https://raw.github.com/wanderer/event_map/master/setup.sh | sudo bash``
+source activate
+``source ./(project name)/bin/activate``
+then go to the root (project name/event_map) folder and run
+``./manage syncedb --all``
 
 Implementation
 --------------
