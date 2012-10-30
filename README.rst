@@ -17,12 +17,12 @@ Planned Features
 
 Installation 
 ------------
-You can use this script if your box is debain based. 
-``wget -qO- --no-check-certificate https://raw.github.com/wanderer/event_map/master/setup.sh | sudo bash``
-source activate
-``source ./(project name)/bin/activate``
-then go to the root (project name/event_map) folder and run
-``./manage syncedb --all``
+You can use this script if your box is debain based.  
+``wget -qO- --no-check-certificate https://raw.github.com/wanderer/event_map/master/setup.sh | sudo bash``  
+source activate  
+``source ./(project name)/bin/activate``  
+then go to the root (project name/event_map) folder and run  
+``./manage syncedb --all``  
 
 Implementation
 --------------
