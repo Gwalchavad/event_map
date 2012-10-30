@@ -1,5 +1,11 @@
 #!/bin/bash
 
+[ -z $DEST ]           && DEST='.'
+[ -z $PROJ ]           && PROJ='event_map'
+[ -z $DB ]             && DB=$PROJ
+[ -z $DOMAIN ]         && DOMAIN='dev'
+[ -z $REPO ]           && REPO='git://github.com/wanderer/event_map.git'
+
 if [[ $USER != "root" ]]; then
     echo You need to be root to run me
     exit 1
@@ -116,11 +122,7 @@ echo '----------------------------------------------------------------------'
 echo '                  Setting up the django Project                       '
 echo '----------------------------------------------------------------------'
 
-[ -z $DEST ]           && DEST='.'
-[ -z $PROJ ]           && PROJ='event_map'
-[ -z $DB ]             && DB=$PROJ
-[ -z $DOMAIN ]         && DOMAIN='dev'
-[ -z $REPO ]           && REPO='git://github.com/wanderer/event_map.git'
+
 
 
 # ask postgres to create our new postgis database
@@ -141,17 +143,17 @@ if pg_db_exists $DB; then
     echo "database $DB already exists" >&2
 fi
 
-cd $DEST                                         || exit 1
+cd $DEST                      || exit 1
 echo "creating virtualenv"
-sudo -u $SUDO_USER virtualenv $PROJ              || exit 1
-cd $PROJ                                         || exit 1
+sudo -u $SUDO_USER virtualenv $PROJ || exit 1
+cd $PROJ                      || exit 1
 echo "installing pip"
 source bin/activate           || exit 1
 easy_install pip              || exit 1
 git clone $REPO event_map     || exit 1
 echo "installing event_map"
 pip install -e event_map      || exit 1
-cd event_map               || exit 1
+cd event_map                  || exit 1
 
 
 # these settings override what's in settings.py *only* for our local install
