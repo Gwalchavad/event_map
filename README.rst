@@ -26,7 +26,7 @@ Installation
 | then go to the root (project name/event_map) folder and run
 | ``./manage syncedb --all``
 |
-| *If you need install it manually* 
+| **If you need install it manually** 
 | `Install GeoDjango <https://docs.djangoproject.com/en/dev/ref/contrib/gis/install/>`_
 | `Install postGIS <https://docs.djangoproject.com/en/dev/ref/contrib/gis/install/postgis/>`_
 | Then install event_map ``pip install -e event_map``
