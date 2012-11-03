@@ -1,8 +1,9 @@
 define([
-   'backbone',
-   'handlebars' 
+    'underscore',
+    'backbone',
+    'handlebars' 
   // Load our app module and pass it to our definition function
-], function(Backbone,handlebars){
+], function(_,Backbone,handlebars){
 
     var Event = Backbone.Model.extend({
         urlRoot: "/api/event",

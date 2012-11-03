@@ -1,7 +1,8 @@
 define([
+   'underscore',
    'handlebars' 
   // Load our app module and pass it to our definition function
-], function(handlebars){
+], function(_,handlebars){
 
     handlebars.registerHelper('slice', function(context,options) {
         for (var prop in this) {
@@ -63,30 +64,6 @@ define([
             } );
         return result;
     }
-    
-    var loadtemps = function(templates,callback){
-            //initilze 
-            Handlebars.loadedTemps = []
-            var promises = [];
-            _.each(templates,function(name,key, list){
-                if(list.length -1 == key)
-                     last = true;
-                get = $.get("/static/"+"templates/" + name + ".must") ;
-
-                get.done( function(data) {
-                    //ich.addTemplate(name + "_template", data);
-                    Handlebars.loadedTemps[name + "_template" ] =  Handlebars.compile(data);
-                    console.log(name);
-                }, "html");
-                promises.push(get);
-            });
-            //render stuff once the last template is loaded
-            $.when.apply(this,promises).done(function(){
-                console.log("Temps loaded");
-                callback();
-            });
-        };
-
     //common time
     Date.prototype.getTimeCom = function(){
         var hours = this.getHours()
@@ -105,7 +82,6 @@ define([
     
     
     return {
-        loadtemps: loadtemps,
         form2object:form2object
         
     };

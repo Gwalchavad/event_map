@@ -3,9 +3,25 @@ define([
     'backbone',
     'models',
     'utils',
-    'timeDatePicker'
+    'timeDatePicker',
+    'hbs!../templates/app_css',
+    'hbs!../templates/list_option', 
+    'hbs!../templates/event',
+    'hbs!../templates/event_add',
+    'hbs!../templates/login',
+    'hbs!../templates/sign_up',
+    'hbs!../templates/markdown',
+    'hbs!../templates/nav'
   // Load our app module and pass it to our definition function
-], function($,Backbone,Models,Utils){
+], function($,Backbone,Models,Utils,timeDatePicker,
+            temp_app_css,
+            temp_list_option,
+            temp_event,
+            temp_event_add,
+            temp_login,
+            temp_sign_up,
+            temp_markdown,
+            temp_nav){
 
     
     Backbone.View.prototype.close = function () {
@@ -63,7 +79,7 @@ define([
             }
             
             this.$el.append(
-                Handlebars.loadedTemps["list_option_template"](
+                temp_list_option(
                     {title:title, allow_add:editable}
                 )
             );
@@ -91,7 +107,7 @@ define([
             this.model.set("edit", this.edit, {
                 silent: true
             });
-            this.$el.html(Handlebars.loadedTemps["event_template"](this.model.toJSON()));
+            this.$el.html(temp_event_template(this.model.toJSON()));
             return this;
         },
     });
@@ -125,7 +141,7 @@ define([
             var context = _.extend({
                 "settings": document.Settings
             }, this.event.toJSON());
-            this.$el.append(Handlebars.loadedTemps["event_add_template"](context));
+            this.$el.append(temp_event_add(context));
             $("#left_notifcation").text("ADD A NEW EVENT");
             $("#right_notifcation").html("DRAG TEH MARKER TO SELECT THE LOCTION <br> (or use the FIND button)&nbsp" + "<span id=\"latlng_error\" class=\"label label-important hide\"></span>");
             //place marker
@@ -258,17 +274,17 @@ define([
             $(window).on('resize', function(){
                 this.height = $(window).height();
                 this.topHeight = $(window).height()- $(".top").height();
-                $("#heightStyle").replaceWith(Handlebars.loadedTemps["app_css_template"]({height: this.height,topHeight:this.topHeight}));
+                $("#heightStyle").replaceWith(temp_app_css({height: this.height,topHeight:this.topHeight}));
                
             });
             //static render
-            this.$el.append(Handlebars.loadedTemps["login_template"](null));
-            this.$el.append(Handlebars.loadedTemps["markdown_template"](null));
-            this.$el.append(Handlebars.loadedTemps["sign_up_template"](null));
+            this.$el.append(temp_login(null));
+            this.$el.append(temp_markdown(null));
+            this.$el.append(temp_sign_up(null));
             this.height = $(window).height();
             //60 height of header
             this.topHeight = $(window).height()- 60;
-            this.$el.append(Handlebars.loadedTemps["app_css_template"]({height: this.height,topHeight: this.topHeight}));
+            this.$el.append(temp_app_css({height: this.height,topHeight: this.topHeight}));
             //start the map with the div the proper size
 
             Swarm.int_map(self.options.map_settings.map);
@@ -276,7 +292,7 @@ define([
         },
         render: function() {
             //add login template
-            $("#mainNav").html(Handlebars.loadedTemps["nav_template"](this.model.toJSON()));
+            $("#mainNav").html(temp_nav(this.model.toJSON()));
             return this;
         },
         logonmodel: function(e) {

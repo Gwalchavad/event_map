@@ -1,10 +1,17 @@
 define([
     'jquery',
-
+    'underscore',
     'backbone',
-    'handlebars' 
+    'hbs!../../templates/event_list',
+    'hbs!../../templates/event_list_empty',
+    
+    'hbs!../../templates/item_open',
+    'hbs!../../templates/item_closed',
+
+    'hbs!../../templates/li_months',
+    'hbs!../../templates/li_days',
   // Load our app module and pass it to our definition function
-], function($,Backbone,handlebars){
+], function($,_,Backbone,temp_event_list,temp_event_list_empty,temp_item_open,temp_item_closed,temp_li_months,temp_li_days){
 
     var EventsListView = Backbone.View.extend({
         tagName: "div",
@@ -180,7 +187,7 @@ define([
             var model = self.model.get(id);
             $("#event_" + id).addClass("open");
             $("#event_" + id).height(self.height + 26);
-            $("#event_" + id).find(".list_item_container").html(Handlebars.loadedTemps["item_open_template"](model.toJSON()));
+            $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
             //set month
             var month = model.get("start_date").getMonth();
             var height = $("#month_" + month).height();
@@ -216,9 +223,10 @@ define([
             $("#month_" + month).height(height - 26);
             var color = $("#event_" + id).css("background-color");
             $("#event_" + id).replaceWith(
-            Handlebars.loadedTemps["item_closed_template"]({
-                events: [model.toJSON()]
-            }));
+                temp_item_closed({
+                    events: [model.toJSON()]
+                })
+            );
             $("#event_" + id).css("background-color", color);
         },
         onResize: function(e) {
@@ -265,7 +273,7 @@ define([
             if (!eventModels) {
                 //if there are no events in the list
                 if(this.model.length == 0){
-                    var html = Handlebars.loadedTemps["event_list_empty_template"]();
+                    var html = temp_event_list_empty();
                     self.$el.html(html);
                     return this;
                 }
@@ -273,7 +281,7 @@ define([
                 self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");    
                 self.render_var.current_date.date =  _.last(eventModels).get("start_date");  
                 var renderEl = function(){
-                    var html = Handlebars.loadedTemps["event_list_template"]({
+                    var html = temp_event_list({
                         months: months,
                         days: days,
                         events: events,
@@ -287,17 +295,17 @@ define([
                     self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");
                     var firstDate = _.last(eventModels).get("start_date");     
                     var renderEl = function() {
-                        var html = Handlebars.loadedTemps["item_closed_template"]({
+                        var html = temp_item_closed({
                             events: events
                         });
 
                         //adds height to the allready present month and day li
                         adjustHeightOnMonthDays(oldLastDate,firstDate);
                         $("#event_list").prepend(html);
-                        $("#event_list_day").prepend(Handlebars.loadedTemps["li_days_template"]({
+                        $("#event_list_day").prepend(temp_li_days({
                             days: days
                         }));
-                        $("#event_list_month").prepend(Handlebars.loadedTemps["li_months_template"]({
+                        $("#event_list_month").prepend(temp_li_months({
                             months: months
                         }));
                     }
@@ -307,16 +315,16 @@ define([
                     self.render_var.current_date.date =  _.last(eventModels).get("start_date");
                     var firstDate = eventModels[0].get("start_date");
                     var renderEl = function() {
-                        var html = Handlebars.loadedTemps["item_closed_template"]({
+                        var html = temp_item_closed({
                             events: events
                         });
                         //adds height to the allready present month and day li
                         adjustHeightOnMonthDays(oldLastDate,firstDate);
                         $("#event_list").append(html);
-                        $("#event_list_day").append(Handlebars.loadedTemps["li_days_template"]({
+                        $("#event_list_day").append(temp_li_days({
                             days: days
                         }));
-                        $("#event_list_month").append(Handlebars.loadedTemps["li_months_template"]({
+                        $("#event_list_month").append(temp_li_months({
                             months: months
                         }));
                     }
