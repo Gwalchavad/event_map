@@ -1,0 +1,178 @@
+define([
+  'jquery',
+  'underscore',
+  'backbone',
+  'models',
+  'views',
+  'views/list'
+], function($, _, Backbone,Models,Views,List){
+    var AppRouter = Backbone.Router.extend({
+        routes: {
+            "": "list",
+            "/:date": "list",
+            "event/add": "addEvent",
+            "event/:id": "eventDetails",
+            "editevent/:id": "addevent",
+            "user/:user": "viewUser",
+            "group/:group":"viewGroup",
+            "addevent": "addevent",
+            "about": "about"
+        },
+        initialize: function(options) {
+            var self = this;
+            //check session
+            self.user = new Models.SessionModel(init_user);
+            //self.user.reset;
+            //start app
+            self.appView = new Views.AppView({
+                model: self.user,
+                map_settings: options.map
+            });
+            this.eventList = new Models.EventCollection();
+            this.eventList.reset(init_events);
+        },
+        list: function(date){
+            //create a event list
+            EventList = new List.EventsListView({
+                model: this.eventList
+            });
+            
+            this.showView([new Views.ListOptionView(),EventList]);
+        },
+        eventDetails: function(id){
+            var self = this;
+            self.event = self.eventList.get(id);
+            if (self.event) {
+                var eventView = new Models.EventView({
+                    model: self.event
+                });
+                this.showView(eventView);
+
+            } else {
+                self.event = new Models.Event({
+                    id: id
+                });
+                request = self.event.fetch();
+                request.error(function() {
+                    throw ("event not found");
+                });
+                request.success(function(data) {
+                    var eventView = new EventView({
+                        model: self.event
+                    });
+                    self.showView(eventView);
+                });
+            }
+        },
+        addevent: function(id){
+            //edit an evet
+            var self = this;
+            if (id) {
+                if (!this.eventList.get(id)) {
+                    self.event = new Event({
+                        id: id
+                    });
+                    request = self.event.fetch();
+                    request.error(function() {
+                        throw ("event not found");
+                    });
+                    request.success(function(data) {
+                        self.eventList.add(self.event)
+                        self.showView(new EventAddView({
+                            model: self.eventList,
+                            eventId:id
+                        }));
+                    });
+                } else {
+                    //create a new event
+                    newEventView = new Models.EventAddView({
+                        model:this.eventList,
+                        eventId:id
+                    });
+                    self.showView(newEventView);              
+                }
+            }else{
+                //create a new event
+                newEventView = new Views.EventAddView({
+                    model:this.eventList,
+                    eventId:id
+                });
+                self.showView(newEventView);
+            }
+        },
+        viewUser:function(user){
+            var self = this;
+            var UserEventList = new Models.EventCollection(
+                this.eventList.where({author:user}),
+                {
+                    data:{user:user}
+                }
+            );
+            var EventList = new List.EventsListView({
+                model:UserEventList
+            });
+            var user = new Models.UserModel({username:user});
+            //user.fetch();
+            var information = new Models.ListOptionView({
+                model:user
+            });
+            
+            this.showView([information,EventList]);                     
+        },
+        viewGroup:function(group){
+            this.eventList.reset();
+            this.eventList.fetch({
+                data: {
+                    group:group
+                }
+            });
+            EventList = new List.EventsListView({
+                model: this.eventList,
+                group:group
+            });
+            
+            this.showView([new Models.ListOptionView(),EventList]);          
+        },
+        about: function() {
+            if (!this.aboutView) {
+                // this.aboutView = new AboutView();
+            }
+        },
+        showView: function(views) {
+            //close last view
+            //$('.replace').remove();
+            if(this.currentView instanceof Array){
+                this.currentView.forEach(function(view){
+                    if(view){
+                        view.close();  
+                    }
+                });
+            }else{
+                if (this.currentView){
+                    this.currentView.close();
+                }
+            }
+            //open new view
+            if(views instanceof Array){
+                var fragment = document.createDocumentFragment();
+                views.forEach(function(view){
+                    fragment.appendChild(view.render().el);
+                });
+                $("#main").prepend(fragment);
+                views.forEach(function(view){
+                    if(view.onDOMadd)
+                        view.onDOMadd();   
+                });
+            }else{
+                $("#main").prepend(views.render().el);
+                if(views.onDOMadd)
+                        views.onDOMadd();
+            }
+            this.currentView = views;
+           
+        }
+    });
+    
+    return AppRouter;
+});
+
