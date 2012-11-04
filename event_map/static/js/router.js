@@ -4,8 +4,8 @@ define([
   'backbone',
   'models',
   'views',
-  'views/list'
-], function($, _, Backbone,Models,Views,List){
+  'views/event_add'
+], function($, _, Backbone,Models,Views){
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "list",
@@ -19,31 +19,33 @@ define([
             "about": "about"
         },
         initialize: function(options) {
-            var self = this;
             //check session
-            self.user = new Models.SessionModel(init_user);
+            this.user = new Models.SessionModel(init_user);
             //self.user.reset;
             //start app
-            self.appView = new Views.AppView({
-                model: self.user,
+            this.appView = new Views.AppView({
+                model: this.user,
                 map_settings: options.map
             });
             this.eventList = new Models.EventCollection();
             this.eventList.reset(init_events);
         },
         list: function(date){
-            //create a event list
-            EventList = new List.EventsListView({
-                model: this.eventList
-            });
-            
-            this.showView([new Views.ListOptionView(),EventList]);
+            var self= this;
+            require(['views/list',],function(list){
+                    //create a event list
+                    EventList = new list.EventsListView({
+                        model: self.eventList
+                    });
+                    self.showView([new Views.ListOptionView(),EventList]);
+                }
+            )
         },
         eventDetails: function(id){
             var self = this;
             self.event = self.eventList.get(id);
             if (self.event) {
-                var eventView = new Models.EventView({
+                var eventView = new Views.EventView({
                     model: self.event
                 });
                 this.showView(eventView);
@@ -57,7 +59,7 @@ define([
                     throw ("event not found");
                 });
                 request.success(function(data) {
-                    var eventView = new EventView({
+                    var eventView = new Views.EventView({
                         model: self.event
                     });
                     self.showView(eventView);
@@ -65,40 +67,35 @@ define([
             }
         },
         addevent: function(id){
-            //edit an evet
             var self = this;
-            if (id) {
-                if (!this.eventList.get(id)) {
-                    self.event = new Event({
-                        id: id
-                    });
-                    request = self.event.fetch();
-                    request.error(function() {
-                        throw ("event not found");
-                    });
-                    request.success(function(data) {
-                        self.eventList.add(self.event)
-                        self.showView(new EventAddView({
-                            model: self.eventList,
-                            eventId:id
-                        }));
-                    });
-                } else {
-                    //create a new event
-                    newEventView = new Models.EventAddView({
-                        model:this.eventList,
-                        eventId:id
-                    });
-                    self.showView(newEventView);              
+            require(['views/event_add'],function(event_add){
+                //edit an evet
+                if (id) {
+                    //look up the event and fetch if it is not in the collection
+                    event = self.eventList.get(id);
+                    if (!event) {
+                        event = new Event({
+                            id: id
+                        });
+                        request = event.fetch();
+                        request.error(function() {
+                            throw ("event not found");
+                        });
+                        request.success(function(data) {
+                            self.eventList.add(event);
+                            self.addevent(id);
+                        });
+                        return;
+                    } 
                 }
-            }else{
                 //create a new event
-                newEventView = new Views.EventAddView({
-                    model:this.eventList,
+                newEventView = new event_add.EventAddView({
+                    model:self.eventList,
                     eventId:id
                 });
                 self.showView(newEventView);
-            }
+                
+            });
         },
         viewUser:function(user){
             var self = this;

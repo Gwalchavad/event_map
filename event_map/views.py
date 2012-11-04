@@ -270,6 +270,7 @@ class event(View):
                 }
             },status = 401)
     #create
+    @method_decorator(json_api_errors)
     def post(self, request, *args, **kwargs):
         jsonPOST =  json.loads(request.raw_post_data)
         form = forms.EventForm(request.user,jsonPOST)
@@ -293,9 +294,7 @@ class event(View):
                     }
             return utils.json_response(response)
         else:
-            return utils.json_response({
-                'errors': dict(form.errors.items()),
-            })
+            raise ApiException(dict(form.errors.items()),"",401)
     #delete
     def delete(self, request, *args, **kwargs):
         try:

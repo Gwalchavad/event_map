@@ -51,8 +51,7 @@ require([
   'app',
   'utils',
 ], function($,App,Utils){
-    
- //get site settings
+    //get site settings
     $.ajax({
         url: "/static/site_settings.json",
         dataType: 'json',
@@ -64,7 +63,6 @@ require([
     });
     // The "app" dependency is passed in as "App"
     $(function(){
-
         //load map
         $.ajax({
             url: "/static/map_settings.json",
