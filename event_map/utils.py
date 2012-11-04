@@ -76,7 +76,7 @@ class ApiException(Exception):
            self.param = param
            self.status = status
        def __str__(self):
-           return repr(self.message)
+           return repr(self.massage)
            
 def json_api_errors(fn):
     """

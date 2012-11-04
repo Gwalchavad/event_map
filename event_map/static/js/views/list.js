@@ -236,6 +236,7 @@ define([
                 self.position.top = $("#EventsListView").position().top;
                 self.genarateColorsAndMonths(true);
             }
+            
         },
         onClose: function() {
             $(window).off('resize.'+this.cid, this.onResize);
