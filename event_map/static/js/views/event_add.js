@@ -1,0 +1,140 @@
+define([
+    'jquery',
+    'underscore',
+    'backbone',
+    'models',
+    'utils',
+
+    'hbs!../../templates/event_add',
+    'timeDatePicker',
+  // Load our app module and pass it to our definition function
+], function($,_,Backbone,Models,Utils,temp_event_add){
+ 
+    var EventAddView = Backbone.View.extend({
+        tagname: "div",
+        className: "span7 overflow setheight replace",
+        events: {
+            "click #geocode_button": "geocode",
+            "click #add_event": "add_event",
+            "click .cancel": "cancel",
+            "click #delete_event": "delete_event"
+        },
+        initialize: function() {            
+            this.model.on("error", function(model, errors) {
+                _.each(errors, function(error, key) {
+                    $("#" + key + "_error").show().html(error);
+                });
+            });
+        },
+        render: function() {
+            Swarm.group.clearLayers();
+            var context = _.extend({
+                "settings": document.Settings
+            }, this.model.toJSON());
+            this.$el.append(temp_event_add(context));
+            $("#left_notifcation").text("ADD A NEW EVENT");
+            $("#right_notifcation").html("DRAG TEH MARKER TO SELECT THE LOCTION <br> (or use the FIND button)&nbsp" + "<span id=\"latlng_error\" class=\"label label-important hide\"></span>");
+            //place marker
+            marker = Swarm.add_marker();
+            marker.on('dragend', function(e) {
+                $('#id_lat').val(e.target._latlng.lat);
+                $('#id_lng').val(e.target._latlng.lng);
+            });
+            //trigger resive event            
+            //set up datetime picker. destroy?
+            this.$el.find("#id_start_date").datetimepicker({
+                dateFormat: 'yy-mm-dd',
+                onClose: function(dateText, inst) {
+                    var endDateTextBox = $('#id_end_date');
+                    if (endDateTextBox.val() != '') {
+                        var testStartDate = new Date(dateText);
+                        var testEndDate = new Date(endDateTextBox.val());
+                        if (testStartDate > testEndDate) endDateTextBox.val(dateText);
+                    } else {
+                        endDateTextBox.val(dateText);
+                    }
+                },
+                onSelect: function(selectedDateTime) {
+                    var start = $(this).datetimepicker('getDate');
+                    $('#id_end_date').datetimepicker('option', 'minDate', new Date(start.getTime()));
+                }
+            });
+            this.$el.find("#id_end_date").datetimepicker({
+                dateFormat: 'yy-mm-dd',
+                onClose: function(dateText, inst) {
+                    var startDateTextBox = $('#id_start_date');
+                    if (startDateTextBox.val() != '') {
+                        var testStartDate = new Date(startDateTextBox.val());
+                        var testEndDate = new Date(dateText);
+                        if (testStartDate > testEndDate) startDateTextBox.val(dateText);
+                    } else {
+                        startDateTextBox.val(dateText);
+                    }
+                },
+                onSelect: function(selectedDateTime) {
+                    var end = $(this).datetimepicker('getDate');
+                    $('#id_start_date').datetimepicker('option', 'maxDate', new Date(end.getTime()));
+                }
+            });
+            return this;
+        },
+        geocode: function() {
+            Swarm.geocode($("#id_street").val() + " " + $("#id_city").val(), {
+                onSuccess: function(lat, lng) {
+                    $('#id_lat').val(lat);
+                    $('#id_lng').val(lng);
+                },
+                onFail: function() {
+                    alert("Could not Find, Please drag the Marker to the location of the event");
+                }
+            });
+        },
+        add_event: function(e){
+            //override the na
+            e.preventDefault();
+            //hide error messages
+            $(".label").hide();
+            this.event.set(Utils.form2object("#event_add_form"));
+            promise = this.event.save();
+            if (promise) {
+                promise.error(function(response) {
+                    throw new Error("Server Error:" + response);
+                });
+                promise.success(function(response) {
+                    //if new event then add to event list
+                    if (!self.options.eventId)     
+                        self.model.add(self.model);
+                    Swarm.remove_marker();
+                    app.navigate('event/' + self.model.id, {
+                        trigger: true
+                    });
+                });
+            }
+        },
+        cancel: function(e) {
+            //todo addddddd delete
+            e.preventDefault();
+            Swarm.remove_marker();
+            app.navigate('/#', {
+                trigger: true
+            });
+        },
+        delete_event: function(e) {
+            e.preventDefault();
+            self = this;
+            if (confirm("Do you want to Delete your event?")) {
+                self.model.destroy({
+                    success: function() {
+                        app.navigate('/#', {
+                            trigger: true
+                        });
+                    }
+                });
+            }
+        }
+    });
+    
+    return {
+        EventAddView:EventAddView
+    };
+});

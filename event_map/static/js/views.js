@@ -1,22 +1,22 @@
 define([
     'jquery',
+    'underscore',
     'backbone',
     'models',
     'utils',
-    'timeDatePicker',
     'hbs!../templates/app_css',
     'hbs!../templates/list_option', 
-    'hbs!../templates/event',
     'hbs!../templates/event_add',
     'hbs!../templates/login',
     'hbs!../templates/sign_up',
     'hbs!../templates/markdown',
-    'hbs!../templates/nav'
+    'hbs!../templates/nav',
+    'timeDatePicker',    
+    'lib/bootstrap',
   // Load our app module and pass it to our definition function
-], function($,Backbone,Models,Utils,timeDatePicker,
+], function($,_,Backbone,Models,Utils,
             temp_app_css,
             temp_list_option,
-            temp_event,
             temp_event_add,
             temp_login,
             temp_sign_up,
@@ -52,8 +52,6 @@ define([
         });
         return this.el;
     };
-
-
     var ListOptionView = Backbone.View.extend({
         tagName: "div",
         className: "replace span3",
@@ -85,163 +83,6 @@ define([
             );
             return this;
         },
-    });
-
-    var EventView = Backbone.View.extend({
-        tagName: "div",
-        className: "replace span7 overflow setheight",
-        id: "event_view",
-        height: 0,
-        initialize: function() {
-            app.user.on("change", function(model) {
-                app.eventView.render()
-            });
-        },
-        render: function() {
-            Swarm.group.clearLayers();
-            if (app.event.get("author") == app.user.get("username")) {
-                this.edit = true;
-            } else {
-                this.edit = false;
-            }
-            this.model.set("edit", this.edit, {
-                silent: true
-            });
-            this.$el.html(temp_event_template(this.model.toJSON()));
-            return this;
-        },
-    });
-
-    var EventAddView = Backbone.View.extend({
-        tagname: "div",
-        className: "span7 overflow setheight replace",
-        events: {
-            "click #geocode_button": "geocode",
-            "click #add_event": "add_event",
-            "click .cancel": "cancel",
-            "click #delete_event": "delete_event"
-        },
-        initialize: function() {
-            //validation error handling
-            if(this.options.eventId){
-                this.event = this.model.get(this.options.eventId); 
-            }else{
-                this.event = new Models.Event();
-                self.newEvent = true;
-            }
-            
-            this.event.on("error", function(model, errors) {
-                _.each(errors, function(error, key) {
-                    $("#" + key + "_error").show().html(error);
-                });
-            });
-        },
-        render: function() {
-            Swarm.group.clearLayers();
-            var context = _.extend({
-                "settings": document.Settings
-            }, this.event.toJSON());
-            this.$el.append(temp_event_add(context));
-            $("#left_notifcation").text("ADD A NEW EVENT");
-            $("#right_notifcation").html("DRAG TEH MARKER TO SELECT THE LOCTION <br> (or use the FIND button)&nbsp" + "<span id=\"latlng_error\" class=\"label label-important hide\"></span>");
-            //place marker
-            marker = Swarm.add_marker();
-            marker.on('dragend', function(e) {
-                $('#id_lat').val(e.target._latlng.lat);
-                $('#id_lng').val(e.target._latlng.lng);
-            });
-            //trigger resive event            
-            //set up datetime picker. destroy?
-            this.$el.find("#id_start_date").datetimepicker({
-                dateFormat: 'yy-mm-dd',
-                onClose: function(dateText, inst) {
-                    var endDateTextBox = $('#id_end_date');
-                    if (endDateTextBox.val() != '') {
-                        var testStartDate = new Date(dateText);
-                        var testEndDate = new Date(endDateTextBox.val());
-                        if (testStartDate > testEndDate) endDateTextBox.val(dateText);
-                    } else {
-                        endDateTextBox.val(dateText);
-                    }
-                },
-                onSelect: function(selectedDateTime) {
-                    var start = $(this).datetimepicker('getDate');
-                    $('#id_end_date').datetimepicker('option', 'minDate', new Date(start.getTime()));
-                }
-            });
-            this.$el.find("#id_end_date").datetimepicker({
-                dateFormat: 'yy-mm-dd',
-                onClose: function(dateText, inst) {
-                    var startDateTextBox = $('#id_start_date');
-                    if (startDateTextBox.val() != '') {
-                        var testStartDate = new Date(startDateTextBox.val());
-                        var testEndDate = new Date(dateText);
-                        if (testStartDate > testEndDate) startDateTextBox.val(dateText);
-                    } else {
-                        startDateTextBox.val(dateText);
-                    }
-                },
-                onSelect: function(selectedDateTime) {
-                    var end = $(this).datetimepicker('getDate');
-                    $('#id_start_date').datetimepicker('option', 'maxDate', new Date(end.getTime()));
-                }
-            });
-            return this;
-        },
-        geocode: function() {
-            Swarm.geocode($("#id_street").val() + " " + $("#id_city").val(), {
-                onSuccess: function(lat, lng) {
-                    $('#id_lat').val(lat);
-                    $('#id_lng').val(lng);
-                },
-                onFail: function() {
-                    alert("Could not Find, Please drag the Marker to the location of the event");
-                }
-            });
-        },
-        add_event: function(e){
-            //override the na
-            e.preventDefault();
-            //hide error messages
-            $(".label").hide();
-            this.event.set(Utils.form2object("#event_add_form"));
-            promise = this.event.save();
-            if (promise) {
-                promise.error(function(response) {
-                    throw new Error("Server Error:" + response);
-                });
-                promise.success(function(response) {
-                    //if new event then add to event list
-                    if (!self.options.eventId)     
-                        self.model.add(self.event);
-                    Swarm.remove_marker();
-                    app.navigate('event/' + self.event.id, {
-                        trigger: true
-                    });
-                });
-            }
-        },
-        cancel: function(e) {
-            //todo addddddd delete
-            e.preventDefault();
-            Swarm.remove_marker();
-            app.navigate('/#', {
-                trigger: true
-            });
-        },
-        delete_event: function(e) {
-            e.preventDefault();
-            self = this;
-            if (confirm("Do you want to Delete your event?")) {
-                self.event.destroy({
-                    success: function() {
-                        app.navigate('/#', {
-                            trigger: true
-                        });
-                    }
-                });
-            }
-        }
     });
 
     var AppView = Backbone.View.extend({
@@ -361,8 +202,6 @@ define([
     
     var self = {
         ListOptionView:ListOptionView,
-        EventView:EventView,
-        EventAddView:EventAddView,
         AppView:AppView
     };
     
