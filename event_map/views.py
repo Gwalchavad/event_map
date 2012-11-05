@@ -17,7 +17,7 @@ import calendar
 from event_map import utils, forms, models as db
 from event_map.utils import json_api_errors, ApiException
 
-
+@ensure_csrf_cookie
 def index(request):
     begin = datetime.now()
     events = db.Event.objects.filter(is_event=True, is_deleted=False, start_date__gte=begin).order_by('start_date')[:10]
@@ -38,12 +38,11 @@ def index(request):
                 "link":event.link
                 } for event in events]
     jsonevents = json.dumps(response, default=utils.clean_data)
-    
     session = {
-            'authenticated':request.user.is_authenticated(),
-            'username':request.user.username,
-            'id':request.user.id
-        }
+        'authenticated':request.user.is_authenticated(),
+        'username':request.user.username,
+        'id':request.user.id
+    }
     jsonsession = json.dumps(session, default=utils.clean_data)
     
     return render_to_response('base.html',

@@ -4,23 +4,21 @@ define([
     'backbone',
     'models',
     'utils',
-    'timeDatePicker',
+
 
     'hbs!../templates/app_css',
     'hbs!../templates/list_option', 
-    'hbs!../templates/event',
     'hbs!../templates/event_add',
     'hbs!../templates/login',
     'hbs!../templates/sign_up',
     'hbs!../templates/markdown',
     'hbs!../templates/nav',
-    
+    'timeDatePicker',    
     'lib/bootstrap',
   // Load our app module and pass it to our definition function
-], function($,_,Backbone,Models,Utils,timeDatePicker,
+], function($,_,Backbone,Models,Utils,
             temp_app_css,
             temp_list_option,
-            temp_event,
             temp_event_add,
             temp_login,
             temp_sign_up,
@@ -85,31 +83,6 @@ define([
                     {title:title, allow_add:editable}
                 )
             );
-            return this;
-        },
-    });
-
-    var EventView = Backbone.View.extend({
-        tagName: "div",
-        className: "replace span7 overflow setheight",
-        id: "event_view",
-        height: 0,
-        initialize: function() {
-            app.user.on("change", function(model) {
-                app.eventView.render()
-            });
-        },
-        render: function() {
-            Swarm.group.clearLayers();
-            if (app.event.get("author") == app.user.get("username")) {
-                this.edit = true;
-            } else {
-                this.edit = false;
-            }
-            this.model.set("edit", this.edit, {
-                silent: true
-            });
-            this.$el.html(temp_event(this.model.toJSON()));
             return this;
         },
     });
@@ -231,7 +204,6 @@ define([
     
     var self = {
         ListOptionView:ListOptionView,
-        EventView:EventView,
         AppView:AppView
     };
     

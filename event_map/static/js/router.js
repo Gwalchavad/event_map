@@ -15,7 +15,7 @@ define([
             "editevent/:id": "addevent",
             "user/:user": "viewUser",
             "group/:group":"viewGroup",
-            "addevent": "addevent",
+            "addevent": "eventAdd",
             "about": "about"
         },
         initialize: function(options) {
@@ -32,89 +32,37 @@ define([
         },
         list: function(date){
             var self= this;
-            require(['views/list',],function(list){
+            require(['views/list'],function(list){
                     //create a event list
                     EventList = new list.EventsListView({
                         model: self.eventList
                     });
+                    //self.appView.addChildren(ListOptionView(),EventList)
+                    //   ->rendAll
+                    //   ->
                     self.showView([new Views.ListOptionView(),EventList]);
                 }
             )
         },
-        eventDetails: function(id){
-            var self = this;
-            self.event = self.eventList.get(id);
-            if (self.event) {
-                var eventView = new Views.EventView({
-                    model: self.event
-                });
-                this.showView(eventView);
-
-            } else {
-                self.event = new Models.Event({
-                    id: id
-                });
-                request = self.event.fetch();
-                request.error(function() {
-                    throw ("event not found");
-                });
-                request.success(function(data) {
-                    var eventView = new Views.EventView({
-                        model: self.event
-                    });
-                    self.showView(eventView);
-                });
-            }
-        },
-        addevent: function(id){
-            var self = this;
-            require(['views/event_add'],function(event_add){
-                //edit an evet
-                if (id) {
-                    //look up the event and fetch if it is not in the collection
-                    event = self.eventList.get(id);
-                    if (!event) {
-                        event = new Event({
-                            id: id
-                        });
-                        request = event.fetch();
-                        request.error(function() {
-                            throw ("event not found");
-                        });
-                        request.success(function(data) {
-                            self.eventList.add(event);
-                            self.addevent(id);
-                        });
-                        return;
-                    } 
-                }
-                //create a new event
-                newEventView = new event_add.EventAddView({
-                    model:self.eventList,
-                    eventId:id
-                });
-                self.showView(newEventView);
-                
-            });
-        },
         viewUser:function(user){
             var self = this;
-            var UserEventList = new Models.EventCollection(
-                this.eventList.where({author:user}),
-                {
-                    data:{user:user}
-                }
-            );
-            var EventList = new List.EventsListView({
-                model:UserEventList
-            });
-            var user = new Models.UserModel({username:user});
-            //user.fetch();
-            var information = new Models.ListOptionView({
-                model:user
-            });
-            
-            this.showView([information,EventList]);                     
+            var fuser = user;
+            require(['views/list'],function(list){
+                var UserEventList = new Models.EventCollection(
+                    self.eventList.where({author:fuser}),
+                    {
+                        data:{user:fuser}
+                    }
+                );
+                var EventList = new list.EventsListView({
+                    model:UserEventList
+                });
+                var user = new Models.UserModel({username:fuser});
+                var information = new Views.ListOptionView({
+                    model:user
+                });
+                self.showView([information,EventList]);        
+            });             
         },
         viewGroup:function(group){
             this.eventList.reset();
@@ -130,43 +78,89 @@ define([
             
             this.showView([new Models.ListOptionView(),EventList]);          
         },
-        about: function() {
-            if (!this.aboutView) {
-                // this.aboutView = new AboutView();
+
+        eventDetails: function(id,fevent,context){
+            var self = context ? context : this; 
+            var event = fevent ? fevent : self.eventList.get(id);
+            //check to see if we already have the event and if not fetch it
+            if (!event) {
+                //recusive 
+                self.fetchEvent(id);
+                return;
             }
+            require(['views/event'],function(EventView){
+                var eventView = new EventView.EventView({
+                    model: event
+                });
+                self.showView(eventView);
+            });
         },
+        eventAdd: function(id,fevent,context){
+            var self = context ? context : this; 
+
+            //edit an evet
+            if (id) {
+                //look up the event and fetch if it is not in the collection
+                var event = self.eventList.get(id);
+                if (!event) {
+                    self.fetchEvent(id,self.addevent);
+                    return;
+                } 
+            }else{
+                //creating a new event
+                var event = new Models.Event();
+            }
+            require(['views/event_add'],function(event_add){
+                //create a new event
+                newEventView = new event_add.EventAddView({
+                    model:event
+                });
+                self.showView(newEventView);
+            });
+        },
+ 
+        about: function(){
+            //about view goes here
+        },
+        //
+        //Helper Functions
+        //
         showView: function(views) {
-            //close last view
-            //$('.replace').remove();
-            if(this.currentView instanceof Array){
+            if(!(views instanceof Array)){
+                views = [views];
+            }
+            if(this.currentView){
                 this.currentView.forEach(function(view){
                     if(view){
                         view.close();  
                     }
                 });
-            }else{
-                if (this.currentView){
-                    this.currentView.close();
-                }
             }
             //open new view
-            if(views instanceof Array){
-                var fragment = document.createDocumentFragment();
-                views.forEach(function(view){
-                    fragment.appendChild(view.render().el);
-                });
-                $("#main").prepend(fragment);
-                views.forEach(function(view){
-                    if(view.onDOMadd)
-                        view.onDOMadd();   
-                });
-            }else{
-                $("#main").prepend(views.render().el);
-                if(views.onDOMadd)
-                        views.onDOMadd();
-            }
+            var fragment = document.createDocumentFragment();
+            views.forEach(function(view){
+                fragment.appendChild(view.render().el);
+            });
+            $("#main").prepend(fragment);
+            views.forEach(function(view){
+                if(view.onDOMadd)
+                    view.onDOMadd();   
+            });
             this.currentView = views;
-           
+        },
+        fetchEvent:function(id, context){
+            var self = this;
+            var callback = arguments.callee.caller;
+            var event = new Models.Event({
+                id: id
+            });
+            request = event.fetch();
+            request.error(function() {
+                throw ("event not found");
+            });
+            request.success(function(data) {
+                callback(id,event,self);
+            });
         }
     });
     
