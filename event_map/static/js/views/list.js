@@ -39,7 +39,7 @@ define([
             "mouseleave .event_item": "onMouseleave",
         },
         initialize: function() {
-            Swarm.group.clearLayers();
+            app.map.group.clearLayers();
             var self = this;
             //bind
             $(window).on('resize.'+this.cid,this ,this.onResize);
@@ -51,17 +51,17 @@ define([
             this.model.forEach(function(model, key) {
                 self.onAdd(model);
             });
-            Swarm.map.on("popupclose", function(event) {
+            app.map.map.on("popupclose", function(event) {
                 if (self.lastClickedMarkerEvent == event.popup._source.options.modelID) {
                     self.eventItemClose(self.lastClickedMarkerEvent);
                     self.lastClickedMarkerEvent = false;
                 }
             });
-            Swarm.map.on("popupopen", function(event) {
+            app.map.map.on("popupopen", function(event) {
                 $(event.popup._source._icon).find(".circleMarker").show();
                 $(event.popup._source._icon ).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
             });
-            Swarm.group.addTo(Swarm.map);    
+            app.map.group.addTo(app.map.map);    
         
         },
         onDOMadd: function(){
@@ -123,8 +123,7 @@ define([
                 modelID: model.get("id")
             });
             marker.bindPopup("<span>" + "<h3>" + model.get("title") + "</h3>" + model.get("start_time") + "-" + model.get("end_time") + "</span>");
-            Swarm.group.addLayer(marker);
-
+            app.map.group.addLayer(marker); 
             marker.on("click", self.onMarkerClick,this);
             this.markers[model.get("id")] = marker;
         },

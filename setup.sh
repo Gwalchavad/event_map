@@ -126,9 +126,12 @@ echo '----------------------------------------------------------------------'
 
 
 # ask postgres to create our new postgis database
-createdb $DB
-pg_dump template_postgis | psql -q $DB
-
+if pg_db_exists $DB; then
+    echo "database $DB already exists" >&2
+else
+    createdb $DB
+    pg_dump template_postgis | psql -q $DB
+fi
 
 if [ $VIRTUAL_ENV ]; then
     echo "you're already inside a virtualenv" >&2
@@ -137,11 +140,10 @@ fi
 
 if [ -d $DEST/$PROJ ]; then
     echo "target $DEST/$PROJ already exists" >&2
+    exit 1
 fi
 
-if pg_db_exists $DB; then
-    echo "database $DB already exists" >&2
-fi
+
 
 cd $DEST                      || exit 1
 echo "creating virtualenv"

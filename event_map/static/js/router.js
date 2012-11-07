@@ -4,15 +4,15 @@ define([
   'backbone',
   'models',
   'views',
-  'views/list'
-], function($, _, Backbone,Models,Views,List){
+  'views/list',
+  'views/map'
+], function($, _, Backbone,Models,Views,List,Map){
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "list",
             "/:date": "list",
-            "event/add": "addEvent",
             "event/:id": "eventDetails",
-            "editevent/:id": "addevent",
+            "editevent/:id": "eventAdd",
             "user/:user": "viewUser",
             "group/:group":"viewGroup",
             "addevent": "eventAdd",
@@ -28,6 +28,7 @@ define([
                 model: self.user,
                 map_settings: options.map
             });
+            self.map = new Map.mapView();
             this.eventList = new Models.EventCollection();
             this.eventList.reset(init_events);
         },
@@ -98,11 +99,10 @@ define([
         },
         eventAdd: function(id,fevent,context){
             var self = context ? context : this; 
-
             //edit an evet
             if (id) {
                 //look up the event and fetch if it is not in the collection
-                var event = self.eventList.get(id);
+                var event = fevent ? fevent : self.eventList.get(id);
                 if (!event) {
                     self.fetchEvent(id,self.addevent);
                     return;

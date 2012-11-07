@@ -1,6 +1,7 @@
 define([
   'backbone',
   'router', // Request router.js
+  'debug'
 ], function(Backbone, Router){
   
   var initialize = function(options){

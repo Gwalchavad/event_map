@@ -15,7 +15,7 @@ define([
             });
         },
         render: function() {
-            Swarm.group.clearLayers();
+            app.map.group.clearLayers();
             if (this.model.get("author") == app.user.get("username")) {
                 this.edit = true;
             } else {

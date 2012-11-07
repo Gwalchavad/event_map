@@ -1,34 +1,22 @@
-define([
-    'jquery',
-    'underscore',
-    'backbone',
-    'models',
-    'utils',
-    'hbs!../templates/app_css',
-    'hbs!../templates/list_option', 
-    'hbs!../templates/event_add',
-    'hbs!../templates/login',
-    'hbs!../templates/sign_up',
-    'hbs!../templates/markdown',
-    'hbs!../templates/nav',
-    'timeDatePicker',    
-    'lib/bootstrap',
-  // Load our app module and pass it to our definition function
-], function($,_,Backbone,Models,Utils,
-            temp_app_css,
-            temp_list_option,
-            temp_event_add,
-            temp_login,
-            temp_sign_up,
-            temp_markdown,
-            temp_nav){
+define(['jquery', 'underscore', 'backbone', 'models', 'utils', 'hbs!../templates/app_css', 'hbs!../templates/list_option', 'hbs!../templates/event_add', 'hbs!../templates/login', 'hbs!../templates/sign_up', 'hbs!../templates/markdown', 'hbs!../templates/nav','views/map', 'timeDatePicker', 'lib/bootstrap',
+// Load our app module and pass it to our definition function
+], function($, _, Backbone, Models, Utils,
+temp_app_css,
+temp_list_option,
+temp_event_add,
+temp_login,
+temp_sign_up,
+temp_markdown,
+temp_nav,
+Map
+) {
 
-    
-    Backbone.View.prototype.close = function () {
-        _.each(this.children,function(child){
-           child.close();     
+
+    Backbone.View.prototype.close = function() {
+        _.each(this.children, function(child) {
+            child.close();
         });
-        
+
         if (this.onClose) {
             this.onClose();
         }
@@ -36,17 +24,17 @@ define([
         this.unbind();
     };
     Backbone.View.prototype.children = [];
-    Backbone.View.prototype.addChild = function (child) {
+    Backbone.View.prototype.addChild = function(child) {
         this.children.push(child);
     };
-    Backbone.View.prototype.renderAll = function (child) {
+    Backbone.View.prototype.renderAll = function(child) {
         this.render();
-        _.each(this.children,function(child){
-            if(child.render){
-                if(this.childrenEl){
+        _.each(this.children, function(child) {
+            if (child.render) {
+                if (this.childrenEl) {
                     $(this.childrenEL).appendTo(child.render());
-                }else{
-                    this.$el.appendTo(child.render());               
+                } else {
+                    this.$el.appendTo(child.render());
                 }
             }
         });
@@ -63,24 +51,24 @@ define([
         render: function() {
             var editable = null;
             //if any user, group or feed is being viewed
-            if(this.model){
-                if(this.model.getTitle() == app.user.get("username")){
+            if (this.model) {
+                if (this.model.getTitle() == app.user.get("username")) {
                     var title = "MY EVENTS"
                     editable = true;
-                }else{
+                } else {
                     var title = this.model.getTitle();
                 }
-            }else{
+            } else {
                 //else all things are being viewed
                 var title = "ALL EVENT";
                 editable = true;
             }
-            
+
             this.$el.append(
-                temp_list_option(
-                    {title:title, allow_add:editable}
-                )
-            );
+            temp_list_option({
+                title: title,
+                allow_add: editable
+            }));
             return this;
         },
     });
@@ -105,18 +93,21 @@ define([
             }
         },
 
-        initialize: function(map_setting) {
+        initialize: function() {
             var self = this;
             this.model.on("error", function(model, errors) {
                 _.each(errors, function(error, key) {
                     $("#" + key + "_error").show().html(error);
                 });
             });
-            $(window).on('resize', function(){
+            $(window).on('resize', function() {
                 this.height = $(window).height();
-                this.topHeight = $(window).height()- $(".top").height();
-                $("#heightStyle").replaceWith(temp_app_css({height: this.height,topHeight:this.topHeight}));
-               
+                this.topHeight = $(window).height() - $(".top").height();
+                $("#heightStyle").replaceWith(temp_app_css({
+                    height: this.height,
+                    topHeight: this.topHeight
+                }));
+
             });
             //static render
             this.$el.append(temp_login(null));
@@ -124,11 +115,11 @@ define([
             this.$el.append(temp_sign_up(null));
             this.height = $(window).height();
             //60 height of header
-            this.topHeight = $(window).height()- 60;
-            this.$el.append(temp_app_css({height: this.height,topHeight: this.topHeight}));
-            //start the map with the div the proper size
-
-            Swarm.int_map(self.options.map_settings.map);
+            this.topHeight = $(window).height() - 60;
+            this.$el.append(temp_app_css({
+                height: this.height,
+                topHeight: this.topHeight
+            }));
             self.render();
         },
         render: function() {
@@ -199,13 +190,11 @@ define([
             }
         }
     });
-    
+
     var self = {
-        ListOptionView:ListOptionView,
-        AppView:AppView
+        ListOptionView: ListOptionView,
+        AppView: AppView
     };
-    
+
     return self;
 });
-
-

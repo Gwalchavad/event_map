@@ -24,7 +24,7 @@ Installation
 | source activate
 | ``source ./(project name)/bin/activate``
 | then go to the root (project name/event_map) folder and run
-| ``./manage syncedb --all``
+| ``./manage.py syncdb --all``
 |
 | **If you need install it manually** 
 | `Install GeoDjango <https://docs.djangoproject.com/en/dev/ref/contrib/gis/install/>`_

@@ -27,7 +27,7 @@ define([
             });
         },
         render: function() {
-            Swarm.group.clearLayers();
+            app.map.group.clearLayers();
             var context = _.extend({
                 "settings": document.Settings
             }, this.model.toJSON());
@@ -35,7 +35,7 @@ define([
             $("#left_notifcation").text("ADD A NEW EVENT");
             $("#right_notifcation").html("DRAG TEH MARKER TO SELECT THE LOCTION <br> (or use the FIND button)&nbsp" + "<span id=\"latlng_error\" class=\"label label-important hide\"></span>");
             //place marker
-            marker = Swarm.add_marker();
+            var marker = app.map.add_marker();
             marker.on('dragend', function(e) {
                 $('#id_lat').val(e.target._latlng.lat);
                 $('#id_lng').val(e.target._latlng.lng);
@@ -79,7 +79,7 @@ define([
             return this;
         },
         geocode: function() {
-            Swarm.geocode($("#id_street").val() + " " + $("#id_city").val(), {
+            app.map.geocode($("#id_street").val() + " " + $("#id_city").val(), {
                 onSuccess: function(lat, lng) {
                     $('#id_lat').val(lat);
                     $('#id_lng').val(lng);
@@ -104,7 +104,7 @@ define([
                     //if new event then add to event list
                     if (!self.options.eventId)     
                         self.model.add(self.model);
-                    Swarm.remove_marker();
+                    app.map.remove_marker();
                     app.navigate('event/' + self.model.id, {
                         trigger: true
                     });
@@ -114,7 +114,6 @@ define([
         cancel: function(e) {
             //todo addddddd delete
             e.preventDefault();
-            Swarm.remove_marker();
             app.navigate('/#', {
                 trigger: true
             });

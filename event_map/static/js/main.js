@@ -13,6 +13,7 @@ require.config({
     paths: {
         jquery: 'lib/jquery',
         underscore: 'lib/underscore',
+        leaflet: 'lib/leaflet/leaflet',
         backbone: 'lib/backbone',
         handlebars: 'lib/handlebars',
         hbs: 'lib/hbs',
@@ -34,12 +35,16 @@ require.config({
             //module value.
             exports: 'Backbone'
         },
+        "backbone.layoutmanager": ["backbone"],
         'handlebars': {
             exports: 'Handlebars'
         },
         'jqueryui': ['jquery'],
         'timepicker':['jqueryui'],
-        'timeDatePicker':['timepicker']
+        'timeDatePicker':['timepicker'],
+        'leaflet':{
+            exports:'L'
+        }
         
     },
 
@@ -49,32 +54,10 @@ require([
   // Load our app module and pass it to our definition function
   'jquery',
   'app',
-  'utils',
-], function($,App,Utils){
-    
- //get site settings
-    $.ajax({
-        url: "/static/site_settings.json",
-        dataType: 'json',
-        error: function(jqXHR, textStatus) {
-            throw new Error("Invalid Settings Syntax! Check " + this.url);
-        }
-    }).done(function(settings) {
-        document.Settings = settings;
-    });
+], function($,App){
     // The "app" dependency is passed in as "App"
     $(function(){
-
-        //load map
-        $.ajax({
-            url: "/static/map_settings.json",
-            dataType: 'json',
-            error: function(jqXHR, textStatus) {
-                throw new Error("Invalid Maps Settings Syntax! Check " + this.url);
-            }
-        }).done(function(settings) {
-            App.initialize({map: settings});
-        });
+        App.initialize();
     });
 });
 
