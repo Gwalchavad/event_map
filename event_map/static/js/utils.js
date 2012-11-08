@@ -16,7 +16,6 @@ define([
     });    
     //other functions
     //load templates 
-
     //send the CSRFToken in the header. from django docs
     jQuery(document).ajaxSend(function(event, xhr, settings) {
         function getCookie(name) {
@@ -63,7 +62,7 @@ define([
                     result[element.name] = element.value; 
             } );
         return result;
-    }
+    };
     //common time
     Date.prototype.getTimeCom = function(){
         var hours = this.getHours()
@@ -71,22 +70,40 @@ define([
         if (minutes < 10){
             minutes = "0" + minutes
         }
-        var time = hours + ":" + minutes + " ";
         if(hours > 11){
-            time += "PM";
+            var orientation = "PM";
         } else {
-            time += "AM";
+            var orientation = "AM";
         }
+        hours = hours % 12; 
+        var time = hours + ":" + minutes + " "+orientation;
         return time;
+    };
+    Date.prototype.getWeekdayName = function(){
+        var weekday=new Array(7);
+        weekday[0]="Sun";
+        weekday[1]="Mon";
+        weekday[2]="Tue";
+        weekday[3]="Wed";
+        weekday[4]="Thu";
+        weekday[5]="Fri";
+        weekday[6]="Sat";
+        return weekday[this.getDay()];    
+    };
+    Date.prototype.month2letter = function(num) {
+        var number = num?num:this.getMonth()
+        var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
+        return m_names[number];
+    };
+    Date.prototype.getDateWithSlash = function(){
+        return  this.getMonth()+"/"+this.getDate()+"/"+this.getFullYear();
     }
-    
-    
+    Date.prototype.getDateShort = function(){
+        return  this.getMonth()+"/"+this.getDate();
+    }   
     return {
         form2object:form2object
-        
     };
-
-
 });
 
 

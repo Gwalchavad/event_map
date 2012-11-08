@@ -455,9 +455,9 @@ define([
         setMonthDay:function(date){
             var self = this;
             //set month on side bar
-            month = date.getMonth();
+            month = date.month2letter();
             day = date.getDate();
-            $("#topMonthLetter").text(self.month2letter(month)+day);
+            $("#topMonthLetter").text(month+day);
             //set day on side bar
             $("#topYear").text(date.getFullYear());       
             
@@ -499,15 +499,11 @@ define([
         isListFull:function(){
             return ($("#EventsListView").height() <  $("#event_list").height())? true:false;
         },
-        month2letter: function(num) {
-            var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
-            return m_names[num];
-        },
         month2FullNameOrLetter:function(monthNum,elHeight){
             var self = this;
             var number0fChar = elHeight/10;
             if(number0fChar < 10){
-                return [self.month2letter(monthNum)];
+                return [Date.prototype.month2letter(monthNum)];
             }else{
                 var m_names = new Array(["January",7],["Febuary",7],["March",5],["April",5],["May",3],["June",4],["July",4],["August",6],["September",9],["October",7],["November",8],["December",8]);
                 month = m_names[monthNum];

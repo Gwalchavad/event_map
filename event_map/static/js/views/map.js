@@ -66,8 +66,10 @@ define([
             });
             
         },
-        add_marker:function(callback){	
-            marker = new L.Marker(props.center,{draggable:true});
+        add_marker:function(coordinates,draggable){	
+            latlng = coordinates ? coordinates.reverse() : props.center;
+            
+            marker = new L.Marker(latlng,{draggable:draggable});
             this.group.addLayer(marker);
             return marker;
         }

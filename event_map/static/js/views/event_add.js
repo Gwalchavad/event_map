@@ -32,10 +32,8 @@ define([
                 "settings": document.Settings
             }, this.model.toJSON());
             this.$el.append(temp_event_add(context));
-            $("#left_notifcation").text("ADD A NEW EVENT");
-            $("#right_notifcation").html("DRAG TEH MARKER TO SELECT THE LOCTION <br> (or use the FIND button)&nbsp" + "<span id=\"latlng_error\" class=\"label label-important hide\"></span>");
-            //place marker
-            var marker = app.map.add_marker();
+
+            var marker = app.map.add_marker(this.model.get("location_point").coordinates,true);
             marker.on('dragend', function(e) {
                 $('#id_lat').val(e.target._latlng.lat);
                 $('#id_lng').val(e.target._latlng.lng);
@@ -90,21 +88,18 @@ define([
             });
         },
         add_event: function(e){
+            var self = this;
             //override the na
             e.preventDefault();
             //hide error messages
             $(".label").hide();
-            this.event.set(Utils.form2object("#event_add_form"));
-            promise = this.event.save();
+            this.model.set(Utils.form2object("#event_add_form"));
+            promise = this.model.save();
             if (promise) {
                 promise.error(function(response) {
                     throw new Error("Server Error:" + response);
                 });
                 promise.success(function(response) {
-                    //if new event then add to event list
-                    if (!self.options.eventId)     
-                        self.model.add(self.model);
-                    app.map.remove_marker();
                     app.navigate('event/' + self.model.id, {
                         trigger: true
                     });
