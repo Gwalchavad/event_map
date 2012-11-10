@@ -20,7 +20,7 @@ from event_map.utils import json_api_errors, ApiException
 @ensure_csrf_cookie
 def index(request):
     begin = datetime.now()
-    events = db.Event.objects.filter(is_event=True, is_deleted=False, start_date__gte=begin).order_by('start_date')[:10]
+    events = db.Event.objects.filter(start_date__gte=begin).order_by('start_date')[:10]
     response = [{
                 'id':event.id,
                 "title":event.title,

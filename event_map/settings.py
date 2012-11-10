@@ -127,7 +127,6 @@ INSTALLED_APPS = (
     'django.contrib.gis',
     'django.contrib.markup',
     'event_map',
-    'occupywallst',
     'south',
     'uuidfield',
     # Uncomment the next line to enable the admin:

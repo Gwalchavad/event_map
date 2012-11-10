@@ -1,11 +1,12 @@
 from django.contrib.gis.db import models
 from django.db.models import Q
-from occupywallst.models import Article
 from uuidfield import UUIDField
 from django.contrib.auth.models import User
 
 class Group(models.Model):
     name =  models.CharField(max_length=255, help_text="""
+        the name of the group""")
+    description =  models.CharField(max_length=255, help_text="""
         the name of the group""")
     members = models.ManyToManyField(User, through='Subscription')
     def __unicode__(self):
@@ -22,8 +23,14 @@ class Subscription(models.Model):
     def __unicode__(self):
         return  self.user.username + " --> "+ self.group.name
 
-class Event(Article):
+class Event(models.Model):
     """Events!"""
+    author = models.ForeignKey(User, null=True, blank=True, help_text="""
+        The user who wrote this article.""")
+    title = models.CharField(max_length=255, help_text="""
+        A one-line title to describe article.""")
+    content = models.TextField(help_text="""
+        The contents of the article in Markdown.""")
     #convert to hide how many events?   
     uuid = UUIDField(auto=True)
 
@@ -51,6 +58,9 @@ class Event(Article):
     location_point = models.PointField(null=True, blank=True, help_text="""
         Aproximate coordinates of where the event will happen""")
     groups = models.ManyToManyField(Group)
+    
+    """Allow geospataul queries"""
+    objects = models.GeoManager()
 
     def __unicode__(self):
         return self.title

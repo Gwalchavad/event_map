@@ -1,7 +1,0 @@
-{# this generates the html for a comment an rss feed #}
-{% load ows %}
-<div class="comment-feed">
-  <p>In reply to <a href="{{ obj.article.get_absolute_url }}">
-    {{ obj.article.title }}</a>:</p>
-  {{ obj.content|markup|strip_annoying_html }}
-</div>
