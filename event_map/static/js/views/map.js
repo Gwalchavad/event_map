@@ -3,46 +3,58 @@ define([
     'leaflet',
     'settings'
 ],function (Backbone,L,settings){
+    
     var mapView = Backbone.View.extend({
-        props:null,
         map:null,
-        marker:null,
-        
+        currentPos:null,
         initialize : function(){
-                props = {};
-                props.center =  new L.LatLng(settings.center[0],settings.center[1]); 
-                props.topLeft = new L.LatLng(settings.bounds.tl[0],settings.bounds.tl[1]);
-                props.lowerRight = new L.LatLng(settings.bounds.lr[0],settings.bounds.lr[1]);
-                props.bounds = new L.LatLngBounds(props.topLeft, props.lowerRight);
-                props.tilesetUrl =  settings.tilesetUrl;
-                props.tilesetAttrib = settings.tilesetAttrib;
-                props.api_key = settings.api_key;
-                
+            props = {};
+            props.center =  new L.LatLng(settings.center[0],settings.center[1]); 
+            props.topLeft = new L.LatLng(settings.bounds.tl[0],settings.bounds.tl[1]);
+            props.lowerRight = new L.LatLng(settings.bounds.lr[0],settings.bounds.lr[1]);
+            props.bounds = new L.LatLngBounds(props.topLeft, props.lowerRight);
+            props.tilesetUrl =  settings.tilesetUrl;
+            props.tilesetAttrib = settings.tilesetAttrib;
+            props.api_key = settings.api_key;
+            
 
-                // create the tile layer with correct attribution
-                var osm = new L.TileLayer(props.tilesetUrl, {
-                    minZoom: 2,
-                    maxZoom: 20,
-                    attribution: props.tilesetAttrib
-                });     
-                // set up the map
-                this.map = new L.Map('map',{
-                    center:props.center,
-                    zoom: settings.zoom,
-                    layers: [osm]    
-                });
-                
-                //creat a group
-                this.group = L.layerGroup();        
-                this.group.addTo(this.map);   
-                
-                var ChaseMarkerOptions = {
-                    fillColor: "#ff7800",
-                    color: "#000",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                };
+            // create the tile layer with correct attribution
+            var osm = new L.TileLayer(props.tilesetUrl, {
+                minZoom: 2,
+                maxZoom: 20,
+                attribution: props.tilesetAttrib
+            });     
+            // set up the map
+            this.map = new L.Map('map',{
+                center:props.center,
+                zoom: settings.zoom,
+                layers: [osm]    
+            });
+            
+            //creat a group
+            this.group = L.layerGroup();        
+            this.group.addTo(this.map);   
+            this.map.on('locationfound', this.onLocationFound,this);
+            this.map.on('locationerror', this.onLocationError,this);
+            this.map.locate({
+                watch: true,
+                enableHighAccuracy:true
+            });
+        },
+
+        onLocationFound:function (e) {
+            var radius = e.accuracy / 2;
+            locationMaker = L.marker(e.latlng).addTo(this.map).bindPopup("You are within " + radius + " meters from this point");
+            if (props.bounds.contains(e.latlng)) {
+                this.map.setView(e.latlng, 13);
+                locationMaker.openPopup();
+            }
+            this.currentPos = e.latlng;
+            L.circle(e.latlng, radius).addTo(this.map);
+            
+        },
+        onLocationError:function (e) {
+            alert(e.message);
         },
         geocode:function(address,callback){
             $.ajax({
@@ -74,8 +86,12 @@ define([
             return marker;
         }
     });
+
+    L.LatLng.prototype.toUrlString = function(){
+        return this.lat + ","+this.lng;
+    };
     
     return{
-        mapView:mapView
+        mapView:mapView,
     }
 });

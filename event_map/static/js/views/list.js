@@ -1,17 +1,10 @@
-define([
-    'jquery',
-    'underscore',
-    'backbone',
-    'hbs!../../templates/event_list',
-    'hbs!../../templates/event_list_empty',
-    
-    'hbs!../../templates/item_open',
-    'hbs!../../templates/item_closed',
+define(['jquery', 'underscore', 'backbone', 'hbs!../../templates/event_list', 'hbs!../../templates/event_list_empty',
 
-    'hbs!../../templates/li_months',
-    'hbs!../../templates/li_days',
-  // Load our app module and pass it to our definition function
-], function($,_,Backbone,temp_event_list,temp_event_list_empty,temp_item_open,temp_item_closed,temp_li_months,temp_li_days){
+'hbs!../../templates/item_open', 'hbs!../../templates/item_closed',
+
+'hbs!../../templates/li_months', 'hbs!../../templates/li_days', 'hbs!../../templates/popup'
+// Load our app module and pass it to our definition function
+], function($, _, Backbone, temp_event_list, temp_event_list_empty, temp_item_open, temp_item_closed, temp_li_months, temp_li_days, temp_popup) {
 
     var EventsListView = Backbone.View.extend({
         tagName: "div",
@@ -39,75 +32,86 @@ define([
             "mouseleave .event_item": "onMouseleave",
         },
         initialize: function() {
-            app.map.group.clearLayers();
             var self = this;
+            app.map.group.clearLayers();
+           
             //bind
-            $(window).on('resize.'+this.cid,this ,this.onResize);
+            $(window).on('resize.' + this.cid, this, this.onResize);
             //process events that are added by fetching
-            self.model.on('add', function(event) {
+            this.model.on('add', function(event) {
                 self.onAdd(event);
             });
             //process events that already exist
             this.model.forEach(function(model, key) {
                 self.onAdd(model);
             });
-            app.map.map.on("popupclose", function(event) {
-                if (self.lastClickedMarkerEvent == event.popup._source.options.modelID) {
-                    self.eventItemClose(self.lastClickedMarkerEvent);
-                    self.lastClickedMarkerEvent = false;
-                }
-            });
-            app.map.map.on("popupopen", function(event) {
-                $(event.popup._source._icon).find(".circleMarker").show();
-                $(event.popup._source._icon ).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
-            });
-            app.map.group.addTo(app.map.map);    
-        
+            app.map.on("popupclose", this.onPopupClose);
+            app.map.on("popupopen", this.onPopupOpen);
+            app.map.map.on('locationfound', this.onLocationFound,this);
+
         },
-        onDOMadd: function(){
+        onPopupOpen: function(event) {
+            $(event.popup._source._icon).find(".circleMarker").show();
+            $(event.popup._source._icon).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
+        },
+        onPopupClose: function(event) {
+            if (self.lastClickedMarkerEvent == event.popup._source.options.modelID) {
+                self.eventItemClose(self.lastClickedMarkerEvent);
+                self.lastClickedMarkerEvent = false;
+            }
+        },
+        onDOMadd: function() {
             var self = this;
             self.onResize();
             //bind the scroll event
             //then trigger a scroll to load more events
-            this.backFetch();  
-            this.forwardFetch(); 
-            $("#EventsListView").on("scroll."+this.cid,self,self.onScroll);
-     
+            this.backFetch();
+            this.forwardFetch();
+            $("#EventsListView").on("scroll." + this.cid, self, self.onScroll);
+
         },
-        onScroll:function(e){
+        onScroll: function(e) {
             //if at the bottom get more events
             var tolerance = 60;
-            if ($("#EventsListView").scrollTop() <= tolerance){
+            if ($("#EventsListView").scrollTop() <= tolerance) {
                 e.data.backFetch(e.data);
             } else if ($("#EventsListView")[0].scrollHeight - $("#EventsListView").scrollTop() < ($("#EventsListView").outerHeight() + tolerance)) {
                 e.data.forwardFetch(e.data);
             }
-            e.data.genarateColorsAndMonths();           
+            e.data.genarateColorsAndMonths();
             e.data.setMonthSideBarPosition();
         },
-        backFetch: function(context){
+        backFetch: function(context) {
             self = context ? context : this;
-            self.model.rfetch({successCallback:function(events){
-                self.render(events,true);
-                scrollPosistion = events.length*self.height;
-                $("#EventsListView").scrollTop(scrollPosistion); 
-                self.genarateColorsAndMonths(true);
-            }});        
+            self.model.rfetch({
+                successCallback: function(events) {
+                    self.render(events, true);
+                    scrollPosistion = events.length * self.height;
+                    $("#EventsListView").scrollTop(scrollPosistion);
+                    self.genarateColorsAndMonths(true);
+                }
+            });
         },
-        forwardFetch: function(context){
+        forwardFetch: function(context) {
             self = context ? context : this;
-            self.model.ffetch({successCallback:function(events){
-                self.render(events);
-                self.genarateColorsAndMonths(true);
-            }});        
+            self.model.ffetch({
+                successCallback: function(events) {
+                    self.render(events);
+                    self.genarateColorsAndMonths(true);
+                }
+            });
         },
-        onAdd: function(model){
+        onAdd: function(model) {
             var self = this;
             //compute the vaules for open and close 
             //this is also compute on render becuase model appended are not
             //a refence to models in the collection
             model.computeCloseValues();
             model.computeOpenValues();
+            //for the handlebars temp
+            var location_point = model.get("location_point");
+            model.set("coordx",location_point.coordinates[0]);
+            model.set("coordy",location_point.coordinates[1]);
             //set map icons       
             var myIcon = L.divIcon({
                 className: "icon",
@@ -122,24 +126,35 @@ define([
                 icon: myIcon,
                 modelID: model.get("id")
             });
-            marker.bindPopup("<span>" + "<h3>" + model.get("title") + "</h3>" + model.get("start_time") + "-" + model.get("end_time") + "</span>");
-            app.map.group.addLayer(marker); 
-            marker.on("click", self.onMarkerClick,this);
+            //TODO:change to on click in case the location changes 
+            marker.bindPopup(temp_popup(model.toJSON()))
+            app.map.group.addLayer(marker);
+            marker.on("click", self.onMarkerClick, this);
             this.markers[model.get("id")] = marker;
+            
+        },
+        onLocationFound: function(e){
+            console.log(e);
+            this.markers.forEach(function(marker){
+                var content = $(marker._popup._content);
+                var _href = content.find(".popupAddress")[0].href+e.latlng.toUrlString();
+                content.find(".popupAddress").attr("href",_href);
+                marker._popup._content = content.html();
+            });
+            
         },
         onMarkerClick: function(e) {
-            var self = this;
-            if (self.lastClickedMarkerEvent) {
-                self.eventItemClose(self.lastClickedMarkerEvent);
+            if (this.lastClickedMarkerEvent) {
+                this.eventItemClose(self.lastClickedMarkerEvent);
             }
-            self.lastClickedMarkerEvent = e.target.options.modelID;
+            this.lastClickedMarkerEvent = e.target.options.modelID;
             //come after the closing the last event
             if (!$(e.target._icon.children).hasClass("open")) {
                 if (!$(e.target._icon.children).hasClass("viewing")) {
                     //$("#event_53").position().top()
-                    self.scrollTo(e.target.options.modelID);
+                    this.scrollTo(e.target.options.modelID);
                 }
-                self.eventItemOpen(self.lastClickedMarkerEvent);
+                this.eventItemOpen(this.lastClickedMarkerEvent);
             }
         },
         onClick: function(event) {
@@ -161,11 +176,7 @@ define([
             //test.attr("transform","scale(1.4)")
             if (!$(target.currentTarget).hasClass("open")) {
                 var id = target.currentTarget.id.replace(/event_/, "");
-                $("#icon-" + id).parent()
-                .css("margin-left",-11)
-                .css("margin-top",-27)
-                .find(".layer1")
-                .attr("transform", "scale(1.2) translate(-1, -3)");
+                $("#icon-" + id).parent().css("margin-left", - 11).css("margin-top", - 27).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
                 self.markers[id].setZIndexOffset(200);
             }
         },
@@ -173,11 +184,7 @@ define([
             var self = this;
             if (!$(target.currentTarget).hasClass("open")) {
                 var id = target.currentTarget.id.replace(/event_/, "");
-                $("#icon-" + id).parent()
-                .css("margin-left", -9)
-                .css("margin-top", -23)
-                .find(".layer1")
-                .attr("transform", "scale(1)");
+                $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
                 self.markers[id].setZIndexOffset(10);
             }
         },
@@ -190,28 +197,24 @@ define([
             //set month
             var month = model.get("start_date").getMonth();
             var height = $("#month_" + month).height();
-            $("#month_" + month).height(height + 26); 
+            $("#month_" + month).height(height + 26);
             //set day height
             var day = model.get("start_date").getDate();
-            height = $("#day_" + day+"_"+month).height();
-            $("#day_"+day+"_"+month).height(height + 26);
-            
+            height = $("#day_" + day + "_" + month).height();
+            $("#day_" + day + "_" + month).height(height + 26);
+
             self.markers[id].setZIndexOffset(100);
         },
         eventItemClose: function(id) {
             var self = this;
             //close the event icon
-            $("#icon-"+id).find(".circleMarker").hide();
-             $("#icon-" + id).parent()
-            .css("margin-left", -9)
-            .css("margin-top", -23)
-            .find(".layer1")
-            .attr("transform", "scale(1)");       
+            $("#icon-" + id).find(".circleMarker").hide();
+            $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
             $("#event_" + id).removeClass("open");
             $("#event_" + id).height(self.height);
             //get model of item thata was clicked 
             var model = self.model.get(id);
-       
+
             var month = model.get("start_date").getMonth();
             //set day height
             var day = model.get("start_date").getDate();
@@ -222,46 +225,47 @@ define([
             $("#month_" + month).height(height - 26);
             var color = $("#event_" + id).css("background-color");
             $("#event_" + id).replaceWith(
-                temp_item_closed({
-                    events: [model.toJSON()]
-                })
-            );
+            temp_item_closed({
+                events: [model.toJSON()]
+            }));
             $("#event_" + id).css("background-color", color);
         },
         onResize: function(e) {
             var self = e ? e.data : this;
-            if($("#event_list").length != 0){
+            if ($("#event_list").length != 0) {
                 self.position.left = $("#event_list").position().left;
                 self.position.top = $("#EventsListView").position().top;
                 self.genarateColorsAndMonths(true);
             }
-            
+
         },
         onClose: function() {
-            $(window).off('resize.'+this.cid, this.onResize);
-            $("#EventsListView").off("scroll."+this.cid,self,self.onScroll).scroll();
+            $(window).off('resize.' + this.cid, this.onResize);
+            $("#EventsListView").off("scroll." + this.cid, self, self.onScroll).scroll();
+            app.map.off("popupclose", this.onPopupClose);
+            app.map.off("popupopen", this.onPopupOpen);
         },
         render: function(eventModels, prepend) {
             var self = this;
-            var adjustHeightOnMonthDays = function(oldEdgeDate, newEdgeDate){
+            var adjustHeightOnMonthDays = function(oldEdgeDate, newEdgeDate) {
                 //check to see if the month il is already rendered
                 if (oldEdgeDate.getFullYear() == newEdgeDate.getFullYear() && oldEdgeDate.getMonth() == newEdgeDate.getMonth()) {
-                    if(prepend){
-                        var firstMonth = months.pop();              
-                    }else{
+                    if (prepend) {
+                        var firstMonth = months.pop();
+                    } else {
                         var firstMonth = months.shift();
                     }
                     //update the last months height
                     var newHeight = $("#month_" + firstMonth.month).height() + firstMonth.height;
                     $("#month_" + firstMonth.month).height(newHeight);
-                    var monthText = self.month2FullNameOrLetter(firstMonth.month,newHeight);
+                    var monthText = self.month2FullNameOrLetter(firstMonth.month, newHeight);
                     $("#month_" + firstMonth.month).children().text(monthText[0]);
                     //check day
                     if (oldEdgeDate.getDate() == newEdgeDate.getDate()) {
-                        if(prepend){
-                            var firstDay = days.pop(); 
-                        }else{
-                           var firstDay = days.shift(); 
+                        if (prepend) {
+                            var firstDay = days.pop();
+                        } else {
+                            var firstDay = days.shift();
                         }
                         var firstDayEl = "#day_" + firstDay.day + "_" + firstDay.month;
                         $(firstDayEl).height($(firstDayEl).height() + firstDay.height);
@@ -271,15 +275,15 @@ define([
             //if no events assume we are rerending
             if (!eventModels) {
                 //if there are no events in the list
-                if(this.model.length == 0){
+                if (this.model.length == 0) {
                     var html = temp_event_list_empty();
                     self.$el.html(html);
                     return this;
                 }
                 eventModels = this.model.models;
-                self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");    
-                self.render_var.current_date.date =  _.last(eventModels).get("start_date");  
-                var renderEl = function(){
+                self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");
+                self.render_var.current_date.date = _.last(eventModels).get("start_date");
+                var renderEl = function() {
                     var html = temp_event_list({
                         months: months,
                         days: days,
@@ -292,14 +296,14 @@ define([
                 if (prepend) {
                     var oldLastDate = self.render_var.pre_current_date.date;
                     self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");
-                    var firstDate = _.last(eventModels).get("start_date");     
+                    var firstDate = _.last(eventModels).get("start_date");
                     var renderEl = function() {
                         var html = temp_item_closed({
                             events: events
                         });
 
                         //adds height to the allready present month and day li
-                        adjustHeightOnMonthDays(oldLastDate,firstDate);
+                        adjustHeightOnMonthDays(oldLastDate, firstDate);
                         $("#event_list").prepend(html);
                         $("#event_list_day").prepend(temp_li_days({
                             days: days
@@ -311,14 +315,14 @@ define([
                 } else {
                     //append event
                     var oldLastDate = self.render_var.current_date.date;
-                    self.render_var.current_date.date =  _.last(eventModels).get("start_date");
+                    self.render_var.current_date.date = _.last(eventModels).get("start_date");
                     var firstDate = eventModels[0].get("start_date");
                     var renderEl = function() {
                         var html = temp_item_closed({
                             events: events
                         });
                         //adds height to the allready present month and day li
-                        adjustHeightOnMonthDays(oldLastDate,firstDate);
+                        adjustHeightOnMonthDays(oldLastDate, firstDate);
                         $("#event_list").append(html);
                         $("#event_list_day").append(temp_li_days({
                             days: days
@@ -347,11 +351,11 @@ define([
                         days[days.length - 1].height = day_counter * self.height;
                         if (months.length > 0) {
                             monthHeight = month_counter * self.height;
-                            var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month,monthHeight);
+                            var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month, monthHeight);
                             months[months.length - 1].height = monthHeight;
-                            months[months.length - 1].letter=  monthArray[0];
-                            months[months.length - 1].vertical= monthArray[1];
-                            months[months.length - 1].margin= monthArray[2];                     
+                            months[months.length - 1].letter = monthArray[0];
+                            months[months.length - 1].vertical = monthArray[1];
+                            months[months.length - 1].margin = monthArray[2];
                         }
                     }
                     months.push({
@@ -380,15 +384,14 @@ define([
                 month_counter++;
             }, this);
             //set final heights
-            if(days.length > 0)
-                days[days.length - 1].height = day_counter * self.height;
-            if(months.length > 0){
+            if (days.length > 0) days[days.length - 1].height = day_counter * self.height;
+            if (months.length > 0) {
                 monthHeight = month_counter * self.height;
-                var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month,monthHeight);
+                var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month, monthHeight);
                 months[months.length - 1].height = monthHeight;
                 months[months.length - 1].letter = monthArray[0];
                 months[months.length - 1].vertical = monthArray[1];
-                months[months.length - 1].margin = monthArray[2];             
+                months[months.length - 1].margin = monthArray[2];
             }
             renderEl(this);
             return this;
@@ -396,29 +399,26 @@ define([
         genarateColorsAndMonths: function(regenrate) {
             var self = this;
             var colorRange = 240;
-            var topVisbleEl = document.elementFromPoint(self.position.left+.5, self.position.top + 20);
+            var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top + 20);
             //have we moved enought to change colors?
-            if ($(topVisbleEl).attr("class") && 
-                $(topVisbleEl).attr("class").split(" ")[0] == "event_item" 
-                &&  (self.topVisbleEl != topVisbleEl || regenrate)
-            ){
+            if ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl || regenrate)) {
                 self.topVisbleEl = topVisbleEl;
-                var topModelId = topVisbleEl.id.replace(/event_/,"");
-                var top_start_date = self.model.get(topModelId).get("start_date");         
+                var topModelId = topVisbleEl.id.replace(/event_/, "");
+                var top_start_date = self.model.get(topModelId).get("start_date");
                 self.setMonthDay(top_start_date);
                 self.setDay(top_start_date);
                 //set map icons that are not in the current view
-                var bottomPos = self.isListFull() ? $("#EventsListView").height() :  $("#event_list").height();
+                var bottomPos = self.isListFull() ? $("#EventsListView").height() : $("#event_list").height();
                 //add tolerance
                 bottomPos = bottomPos - 11;
-                var bottomVisbleEl = document.elementFromPoint(self.position.left,self.position.top + bottomPos);
-                
-                var topIndex = $("#event_list").children().index(topVisbleEl);   
+                var bottomVisbleEl = document.elementFromPoint(self.position.left, self.position.top + bottomPos);
+
+                var topIndex = $("#event_list").children().index(topVisbleEl);
                 var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
 
-                
+
                 //set the color to white for all over elements
-                $(".event_item").css("background-color","white");
+                $(".event_item").css("background-color", "white");
                 //set up event icons
                 $(".viewed").removeClass("viewing");
                 $(".viewed").each(function(index, el) {
@@ -427,7 +427,7 @@ define([
                     if (model.get("start_date") < top_start_date) {
                         H = 0;
                     } else {
-                        H =  colorRange;
+                        H = colorRange;
                     }
                     $(el).find(".svgForeground").css("stroke", "grey").css("fill-opacity", 0.4).css("fill", "hsl(" + H + ",100%, 50%)");
                     self.markers[id].setZIndexOffset(-10);
@@ -436,10 +436,10 @@ define([
                 var numberOfEl = bottomIndex - topIndex;
                 for (var i = 0; i <= numberOfEl; ++i) {
                     //var model = self.model.models[i];
-                    var id = $(".event_item")[i+topIndex].id.replace(/event_/, "");
+                    var id = $(".event_item")[i + topIndex].id.replace(/event_/, "");
                     var H = (i / numberOfEl) * colorRange;
-                    $("#event_"+ id).css("background-color", "hsl(" + H + ",100%, 50%)");
-                    if (!$("#icon-" +id).hasClass("viewed")) {
+                    $("#event_" + id).css("background-color", "hsl(" + H + ",100%, 50%)");
+                    if (!$("#icon-" + id).hasClass("viewed")) {
                         $("#icon-" + id).html($('#svg svg').clone());
                     }
                     $("#icon-" + id).addClass("viewed").addClass("viewing").find(".svgForeground").css("fill", "hsl(" + H + ",100%, 50%)").css("fill-opacity", 1).css("stroke", "black");
@@ -447,74 +447,70 @@ define([
                 }
             }
         },
-        setDay:function(date){
+        setDay: function(date) {
             var day = date.getDay();
             $(".selected_day").removeClass("selected_day");
-            $("#day_"+day).addClass("selected_day") ;
+            $("#day_" + day).addClass("selected_day");
         },
-        setMonthDay:function(date){
+        setMonthDay: function(date) {
             var self = this;
             //set month on side bar
             month = date.month2letter();
             day = date.getDate();
-            $("#topMonthLetter").text(month+day);
+            $("#topMonthLetter").text(month + day);
             //set day on side bar
-            $("#topYear").text(date.getFullYear());       
-            
+            $("#topYear").text(date.getFullYear());
+
         },
-        setMonthSideBarPosition:function(){
+        setMonthSideBarPosition: function() {
             var self = this;
-            var topVisbleEl = document.elementFromPoint(self.position.left+.5, self.position.top);
-            var topModelId = topVisbleEl.id.replace(/event_/,"");
+            var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top);
+            var topModelId = topVisbleEl.id.replace(/event_/, "");
             var top_start_date = self.model.get(topModelId).get("start_date");
             var topMonthId = top_start_date.getMonth();
-                            
-            var halfHeight = $("#EventsListView").position().top + $("#EventsListView").height()/2
-            var topElBottom = $("#month_"+topMonthId).position().top + $("#month_"+topMonthId).height();
-            var topElwidth = $("#month_"+topMonthId).children().width();
-            var bottomElwidth = $("#month_"+topMonthId).next().children().width();
-            var tolarance = 20;   
+
+            var halfHeight = $("#EventsListView").position().top + $("#EventsListView").height() / 2
+            var topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height();
+            var topElwidth = $("#month_" + topMonthId).children().width();
+            var bottomElwidth = $("#month_" + topMonthId).next().children().width();
+            var tolarance = 20;
             //set the top month tobe fixed       
-            $(".monthFixed").removeClass("monthFixed"); 
-            if(topElBottom > $("#EventsListView").position().top + topElwidth + tolarance){
-                $("#month_"+topMonthId).children()
-                .addClass("monthFixed")
-                .removeClass("relative")
-                .css("top",$("#EventsListView").position().top);
-            }else{
+            $(".monthFixed").removeClass("monthFixed");
+            if (topElBottom > $("#EventsListView").position().top + topElwidth + tolarance) {
+                $("#month_" + topMonthId).children().addClass("monthFixed").removeClass("relative").css("top", $("#EventsListView").position().top);
+            } else {
                 //set the top monthe to be at the bottom of the li
-                var parentHeight = $("#month_"+topMonthId).height(); 
-                $("#month_"+topMonthId).children()
-                .addClass("relative")
-                .removeClass("monthFixed")
-                .css("top",parentHeight - topElwidth - tolarance); //set to botto
+                var parentHeight = $("#month_" + topMonthId).height();
+                $("#month_" + topMonthId).children().addClass("relative").removeClass("monthFixed").css("top", parentHeight - topElwidth - tolarance); //set to botto
             }
         },
-        scrollTo:function(id){
-            var targetOffset = $("#EventsListView").scrollTop()  - $("#EventsListView").position().top + $("#event_"+id).position().top;
+        scrollTo: function(id) {
+            var targetOffset = $("#EventsListView").scrollTop() - $("#EventsListView").position().top + $("#event_" + id).position().top;
             //$("#EventsListView").scrollTop(scrollTop);
-            $("#EventsListView").animate({scrollTop:targetOffset},700);
+            $("#EventsListView").animate({
+                scrollTop: targetOffset
+            }, 700);
         },
         //test to see if the list of events is full
-        isListFull:function(){
-            return ($("#EventsListView").height() <  $("#event_list").height())? true:false;
+        isListFull: function() {
+            return ($("#EventsListView").height() < $("#event_list").height()) ? true : false;
         },
-        month2FullNameOrLetter:function(monthNum,elHeight){
+        month2FullNameOrLetter: function(monthNum, elHeight) {
             var self = this;
-            var number0fChar = elHeight/10;
-            if(number0fChar < 10){
+            var number0fChar = elHeight / 10;
+            if (number0fChar < 10) {
                 return [Date.prototype.month2letter(monthNum)];
-            }else{
-                var m_names = new Array(["January",7],["Febuary",7],["March",5],["April",5],["May",3],["June",4],["July",4],["August",6],["September",9],["October",7],["November",8],["December",8]);
+            } else {
+                var m_names = new Array(["January", 7], ["Febuary", 7], ["March", 5], ["April", 5], ["May", 3], ["June", 4], ["July", 4], ["August", 6], ["September", 9], ["October", 7], ["November", 8], ["December", 8]);
                 month = m_names[monthNum];
 
                 //month[0] = month[0].slice(0,number0fChar);
-                return [month[0],true];
+                return [month[0], true];
             }
         }
     });
-    
+
     return {
-        EventsListView:EventsListView
+        EventsListView: EventsListView
     };
 });
