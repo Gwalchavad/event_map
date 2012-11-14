@@ -2,13 +2,11 @@ define([
     'jquery',
     'underscore',
     'backbone',
-    'models',
     'utils',
-
     'hbs!../../templates/event_add',
     'timeDatePicker',
   // Load our app module and pass it to our definition function
-], function($,_,Backbone,Models,Utils,temp_event_add){
+], function($,_,Backbone,Utils,temp_event_add){
  
     var EventAddView = Backbone.View.extend({
         tagname: "div",
@@ -93,17 +91,18 @@ define([
             e.preventDefault();
             //hide error messages
             $(".label").hide();
-            this.model.set(Utils.form2object("#event_add_form"));
-            promise = this.model.save();
-            if (promise) {
-                promise.error(function(response) {
-                    throw new Error("Server Error:" + response);
-                });
-                promise.success(function(response) {
-                    app.navigate('event/' + self.model.id, {
-                        trigger: true
+            if(this.model.set(Utils.form2object("#event_add_form"))){
+                promise = this.model.save();
+                if (promise) {
+                    promise.error(function(response) {
+                        throw new Error("Server Error:" + response);
                     });
-                });
+                    promise.success(function(response) {
+                        app.navigate('event/' + self.model.id, {
+                            trigger: true
+                        });
+                    });
+                }
             }
         },
         cancel: function(e) {

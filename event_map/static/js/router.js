@@ -2,11 +2,13 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'models',
+  'models/users',
+  'models/events',
+  'models/session',
   'views',
   'views/list',
   'views/map'
-], function($, _, Backbone,Models,Views,List,Map){
+], function($, _, Backbone,UserModels,EventModel,SessionModel,Views,List,MapView){
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "list",
@@ -21,15 +23,14 @@ define([
         initialize: function(options) {
             var self = this;
             //check session
-            self.user = new Models.SessionModel(init_user);
+            self.user = new SessionModel(init_user);
             //self.user.reset;
             //start app
             self.appView = new Views.AppView({
-                model: self.user,
-                map_settings: options.map
+                model: self.user
             });
-            self.map = new Map.mapView();
-            this.eventList = new Models.EventCollection();
+            self.map = new MapView();
+            this.eventList = new EventModel.EventCollection();
             this.eventList.reset(init_events);
         },
         list: function(date){
@@ -44,13 +45,13 @@ define([
                     //   ->
                     self.showView([new Views.ListOptionView(),EventList]);
                 }
-            )
+            );
         },
         viewUser:function(user){
             var self = this;
             var fuser = user;
             require(['views/list'],function(list){
-                var UserEventList = new Models.EventCollection(
+                var UserEventList = new EventModel.EventCollection(
                     self.eventList.where({author:fuser}),
                     {
                         data:{user:fuser}
@@ -59,7 +60,7 @@ define([
                 var EventList = new list.EventsListView({
                     model:UserEventList
                 });
-                var user = new Models.UserModel({username:fuser});
+                var user = new UserModels({username:fuser});
                 var information = new Views.ListOptionView({
                     model:user
                 });
@@ -109,7 +110,7 @@ define([
                 } 
             }else{
                 //creating a new event
-                var event = new Models.Event();
+                var event = new EventModel.Event();
             }
             require(['views/event_add'],function(event_add){
                 //create a new event

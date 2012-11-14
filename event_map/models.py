@@ -4,10 +4,17 @@ from uuidfield import UUIDField
 from django.contrib.auth.models import User
 
 class Group(models.Model):
+    visibility_choices = (
+        ('public', 'Public'),
+        ('private', 'Private'),
+        ('unlisted', 'Unlisted'),
+    )    
     name =  models.CharField(max_length=255, help_text="""
         the name of the group""")
     description =  models.CharField(max_length=255, help_text="""
         the name of the group""")
+    visibility = models.CharField(max_length=32, choices=visibility_choices, default="maybe", help_text="""
+        Whether or not user is attending protest.""")
     members = models.ManyToManyField(User, through='Subscription')
     def __unicode__(self):
         return self.name
@@ -19,7 +26,6 @@ class Feed(Group):
 class Subscription(models.Model):
     user = models.ForeignKey(User)
     group = models.ForeignKey(Group)
-    public = models.BooleanField(default=True)
     def __unicode__(self):
         return  self.user.username + " --> "+ self.group.name
 

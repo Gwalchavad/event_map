@@ -63,6 +63,28 @@ define([
             } );
         return result;
     };
+    /**
+     * http://stackoverflow.com/a/10997390/11236
+     */
+    var updateURLParameter = function(url, param, paramVal){
+        var newAdditionalURL = "";
+        var tempArray = url.split("?");
+        var baseURL = tempArray[0];
+        var additionalURL = tempArray[1];
+        var temp = "";
+        if (additionalURL) {
+            tempArray = additionalURL.split("&");
+            for (i=0; i<tempArray.length; i++){
+                if(tempArray[i].split('=')[0] != param){
+                    newAdditionalURL += temp + tempArray[i];
+                    temp = "&";
+                }
+            }
+        }
+
+        var rows_txt = temp + "" + param + "=" + paramVal;
+        return baseURL + "?" + newAdditionalURL + rows_txt;
+    }
     //common time
     Date.prototype.getTimeCom = function(){
         var hours = this.getHours()
@@ -102,7 +124,8 @@ define([
         return  this.getMonth()+"/"+this.getDate();
     }   
     return {
-        form2object:form2object
+        form2object:form2object,
+        updateURLParameter:updateURLParameter
     };
 });
 

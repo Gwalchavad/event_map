@@ -1,8 +1,9 @@
 define([
+    'underscore',
     'backbone',
     'leaflet',
     'settings'
-],function (Backbone,L,settings){
+],function (_,Backbone,L,settings){
     
     var mapView = Backbone.View.extend({
         map:null,
@@ -78,9 +79,9 @@ define([
             });
             
         },
-        add_marker:function(coordinates,draggable){	
-            latlng = coordinates ? coordinates.reverse() : props.center;
-            
+        add_marker:function(coordinates,draggable){
+            //clone so we don't reverse the actully coodinates
+            latlng = coordinates ? _.clone(coordinates).reverse() : props.center;
             marker = new L.Marker(latlng,{draggable:draggable});
             this.group.addLayer(marker);
             return marker;
@@ -91,7 +92,5 @@ define([
         return this.lat + ","+this.lng;
     };
     
-    return{
-        mapView:mapView,
-    }
+    return mapView;
 });

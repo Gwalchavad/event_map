@@ -1,10 +1,10 @@
-define(['jquery', 'underscore', 'backbone', 'hbs!../../templates/event_list', 'hbs!../../templates/event_list_empty',
+define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_list', 'hbs!../../templates/event_list_empty',
 
 'hbs!../../templates/item_open', 'hbs!../../templates/item_closed',
 
 'hbs!../../templates/li_months', 'hbs!../../templates/li_days', 'hbs!../../templates/popup'
 // Load our app module and pass it to our definition function
-], function($, _, Backbone, temp_event_list, temp_event_list_empty, temp_item_open, temp_item_closed, temp_li_months, temp_li_days, temp_popup) {
+], function($, _, Backbone,utils, temp_event_list, temp_event_list_empty, temp_item_open, temp_item_closed, temp_li_months, temp_li_days, temp_popup) {
 
     var EventsListView = Backbone.View.extend({
         tagName: "div",
@@ -45,31 +45,27 @@ define(['jquery', 'underscore', 'backbone', 'hbs!../../templates/event_list', 'h
             this.model.forEach(function(model, key) {
                 self.onAdd(model);
             });
-            app.map.on("popupclose", this.onPopupClose);
-            app.map.on("popupopen", this.onPopupOpen);
+            app.map.map.on("popupclose", this.onPopupClose);
+            app.map.map.on("popupopen", this.onPopupOpen);
             app.map.map.on('locationfound', this.onLocationFound,this);
 
+        },
+        onMarkerClick: function(e) {
+            this.eventItemOpen( e.target.options.modelID);
+            //if the target event is not currently viewble in the list, then scroll to it
+            if (!$(e.target._icon.children).hasClass("viewing")) {
+                //$("#event_53").position().top()
+                this.scrollTo(e.target.options.modelID);
+            }
         },
         onPopupOpen: function(event) {
             $(event.popup._source._icon).find(".circleMarker").show();
             $(event.popup._source._icon).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
         },
         onPopupClose: function(event) {
-            if (self.lastClickedMarkerEvent == event.popup._source.options.modelID) {
-                self.eventItemClose(self.lastClickedMarkerEvent);
-                self.lastClickedMarkerEvent = false;
-            }
-        },
-        onDOMadd: function() {
-            var self = this;
-            self.onResize();
-            //bind the scroll event
-            //then trigger a scroll to load more events
-            this.backFetch();
-            this.forwardFetch();
-            $("#EventsListView").on("scroll." + this.cid, self, self.onScroll);
 
         },
+
         onScroll: function(e) {
             //if at the bottom get more events
             var tolerance = 60;
@@ -126,37 +122,24 @@ define(['jquery', 'underscore', 'backbone', 'hbs!../../templates/event_list', 'h
                 icon: myIcon,
                 modelID: model.get("id")
             });
-            //TODO:change to on click in case the location changes 
-            marker.bindPopup(temp_popup(model.toJSON()))
+            marker.bindPopup(temp_popup(model.toJSON()));
             app.map.group.addLayer(marker);
             marker.on("click", self.onMarkerClick, this);
             this.markers[model.get("id")] = marker;
             
         },
         onLocationFound: function(e){
-            console.log(e);
+            //update the makers start address for directions
             this.markers.forEach(function(marker){
                 var content = $(marker._popup._content);
-                var _href = content.find(".popupAddress")[0].href+e.latlng.toUrlString();
+                var _href = content.find(".popupAddress").attr("href");
+                _href = utils.updateURLParameter(_href,"saddr",e.latlng.toUrlString());
                 content.find(".popupAddress").attr("href",_href);
-                marker._popup._content = content.html();
+                marker._popup._content = content.prop('outerHTML');
             });
             
         },
-        onMarkerClick: function(e) {
-            if (this.lastClickedMarkerEvent) {
-                this.eventItemClose(self.lastClickedMarkerEvent);
-            }
-            this.lastClickedMarkerEvent = e.target.options.modelID;
-            //come after the closing the last event
-            if (!$(e.target._icon.children).hasClass("open")) {
-                if (!$(e.target._icon.children).hasClass("viewing")) {
-                    //$("#event_53").position().top()
-                    this.scrollTo(e.target.options.modelID);
-                }
-                this.eventItemOpen(this.lastClickedMarkerEvent);
-            }
-        },
+       
         onClick: function(event) {
             var self = this;
             var id = event.currentTarget.id.replace(/event_/, "");
@@ -189,27 +172,30 @@ define(['jquery', 'underscore', 'backbone', 'hbs!../../templates/event_list', 'h
             }
         },
         eventItemOpen: function(id) {
-            var self = this;
-            var model = self.model.get(id);
-            $("#event_" + id).addClass("open");
-            $("#event_" + id).height(self.height + 26);
-            $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
-            //set month
-            var month = model.get("start_date").getMonth();
-            var height = $("#month_" + month).height();
-            $("#month_" + month).height(height + 26);
-            //set day height
-            var day = model.get("start_date").getDate();
-            height = $("#day_" + day + "_" + month).height();
-            $("#day_" + day + "_" + month).height(height + 26);
+            if(!$("#event_" + id).hasClass("open")){
+                var model = self.model.get(id);
+                $("#event_" + id).addClass("open");
+                $("#event_" + id).height(self.height + 26);
+                $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
+                //set month
+                var month = model.get("start_date").getMonth();
+                var height = $("#month_" + month).height();
+                $("#month_" + month).height(height + 26);
+                //set day height
+                var day = model.get("start_date").getDate();
+                height = $("#day_" + day + "_" + month).height();
+                $("#day_" + day + "_" + month).height(height + 26);
 
-            self.markers[id].setZIndexOffset(100);
+                self.markers[id].setZIndexOffset(100);
+            }
         },
         eventItemClose: function(id) {
             var self = this;
             //close the event icon
             $("#icon-" + id).find(".circleMarker").hide();
             $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
+            //$("#icon-" + id).removeClass("open");            
+            //close the event           
             $("#event_" + id).removeClass("open");
             $("#event_" + id).height(self.height);
             //get model of item thata was clicked 
@@ -244,6 +230,15 @@ define(['jquery', 'underscore', 'backbone', 'hbs!../../templates/event_list', 'h
             $("#EventsListView").off("scroll." + this.cid, self, self.onScroll).scroll();
             app.map.off("popupclose", this.onPopupClose);
             app.map.off("popupopen", this.onPopupOpen);
+        },
+        onDOMadd: function() {
+            var self = this;
+            self.onResize();
+            //bind the scroll event
+            //then trigger a scroll to load more events
+            this.backFetch();
+            this.forwardFetch();
+            $("#EventsListView").on("scroll." + this.cid, self, self.onScroll);
         },
         render: function(eventModels, prepend) {
             var self = this;

@@ -1,17 +1,15 @@
-define(['jquery', 'underscore', 'backbone', 'models', 'utils', 'hbs!../templates/app_css', 'hbs!../templates/list_option', 'hbs!../templates/event_add', 'hbs!../templates/login', 'hbs!../templates/sign_up', 'hbs!../templates/markdown', 'hbs!../templates/nav','views/map', 'timeDatePicker', 'lib/bootstrap',
+define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../templates/app_css', 'hbs!../templates/list_option', 'hbs!../templates/event_add', 'hbs!../templates/login', 'hbs!../templates/sign_up', 'hbs!../templates/markdown', 'hbs!../templates/nav','views/map', 'timeDatePicker', 'lib/bootstrap',
 // Load our app module and pass it to our definition function
-], function($, _, Backbone, Models, Utils,
-temp_app_css,
-temp_list_option,
-temp_event_add,
-temp_login,
-temp_sign_up,
-temp_markdown,
-temp_nav,
-Map
+], function($, _, Backbone, Utils,
+    temp_app_css,
+    temp_list_option,
+    temp_event_add,
+    temp_login,
+    temp_sign_up,
+    temp_markdown,
+    temp_nav,
+    Map
 ) {
-
-
     Backbone.View.prototype.close = function() {
         _.each(this.children, function(child) {
             child.close();
@@ -111,7 +109,7 @@ Map
             });
             //static render
             this.$el.append(temp_login(null));
-            this.$el.append(temp_markdown(null));
+            //this.$el.append(temp_markdown(null));
             this.$el.append(temp_sign_up(null));
             this.height = $(window).height();
             //60 height of header
