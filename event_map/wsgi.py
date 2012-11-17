@@ -13,12 +13,12 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
-import os,sys
+import os,sys,site
 CWD = os.path.abspath(os.path.normpath(os.path.dirname(__file__)))
 PROJECT_DIR = os.path.dirname(CWD)
  
 sys.path.append(PROJECT_DIR)
-
+site.addsitedir("/home/null/event_map/lib/python2.6/site-packages")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "event_map.settings")
 
 # This application object is used by any WSGI server configured to use this
