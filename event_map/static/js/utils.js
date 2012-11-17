@@ -3,7 +3,6 @@ define([
    'handlebars' 
   // Load our app module and pass it to our definition function
 ], function(_,handlebars){
-
     handlebars.registerHelper('slice', function(context,options) {
         for (var prop in this) {
             if(typeof this[prop] === "string"){

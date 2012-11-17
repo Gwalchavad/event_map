@@ -8,26 +8,52 @@ class Group(models.Model):
         ('public', 'Public'),
         ('private', 'Private'),
         ('unlisted', 'Unlisted'),
-    )    
-    name =  models.CharField(max_length=255, help_text="""
+    )
+    posting_choices = (
+        ('open', 'Open'),
+        ('queue', 'Queue'),
+        ('restricted', 'Restricted'),
+    )
+    title =  models.CharField(unique=True,max_length=255, help_text="""
         the name of the group""")
-    description =  models.CharField(max_length=255, help_text="""
+    description =  models.TextField(help_text="""
         the name of the group""")
-    visibility = models.CharField(max_length=32, choices=visibility_choices, default="maybe", help_text="""
+    visibility = models.CharField(max_length=32, choices=visibility_choices, default="public", help_text="""
         Whether or not user is attending protest.""")
-    members = models.ManyToManyField(User, through='Subscription')
+    posting_option = models.CharField(max_length=32, choices=posting_choices, default="restricted", help_text="""
+        How post should be processed""")
+    permissions = models.ManyToManyField(User, through='Permission', blank=True)
+    subscription = models.ManyToManyField('self', blank=True, help_text="""
+        What other groups are aggergated?""")
     def __unicode__(self):
-        return self.name
+        return self.title
 
 class Feed(Group):
     source = models.URLField()
     source_type =  models.CharField(null=True, blank=True, max_length=255)
 
-class Subscription(models.Model):
+class UserGroup(Group):
+    user = models.ForeignKey(User)
+    def save(self, *args, **kwargs):
+        self.title = self.user.username
+        self.visibility = "public"
+        self.description = "Write something about You"
+        self.posting_option = "restricted"
+        return super(Group, self).save(*args, **kwargs)
+
+class Permission(models.Model): 
+    banned = models.BooleanField(default=False, help_text="""
+        is this user banned?""")
+    read  = models.BooleanField(default=False, help_text="""
+        can this user view the group?""")
+    write = models.BooleanField(default=False, help_text="""
+        can the user post to this group""")
+    admin = models.BooleanField(default=False, help_text="""
+        deos user have admin privilages?""")
     user = models.ForeignKey(User)
     group = models.ForeignKey(Group)
     def __unicode__(self):
-        return  self.user.username + " --> "+ self.group.name
+        return  self.user.username + " --> "+ self.group.title
 
 class Event(models.Model):
     """Events!"""
@@ -46,7 +72,7 @@ class Event(models.Model):
 
     start_date = models.DateTimeField( help_text="""
         What Date is this event Happening On?""")
-    end_date = models.DateTimeField(null=True, help_text="""
+    end_date = models.DateTimeField(null=True, blank=True, help_text="""
         When is your event ending?""")
     location = models.CharField(null=True, blank=True, max_length=255, help_text="""
         the location of the event""")

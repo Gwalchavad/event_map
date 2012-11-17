@@ -2,7 +2,7 @@
 	<fieldset>	
 		<label for="id_title" class="required">Title &nbsp;<span id="title_error" class="label label-important hide"></span></label>
 			<input id="id_title" class="span9" type="text" name="title" maxlength="255" value="{{title}}">
-			<span class="help-block">A one-line title to describe article.</span>
+			<span class="help-block">A one-line title to describe the event.</span>
 			<div class="row-fluid">
 				<div class	="span5">
 					<label for="id_start_date" class="required">Start date &nbsp;

@@ -247,6 +247,7 @@ class Event(View):
         """
         Get An Events Details given its ID
         """
+        
         event = db.Event.objects.get(id=kwargs['id'])
         response = {
             "id": event.id,
@@ -272,7 +273,7 @@ class Event(View):
         if event.author == request.user:
             form = forms.EventForm(request.user, json_post, instance=event)
             if form.is_valid():
-                event = form.save(request.user)
+                event = form.save()
                 return utils.json_response({
                     'success': True,
                 })
@@ -292,7 +293,7 @@ class Event(View):
         json_post = json.loads(request.raw_post_data)
         form = forms.EventForm(request.user, json_post)
         if form.is_valid():
-            event = form.save(request.user)
+            event = form.save()
             response = {
                 "id": event.id,
                 "title": event.title,
@@ -313,7 +314,7 @@ class Event(View):
         else:
             return utils.json_response({
                 'errors': dict(form.errors.items()),
-            })
+            }, status=401)
 
     def delete(self, request, **kwargs):
         """Deletes An Event"""
@@ -340,13 +341,24 @@ class Event(View):
 
 class Group(View):
     """API For groups"""
+    @method_decorator(json_api_errors)
     def get(self, request, **kwargs):
         """Get info about a group"""
-        return utils.json_response({
-            'errors': {
-                'message': "NOT Implemented",
-            }
-        }, status=401)
+        group = db.Group.objects.get(id=kwargs['id'])
+        permission = group.permission_set.all().get(user=request.user)
+        permission_json = {
+            "admin":permission.admin,
+            "read":permission.read,
+            "write":permission.write,
+            "banned":permission.banned,
+        }
+        response = {
+            "id": group.id,
+            "title": group.title,
+            "description": group.description,
+            "permissions":permission_json
+        }
+        return utils.json_response(response)
         
     def put(self, request, **kwargs):
         """modifiey a group"""
@@ -358,11 +370,21 @@ class Group(View):
         
     def post(self, request):
         """create an a group"""
-        return utils.json_response({
-            'errors': {
-                'message': "NOT Implemented",
+        json_post = json.loads(request.raw_post_data)
+        form = forms.GroupForm(json_post)
+        if form.is_valid():
+            group = form.save()
+            db.Permission.objects.create(admin=True,user=request.user,group=group)
+            response = {
+                "id": group.id,
+                "title": group.title,
+                "description": group.description
             }
-        }, status=401)
+            return utils.json_response(response)
+        else:
+            return utils.json_response({
+                'errors': dict(form.errors.items()),
+            }, status=401)
         
     def delete(self, request):
         """delete a group"""

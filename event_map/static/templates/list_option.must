@@ -7,6 +7,9 @@
     {{#if allow_add}}
     <a href="#addevent" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
     {{/if}}
+    {{#if permissions.admin}}
+    <a href="#addevent" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
+    {{/if}}
     <div id="listOptionPanels">
         
     </div>

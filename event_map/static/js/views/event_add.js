@@ -7,7 +7,7 @@ define([
     'timeDatePicker',
   // Load our app module and pass it to our definition function
 ], function($,_,Backbone,Utils,temp_event_add){
- 
+
     var EventAddView = Backbone.View.extend({
         tagname: "div",
         className: "span7 overflow setheight replace",

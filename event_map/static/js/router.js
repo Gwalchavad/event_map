@@ -6,9 +6,8 @@ define([
   'models/events',
   'models/session',
   'views',
-  'views/list',
   'views/map'
-], function($, _, Backbone,UserModels,EventModel,SessionModel,Views,List,MapView){
+], function($, _, Backbone,UserModels,EventModel,SessionModel,Views,MapView){
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "list",
@@ -16,9 +15,10 @@ define([
             "event/:id": "eventDetails",
             "editevent/:id": "eventAdd",
             "user/:user": "viewUser",
-            "group/:group":"viewGroup",
             "addevent": "eventAdd",
-            "about": "about"
+            "about": "about",
+            "group/:group":"viewGroup",
+            "addGroup":"addGroup"
         },
         initialize: function(options) {
             var self = this;
@@ -67,21 +67,39 @@ define([
                 self.showView([information,EventList]);        
             });             
         },
-        viewGroup:function(group){
-            this.eventList.reset();
-            this.eventList.fetch({
-                data: {
-                    group:group
-                }
-            });
-            EventList = new List.EventsListView({
-                model: this.eventList,
-                group:group
-            });
-            
-            this.showView([new Models.ListOptionView(),EventList]);          
-        },
+        viewGroup:function(id){
+            var self = this;
 
+            require(['views/list','models/groups','views/groups'],function(ListView,Group,GroupView){
+                var group = new Group({id:id});
+                group.fetch({
+                    success:function(){
+                        var groupEventList = new EventModel.EventCollection(
+                        self.eventList.where({group:id}),
+                            {
+                                data:{group:id}
+                            }
+                        );
+                        var groupEventList = new ListView.EventsListView({
+                            model:groupEventList
+                        });         
+                               
+                        self.showView([new GroupView({ model:group }),groupEventList]);    
+                    }
+                });
+                   
+            });  
+        },
+        addGroup:function(){
+            var self = this;
+            require(['models/groups','views/group_add'],function(Group,AddGroupView){
+                var group = new Group();
+                var groupView = new AddGroupView({
+                    model: group
+                });
+                self.showView(groupView);
+            });
+        },
         eventDetails: function(id,fevent,context){
             var self = context ? context : this; 
             var event = fevent ? fevent : self.eventList.get(id);
@@ -153,7 +171,7 @@ define([
         fetchEvent:function(id, context){
             var self = this;
             var callback = arguments.callee.caller;
-            var event = new Models.Event({
+            var event = new EventModel.Event({
                 id: id
             });
             request = event.fetch();

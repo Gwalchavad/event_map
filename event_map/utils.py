@@ -1,4 +1,5 @@
 from django.http import Http404, HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
 import json
 import time
 import sys
@@ -20,12 +21,11 @@ def clean_data(obj):
     return obj    
         
 def json_response(data, status=200):
-
     return HttpResponse(
-						 json.dumps(data, default=clean_data ),
-                         content_type='application/json; charset=UTF-8', 
-                         status = status,
-                        )
+        json.dumps(data, default=clean_data ),
+        content_type='application/json; charset=UTF-8', 
+        status = status,
+    )
                         
 #not in use
 def jstime(dt):
@@ -91,6 +91,12 @@ def json_api_errors(fn):
                     'message':detail
                     }
             },status = 401)
+        except ObjectDoesNotExist, e:
+            return json_response({
+                'errors':{
+                    'message':"does not exist",
+                }
+            },status = 404)
         except ApiException, e:
             return json_response({
                  'errors':{

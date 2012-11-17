@@ -13,4 +13,4 @@ class GeoAdmin(OSMGeoAdmin):
 admin.site.register(db.Event, GeoAdmin)
 admin.site.register(db.Group)
 admin.site.register(db.Feed)
-admin.site.register(db.Subscription)
+admin.site.register(db.Permission)

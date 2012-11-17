@@ -31,7 +31,6 @@ class EventForm(forms.ModelForm):
         return end_date           
     
     def __init__(self, user, *args, **kwargs):
-
         self.user = user
         super(EventForm, self).__init__(*args, **kwargs)   
         
@@ -47,7 +46,12 @@ class EventForm(forms.ModelForm):
         model.is_event = True
         model.save()
         return model
-        
+
+class GroupForm(forms.ModelForm):
+    class Meta:
+        model = db.Group
+        fields = ('title','description','visibility','posting_option')
+    
 class SignUpForm(forms.Form):
     username = forms.RegexField(
         label="Username", max_length=30, regex=r'^[a-zA-Z0-9]{3,30}$',

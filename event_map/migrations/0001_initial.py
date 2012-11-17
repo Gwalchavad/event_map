@@ -11,10 +11,20 @@ class Migration(SchemaMigration):
         # Adding model 'Group'
         db.create_table('event_map_group', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('title', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('description', self.gf('django.db.models.fields.TextField')()),
+            ('visibility', self.gf('django.db.models.fields.CharField')(default='public', max_length=32)),
+            ('posting_option', self.gf('django.db.models.fields.CharField')(default='restricted', max_length=32)),
         ))
         db.send_create_signal('event_map', ['Group'])
+
+        # Adding M2M table for field subscription on 'Group'
+        db.create_table('event_map_group_subscription', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('from_group', models.ForeignKey(orm['event_map.group'], null=False)),
+            ('to_group', models.ForeignKey(orm['event_map.group'], null=False))
+        ))
+        db.create_unique('event_map_group_subscription', ['from_group_id', 'to_group_id'])
 
         # Adding model 'Feed'
         db.create_table('event_map_feed', (
@@ -24,14 +34,17 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('event_map', ['Feed'])
 
-        # Adding model 'Subscription'
-        db.create_table('event_map_subscription', (
+        # Adding model 'Permission'
+        db.create_table('event_map_permission', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('banned', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('read', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('write', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('admin', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.Group'])),
-            ('public', self.gf('django.db.models.fields.BooleanField')(default=True)),
         ))
-        db.send_create_signal('event_map', ['Subscription'])
+        db.send_create_signal('event_map', ['Permission'])
 
         # Adding model 'Event'
         db.create_table('event_map_event', (
@@ -43,7 +56,7 @@ class Migration(SchemaMigration):
             ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('start_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
             ('location', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
             ('city', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
             ('venue', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
@@ -67,11 +80,14 @@ class Migration(SchemaMigration):
         # Deleting model 'Group'
         db.delete_table('event_map_group')
 
+        # Removing M2M table for field subscription on 'Group'
+        db.delete_table('event_map_group_subscription')
+
         # Deleting model 'Feed'
         db.delete_table('event_map_feed')
 
-        # Deleting model 'Subscription'
-        db.delete_table('event_map_subscription')
+        # Deleting model 'Permission'
+        db.delete_table('event_map_permission')
 
         # Deleting model 'Event'
         db.delete_table('event_map_event')
@@ -125,7 +141,7 @@ class Migration(SchemaMigration):
             'content': ('django.db.models.fields.TextField', [], {}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'end_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'end_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.Group']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'link': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
@@ -145,17 +161,23 @@ class Migration(SchemaMigration):
         },
         'event_map.group': {
             'Meta': {'object_name': 'Group'},
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'description': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'members': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'through': "orm['event_map.Subscription']", 'symmetrical': 'False'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'symmetrical': 'False', 'through': "orm['event_map.Permission']", 'blank': 'True'}),
+            'posting_option': ('django.db.models.fields.CharField', [], {'default': "'restricted'", 'max_length': '32'}),
+            'subscription': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'subscription_rel_+'", 'blank': 'True', 'to': "orm['event_map.Group']"}),
+            'title': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'visibility': ('django.db.models.fields.CharField', [], {'default': "'public'", 'max_length': '32'})
         },
-        'event_map.subscription': {
-            'Meta': {'object_name': 'Subscription'},
+        'event_map.permission': {
+            'Meta': {'object_name': 'Permission'},
+            'admin': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'banned': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.Group']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+            'read': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
+            'write': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         }
     }
 
