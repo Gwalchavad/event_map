@@ -38,3 +38,4 @@ Implementation
 
 `API <https://github.com/wanderer/event_map/wiki/API>`_
 -------------------------------------------------------
+
