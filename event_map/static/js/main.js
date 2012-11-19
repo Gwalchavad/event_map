@@ -21,7 +21,8 @@ require.config({
         json2 : "lib/hbs/json2",
         timeDatePicker: 'lib/jquery-ui-sliderAccess',
         jqueryui:'lib/jquery-ui-1.8.21.custom.min',
-        timepicker:'lib/jquery-ui-timepicker-addon'
+        timepicker:'lib/jquery-ui-timepicker-addon',
+        bootstrap:'lib/bootstrap'
     },
     shim: {
         'underscore':{
@@ -38,6 +39,9 @@ require.config({
         "backbone.layoutmanager": ["backbone"],
         'handlebars': {
             exports: 'Handlebars'
+        },
+        'bootstrap':{
+            deps:['jquery']
         },
         'jqueryui': ['jquery'],
         'timepicker':['jqueryui'],

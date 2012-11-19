@@ -1,8 +1,9 @@
 define([
+   'jquery',
    'underscore',
    'handlebars' 
   // Load our app module and pass it to our definition function
-], function(_,handlebars){
+], function($,_,handlebars){
     handlebars.registerHelper('slice', function(context,options) {
         for (var prop in this) {
             if(typeof this[prop] === "string"){
@@ -16,7 +17,7 @@ define([
     //other functions
     //load templates 
     //send the CSRFToken in the header. from django docs
-    jQuery(document).ajaxSend(function(event, xhr, settings) {
+    $(document).ajaxSend(function(event, xhr, settings) {
         function getCookie(name) {
             var cookieValue = null;
             if (document.cookie && document.cookie != '') {
