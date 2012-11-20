@@ -28,9 +28,6 @@ require.config({
         'underscore':{
              exports: '_'
         },
-        'jquery':{
-             exports: '$'
-        },
         'backbone': {
             //These script dependencies should be loaded before loading
             //backbone.js
@@ -43,9 +40,7 @@ require.config({
         'handlebars': {
             exports: 'Handlebars'
         },
-        'bootstrap':{
-            deps:['jquery']
-        },
+        'bootstrap':['jquery'],
         'jqueryui': ['jquery'],
         'timepicker':['jqueryui'],
         'timeDatePicker':['timepicker'],
