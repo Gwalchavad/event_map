@@ -36,7 +36,6 @@ require.config({
             //module value.
             exports: 'Backbone'
         },
-        "backbone.layoutmanager": ["backbone"],
         'handlebars': {
             exports: 'Handlebars'
         },

@@ -6,8 +6,9 @@ define([
   'models/events',
   'models/session',
   'views',
-  'views/map'
-], function($, _, Backbone,UserModels,EventModel,SessionModel,Views,MapView){
+  'views/map',
+  'views/loading'
+], function($, _, Backbone,UserModels,EventModel,SessionModel,Views,MapView,LoadingView){
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "list",
@@ -29,7 +30,9 @@ define([
             self.appView = new Views.AppView({
                 model: self.user
             });
+            self.showView(new LoadingView());
             self.map = new MapView();
+
             this.eventList = new EventModel.EventCollection();
             this.eventList.reset(init_events);
         },
