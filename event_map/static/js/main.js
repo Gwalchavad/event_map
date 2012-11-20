@@ -28,6 +28,9 @@ require.config({
         'underscore':{
              exports: '_'
         },
+        'jquery':{
+             exports: '$'
+        },
         'backbone': {
             //These script dependencies should be loaded before loading
             //backbone.js
