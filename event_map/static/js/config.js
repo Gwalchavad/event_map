@@ -23,7 +23,7 @@ require.config({
         timeDatePicker: 'lib/jquery-ui-sliderAccess',
         jqueryui:'lib/jquery-ui-1.8.21.custom.min',
         timepicker:'lib/jquery-ui-timepicker-addon',
-        bootstrap:'lib/bootstrap'
+        bootstrap:'../vendor/bootstrap/js/bootstrap'
     },
     shim: {
         'underscore':{

@@ -26,7 +26,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
 
         initialize: function() {
             var self = this;
-            this.model.on('change',this.render);
+            this.model.on('change',this.render,this);
             
             $(window).on('resize', function() {
                 this.height = $(window).height();
