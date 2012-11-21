@@ -1,17 +1,10 @@
-define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../templates/app_css', 'hbs!../templates/list_option', 'hbs!../templates/event_add', 'hbs!../templates/login', 'hbs!../templates/sign_up', 'hbs!../templates/markdown', 'hbs!../templates/nav','views/map', 'timeDatePicker', 'lib/bootstrap',
+define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/session', 'hbs!../../templates/app_css', 'hbs!../../templates/nav', 'lib/bootstrap',
 // Load our app module and pass it to our definition function
-], function($, _, Backbone, Utils,
+], function($, _, Backbone, Utils, User, Session,
     temp_app_css,
-    temp_list_option,
-    temp_event_add,
-    temp_login,
-    temp_sign_up,
-    temp_markdown,
-    temp_nav,
-    Map
+    temp_nav
 ) {
-
-    var AppView = Backbone.View.extend({
+    var frameView = Backbone.View.extend({
         el: 'body',
         height: 0,
         events: {
@@ -33,11 +26,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../templates/app_css',
 
         initialize: function() {
             var self = this;
-            this.model.on("error", function(model, errors) {
-                _.each(errors, function(error, key) {
-                    $("#" + key + "_error").show().html(error);
-                });
-            });
+            this.model.on('change',this.render);
+            
             $(window).on('resize', function() {
                 this.height = $(window).height();
                 this.topHeight = $(window).height() - $(".top").height();
@@ -47,10 +37,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../templates/app_css',
                 }));
 
             });
-            //static render
-            this.$el.append(temp_login(null));
+
             //this.$el.append(temp_markdown(null));
-            this.$el.append(temp_sign_up(null));
             this.height = $(window).height();
             //60 height of header
             this.topHeight = $(window).height() - 60;
@@ -93,22 +81,28 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../templates/app_css',
                 });
                 promise.success(function(data) {
                     $('#loginhtml').modal('hide');
-                    self.render();
                 });
             }
         },
         signUpModel: function() {
             $('#loginhtml').modal('hide');
             $('#signup_html').modal('show');
+            $(".label").hide();
         },
         signUp: function(e) {
             self = this;
             e.preventDefault();
-            $(".label").hide();
-            var NewUser = new UserModel(Utils.form2object("#SignUpForm")),
-                promise = NewUser.save();
 
-            if (promise) {
+            var NewUser = new User();
+            
+            NewUser.on("error", function(model, errors) {
+                _.each(errors, function(error, key) {
+                    $("#" + key + "_error").show().html(error);
+                });
+            });    
+            
+            if(NewUser.set(Utils.form2object("#SignUpForm"))){
+                promise = NewUser.save();
                 promise.error(function(response) {
                     //get the error message and display it
                     json = JSON.parse(response.responseText);
@@ -122,16 +116,11 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../templates/app_css',
                     $('#signupError').html(list).show('fast');
                 });
                 promise.success(function(data) {
+                    self.model.fetch();
                     $('#signup_html').modal('hide');
-                    self.render()
                 });
             }
         }
     });
-
-    var self = {
-        AppView: AppView
-    };
-
-    return self;
+    return frameView;
 });

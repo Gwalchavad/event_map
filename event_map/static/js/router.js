@@ -5,10 +5,11 @@ define([
   'models/users',
   'models/events',
   'models/session',
-  'views',
+  'views/frame',
   'views/map',
-  'views/loading'
-], function($, _, Backbone,UserModels,EventModel,SessionModel,Views,MapView,LoadingView){
+  'views/loading',
+ 
+], function($, _, Backbone,UserModels,EventModel,SessionModel,FrameView,MapView,LoadingView,signupView){
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "list",
@@ -24,12 +25,15 @@ define([
         initialize: function(options) {
             var self = this;
             //check session
-            self.user = new SessionModel(init_user);
+            self.session = new SessionModel(init_user);
             //self.user.reset;
             //start app
-            self.appView = new Views.AppView({
-                model: self.user
+            self.appView = new FrameView({
+                model: self.session
             });
+            self.appView.render()
+            
+    
             self.showView(new LoadingView());
             self.map = new MapView();
 
@@ -38,7 +42,7 @@ define([
         },
         list: function(date){
             var self= this;
-            require(['views/list'],function(list){
+            require(['views/list','views/list_info'],function(list,ListInfoView){
                     //create a event list
                     EventList = new list.EventsListView({
                         model: self.eventList
@@ -46,14 +50,14 @@ define([
                     //self.appView.addChildren(ListOptionView(),EventList)
                     //   ->rendAll
                     //   ->
-                    self.showView([new Views.ListOptionView(),EventList]);
+                    self.showView([new ListInfoView(),EventList]);
                 }
             );
         },
         viewUser:function(user){
             var self = this;
             var fuser = user;
-            require(['views/list'],function(list){
+            require(['views/list','views/list_info'],function(list,ListInfoView){
                 var UserEventList = new EventModel.EventCollection(
                     self.eventList.where({author:fuser}),
                     {
@@ -64,7 +68,7 @@ define([
                     model:UserEventList
                 });
                 var user = new UserModels({username:fuser});
-                var information = new Views.ListOptionView({
+                var information = new ListInfoView({
                     model:user
                 });
                 self.showView([information,EventList]);        
