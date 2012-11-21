@@ -1,4 +1,4 @@
-define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/session', 'hbs!../../templates/app_css', 'hbs!../../templates/nav', 'lib/bootstrap',
+define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/session', 'hbs!../../templates/app_css', 'hbs!../../templates/nav', 'bootstrap',
 // Load our app module and pass it to our definition function
 ], function($, _, Backbone, Utils, User, Session,
     temp_app_css,
