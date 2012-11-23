@@ -4,7 +4,7 @@
         <div><a href="#/event/{{id}}">{{titleOpen}}</a>
         {{#if contentOpen}} | <a href="#/event/{{id}}">{{contentOpen}}</a>{{/if}}
         </div>
-        <div>{{start_time }} - {{end_time }} <b>At</b>
+        <div class="timePlace">{{start_time }} - {{end_time }} <b>At</b>
          {{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}
         </div>
         <div class="itemControlls">Going?/Spam</div>

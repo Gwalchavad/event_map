@@ -81,3 +81,10 @@ h2{
     -o-transform-origin:  bottom left;
     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
 }
+.timePlace{
+    overflow: hidden;
+}
+.list_open_content{
+    width: 376px;
+    white-space: nowrap;
+}
