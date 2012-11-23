@@ -84,7 +84,7 @@ h2{
 .timePlace{
     overflow: hidden;
 }
-.list_open_content{
+.list_item_content{
     width: 376px;
     white-space: nowrap;
 }
