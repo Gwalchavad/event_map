@@ -48,7 +48,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             app.map.map.on("popupclose", this.onPopupClose);
             app.map.map.on("popupopen", this.onPopupOpen);
             app.map.map.on('locationfound', this.onLocationFound,this);
-
         },
         onMarkerClick: function(e) {
             this.eventItemOpen( e.target.options.modelID);
@@ -288,6 +287,17 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     self.$el.html(html);
                 }
             } else {
+                //if there was pervously no events
+                if($("#NoEvent").length){
+                    var html = temp_event_list({
+                            months: null,
+                            days: null,
+                            events: null,
+                            height: null
+                        });
+                    self.$el.html(html);
+                }
+
                 if (prepend) {
                     var oldLastDate = self.render_var.pre_current_date.date;
                     self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");

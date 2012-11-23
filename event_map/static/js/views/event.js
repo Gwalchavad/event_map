@@ -10,14 +10,14 @@ define([
         height: 0,
         initialize: function() {
             var self = this;
-            app.user.on("change", function(model) {
+            app.session.on("change", function(model) {
                 self.render();
             });
         },
         render: function() {
             app.map.group.clearLayers();
             var marker = app.map.add_marker(this.model.get("location_point").coordinates)
-            if (this.model.get("author") == app.user.get("username")) {
+            if (this.model.get("author") == app.session.get("username")) {
                 this.edit = true;
             } else {
                 this.edit = false;
