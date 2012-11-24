@@ -172,6 +172,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             }
         },
         eventItemOpen: function(id) {
+            var self = this;
             if(!$("#event_" + id).hasClass("open")){
                 var model = self.model.get(id);
                 $("#event_" + id).addClass("open");
