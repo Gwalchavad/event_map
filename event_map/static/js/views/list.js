@@ -11,6 +11,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         className: "span4",
         id: "",
         height: 40,
+        openHeight: 38,
         markers: [],
         position: {
             left: 0,
@@ -174,16 +175,16 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             if(!$("#event_" + id).hasClass("open")){
                 var model = self.model.get(id);
                 $("#event_" + id).addClass("open");
-                $("#event_" + id).height(self.height + 26);
+                $("#event_" + id).height(self.height + self.openHeight);
                 $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
                 //set month
                 var month = model.get("start_date").getMonth();
                 var height = $("#month_" + month).height();
-                $("#month_" + month).height(height + 26);
+                $("#month_" + month).height(height + self.openHeight);
                 //set day height
                 var day = model.get("start_date").getDate();
                 height = $("#day_" + day + "_" + month).height();
-                $("#day_" + day + "_" + month).height(height + 26);
+                $("#day_" + day + "_" + month).height(height +  self.openHeight);
 
                 self.markers[id].setZIndexOffset(100);
             }
@@ -204,10 +205,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //set day height
             var day = model.get("start_date").getDate();
             var height = $("#day_" + day + "_" + month).height();
-            $("#day_" + day + "_" + month).height(height - 26);
+            $("#day_" + day + "_" + month).height(height -  self.openHeight);
             //set month
             height = $("#month_" + month).height();
-            $("#month_" + month).height(height - 26);
+            $("#month_" + month).height(height -  self.openHeight);
             var color = $("#event_" + id).css("background-color");
             $("#event_" + id).replaceWith(
             temp_item_closed({
