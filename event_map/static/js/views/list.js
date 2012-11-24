@@ -269,7 +269,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 }
             }
             //if no events assume we are rerending
-            if (!eventModels) {
+            if (!eventModels || $("#NoEvent").length) {
                 //if there are no events in the list
                 if (this.model.length == 0) {
                     var html = temp_event_list_empty();
@@ -289,17 +289,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     self.$el.html(html);
                 }
             } else {
-                //if there was pervously no events
-                if($("#NoEvent").length){
-                    var html = temp_event_list({
-                            months: null,
-                            days: null,
-                            events: null,
-                            height: null
-                        });
-                    self.$el.html(html);
-                }
-
                 if (prepend) {
                     var oldLastDate = self.render_var.pre_current_date.date;
                     self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");
