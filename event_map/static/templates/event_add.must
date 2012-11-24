@@ -17,14 +17,19 @@
 			</div>
 			<div class="row-fluid">
 				<div class="span5">
-					<label for="id_organization">Organization &nbsp;<span id="organization_error" class="label label-important hide"></span></label>
-					<input id="id_organization" type="text" name="organization" maxlength="255" value="{{organization}}">
-					<span class="help-block">organization or group name</span>
-				</div>
-				<div class="span5">
 					<label for="id_link">Link &nbsp;<span id="link_error" class="label label-important hide"></span></label>
 					<input id="id_link" type="text" name="link" maxlength="255" value="{{link}}">
-					<span class="help-block">a link to other infomation on the event</span>
+					<span class="help-block">a link to other infomation on the event</span>				
+				</div>
+				<div class="span5">
+                    <label for="id_location" class="required">Location &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
+					<div class="form-inline">
+						<input id="id_street" class="input-medium" type="text" placeholder="Steet" name="location" maxlength="255" value="{{location}}">					
+						<div class="input-append">
+							<input class="input-mini" id="id_city" type="text" value="{{settings.city}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
+						</div>
+					</div>
+					<span class="help-block">The address of the event and the name of the venue</span>
 				</div>
 			</div>
 			<div class="row-fluid">
@@ -34,15 +39,8 @@
 					<span class="help-block">Public Contact info. Perhaps a email or phone number</span>
 				</div>
 				<div class="span5 ">
-					<label for="id_location" class="required">Location &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
-					<div class="form-inline">
-						<input id="id_street" class="input-medium" type="text" placeholder="Steet" name="location" maxlength="255" value="{{location}}">					
-						<div class="input-append">
-							<input class="input-mini" id="id_city" type="text" value="{{settings.city}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
-						</div>
-					</div></br>	
-					<input id="id_venue" placeholder="venue e.g. 'mom's house'"  type="text" name="venue" maxlength="255" value="{{venue}}">
-					<span class="help-block">The address of the event and the name of the venue</span>
+                    <label for="id_venue" class="required">Venue &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
+                    <input id="id_venue" placeholder="venue e.g. 'mom's house'"  type="text" name="venue" maxlength="255" value="{{venue}}">
 				</div>
 			</div>
 			<label for="id_content">Content &nbsp;<span id="content_error" class="label label-important hide"></span></label>

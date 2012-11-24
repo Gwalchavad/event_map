@@ -173,3 +173,22 @@ try:
    from settings_local import *
 except ImportError, e:
    pass
+
+#
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+#        'NAME': 'event_map',                      # Or path to database file if using sqlite3.
+#        'USER': '',                      # Not used with sqlite3.
+#        'PASSWORD': '',                  # Not used with sqlite3.
+#        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+#    }
+#}
+#STATICFILES_DIRS = (
+#    "/home/name/event_map/lib/python2.7/site-packages/django/contrib/admin/static/admin",
+#)
+#STATIC_ROOT = "/home/name/event_map/event_map/event_map/static"
+#
+#./manage.py collectstatic
+

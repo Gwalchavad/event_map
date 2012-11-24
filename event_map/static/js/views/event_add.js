@@ -3,10 +3,11 @@ define([
     'underscore',
     'backbone',
     'utils',
+    'settings',
     'hbs!../../templates/event_add',
     'timeDatePicker',
   // Load our app module and pass it to our definition function
-], function($,_,Backbone,Utils,temp_event_add){
+], function($,_,Backbone,Utils,settings,temp_event_add){
 
     var EventAddView = Backbone.View.extend({
         tagname: "div",
@@ -27,7 +28,7 @@ define([
         render: function() {
             app.map.group.clearLayers();
             var context = _.extend({
-                "settings": document.Settings
+                "settings": settings
             }, this.model.toJSON());
             this.$el.append(temp_event_add(context));
 
