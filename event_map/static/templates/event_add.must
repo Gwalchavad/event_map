@@ -39,11 +39,11 @@
 					<span class="help-block">Public Contact info. Perhaps a email or phone number</span>
 				</div>
 				<div class="span5 ">
-                    <label for="id_venue" class="required">Venue &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
+                    <label for="id_venue">Venue &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
                     <input id="id_venue" placeholder="venue e.g. 'mom's house'"  type="text" name="venue" maxlength="255" value="{{venue}}">
 				</div>
 			</div>
-			<label for="id_content">Content &nbsp;<span id="content_error" class="label label-important hide"></span></label>
+			<label for="id_content" class="required">Content &nbsp;<span id="content_error" class="label label-important hide"></span></label>
 			<textarea id="id_content" class="span9" rows=10 name="content">{{content}}</textarea>
 			<span class="help-block">The contents of the article in <a id="markdown" >Markdown</a>.</span>
 

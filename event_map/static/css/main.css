@@ -4,6 +4,7 @@ html{
 body{
     height: 100%;              
 }
+label.required:after { content: " (required)"; }
 .top{
     height:60px
 }
@@ -43,7 +44,7 @@ body{
     top: 6px;
     left: 3px;
     white-space: nowrap;
-    width: 100%
+    width: 99%
 }
 .list_item_content{
     background: rgba(255, 255, 2555, 0.89);
