@@ -402,10 +402,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //the range of colors (Hue) to use
             var colorRange = 240;
             //find the top elemetns
-            var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top + 20);
+            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#event_list").position().top + 20);
             //have we moved enought to change colors?
-            if (regenrate || 
-                 ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl))) {
+            if (regenrate || self.topVisbleEl != topVisbleEl) {
                 self.topVisbleEl = topVisbleEl;
                 var topModelId = topVisbleEl.id.replace(/event_/, "");
                 var top_start_date = self.model.get(topModelId).get("start_date");
@@ -415,7 +414,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 var bottomPos = self.isListFull() ? $("#EventsListView").height() : $("#event_list").height();
                 //add tolerance
                 bottomPos = bottomPos - 11;
-                var bottomVisbleEl = document.elementFromPoint(self.position.left, self.position.top + bottomPos);
+                var bottomVisbleEl = document.elementFromPoint($("#event_list").position().left, $("#event_list").position().top + bottomPos);
 
                 var topIndex = $("#event_list").children().index(topVisbleEl);
                 var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
