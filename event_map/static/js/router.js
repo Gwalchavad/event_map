@@ -113,7 +113,7 @@ define([
         },
         eventDetails: function(id,fevent,context){
             var self = context ? context : this; 
-            this.showView(new LoadingView());
+            self.showView(new LoadingView());
             var event = fevent ? fevent : self.eventList.get(id);
             //check to see if we already have the event and if not fetch it
             if (!event) {
