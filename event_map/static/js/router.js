@@ -129,8 +129,8 @@ define([
             });
         },
         eventAdd: function(id,fevent,context){
-            this.showView(new LoadingView());
-            var self = context ? context : this; 
+            var self = context ? context : this;
+            self.showView(new LoadingView()); 
             //edit an evet
             if (id) {
                 //look up the event and fetch if it is not in the collection
