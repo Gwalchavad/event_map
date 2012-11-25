@@ -41,6 +41,7 @@ define([
             this.eventList.reset(init_events);
         },
         list: function(date){
+            this.showView(new LoadingView());
             var self= this;
             require(['views/list','views/list_info'],function(list,ListInfoView){
                     //create a event list
@@ -55,6 +56,7 @@ define([
             );
         },
         viewUser:function(user){
+            this.showView(new LoadingView());
             var self = this;
             var fuser = user;
             require(['views/list','views/list_info'],function(list,ListInfoView){
@@ -75,6 +77,7 @@ define([
             });             
         },
         viewGroup:function(id){
+            this.showView(new LoadingView());
             var self = this;
 
             require(['views/list','models/groups','views/groups'],function(ListView,Group,GroupView){
@@ -98,6 +101,7 @@ define([
             });  
         },
         addGroup:function(){
+            this.showView(new LoadingView());
             var self = this;
             require(['models/groups','views/group_add'],function(Group,AddGroupView){
                 var group = new Group();
@@ -108,6 +112,7 @@ define([
             });
         },
         eventDetails: function(id,fevent,context){
+            this.showView(new LoadingView());
             var self = context ? context : this; 
             var event = fevent ? fevent : self.eventList.get(id);
             //check to see if we already have the event and if not fetch it
@@ -124,6 +129,7 @@ define([
             });
         },
         eventAdd: function(id,fevent,context){
+            this.showView(new LoadingView());
             var self = context ? context : this; 
             //edit an evet
             if (id) {
