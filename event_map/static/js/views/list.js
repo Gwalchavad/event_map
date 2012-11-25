@@ -13,10 +13,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         height: 40,
         openHeight: 38,
         markers: [],
-        position: {
-            left: 0,
-            top: 0
-        },
         //anything before Wed Dec 31 1969 19:00:00 GMT-0500 (EST) will fuck up the system
         //book keeping to render varibles
         render_var: {
@@ -54,7 +50,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             this.eventItemOpen( e.target.options.modelID);
             //if the target event is not currently viewble in the list, then scroll to it
             if (!$(e.target._icon.children).hasClass("viewing")) {
-                //$("#event_53").position().top()
                 this.scrollTo(e.target.options.modelID);
             }
         },
@@ -220,8 +215,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         onResize: function(e) {
             var self = e ? e.data : this;
             if ($("#event_list").length != 0) {
-                self.position.left = $("#event_list").position().left;
-                self.position.top = $("#EventsListView").position().top;
                 self.genarateColorsAndMonths(true);
             }
 
@@ -475,7 +468,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
          */
         setMonthSideBarPosition: function() {
             var self = this;
-            var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top);
+            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#event_list").position().top);
             var topModelId = topVisbleEl.id.replace(/event_/, "");
             var top_start_date = self.model.get(topModelId).get("start_date");
             var topMonthId = top_start_date.getMonth();
