@@ -31,8 +31,10 @@ define([
                 "settings": settings
             }, this.model.toJSON());
             //untill i figure out how to accesses arrey indexes in handlebars
-            context.location_point.lat = context.location_point.coordinates[1];
-            context.location_point.lng = context.location_point.coordinates[0];
+            if(context.location_point){
+                context.location_point.lat = context.location_point.coordinates[1];
+                context.location_point.lng = context.location_point.coordinates[0];
+            }
             this.$el.html(temp_event_add(context));
             
 

@@ -22,7 +22,6 @@
                             <label class="checkbox inline">
                                 <input type="checkbox"> Remember me
                             </label>
-                            <input type="hidden" name="authenticated" value="login">
                         </div>
                     </div>
                 </form>
