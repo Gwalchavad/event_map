@@ -404,7 +404,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //find the top elemetns
             var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top + 20);
             //have we moved enought to change colors?
-            if ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl || regenrate)) {
+            if (regenrate || 
+                 ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl))) {
                 self.topVisbleEl = topVisbleEl;
                 var topModelId = topVisbleEl.id.replace(/event_/, "");
                 var top_start_date = self.model.get(topModelId).get("start_date");
