@@ -392,9 +392,16 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             renderEl(this);
             return this;
         },
+        /*
+         * Generate the Colors for the events in the list
+         * And the Colors for the Icons
+         * And Generate the the Date Display at the top of the list
+         */
         genarateColorsAndMonths: function(regenrate) {
             var self = this;
+            //the range of colors (Hue) to use
             var colorRange = 240;
+            //find the top elemetns
             var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top + 20);
             //have we moved enought to change colors?
             if ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl || regenrate)) {
@@ -412,10 +419,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 var topIndex = $("#event_list").children().index(topVisbleEl);
                 var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
 
-
                 //set the color to white for all over elements
                 $(".event_item").css("background-color", "white");
-                //set up event icons
+                //set up event icons. Clears the prevouse colour 
                 $(".viewed").removeClass("viewing");
                 $(".viewed").each(function(index, el) {
                     var id = el.id.replace(/icon-/, "");
@@ -435,6 +441,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     var id = $(".event_item")[i + topIndex].id.replace(/event_/, "");
                     var H = (i / numberOfEl) * colorRange;
                     $("#event_" + id).css("background-color", "hsl(" + H + ",100%, 50%)");
+                    //add colors to icons
                     if (!$("#icon-" + id).hasClass("viewed")) {
                         $("#icon-" + id).html($('#svg svg').clone());
                     }
@@ -448,6 +455,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             $(".selected_day").removeClass("selected_day");
             $("#day_" + day).addClass("selected_day");
         },
+        
+        /*
+         *Set the Month Letter, Day Number and Year at the top of the list
+         */
         setMonthDay: function(date) {
             var self = this;
             //set month on side bar
@@ -458,6 +469,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             $("#topYear").text(date.getFullYear());
 
         },
+        /*
+         * Positions the Month vertical on the side of the list as the 
+         * user scolls
+         */
         setMonthSideBarPosition: function() {
             var self = this;
             var topVisbleEl = document.elementFromPoint(self.position.left + .5, self.position.top);
