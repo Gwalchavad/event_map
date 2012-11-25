@@ -30,8 +30,13 @@ define([
             var context = _.extend({
                 "settings": settings
             }, this.model.toJSON());
-            this.$el.append(temp_event_add(context));
+            //untill i figure out how to accesses arrey indexes in handlebars
+            context.location_point.lat = context.location_point.coordinates[1];
+            context.location_point.lng = context.location_point.coordinates[0];
+            this.$el.html(temp_event_add(context));
+            
 
+            
             var marker = app.map.add_marker(this.model.get("location_point").coordinates,true);
             marker.on('dragend', function(e) {
                 $('#id_lat').val(e.target._latlng.lat);

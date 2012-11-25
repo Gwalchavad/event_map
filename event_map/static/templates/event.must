@@ -18,10 +18,13 @@
 			WHERE:{{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}
 			<br>
 			<a href="#/user/{{author}}">BY:{{author}}</a>
+          
 			</h3>
 		</div>
 	</div>
 </div>
 <div>
-{{content}}
+{{#nl2br content}}
+   
+{{/nl2br}}
 </div>

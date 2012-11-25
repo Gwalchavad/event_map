@@ -1,8 +1,9 @@
 define([
+    'utils',
     'backbone',
     'hbs!../../templates/event',
   // Load our app module and pass it to our definition function
-], function(Backbone,temp_event){
+], function(Utils,Backbone,temp_event){
     var EventView = Backbone.View.extend({
         tagName: "div",
         className: "replace span7 overflow setheight",

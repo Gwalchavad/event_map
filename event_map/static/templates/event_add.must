@@ -44,7 +44,7 @@
 				</div>
 			</div>
 			<label for="id_content" class="required">Content &nbsp;<span id="content_error" class="label label-important hide"></span></label>
-			<textarea id="id_content" class="span9" rows=10 name="content">{{content}}</textarea>
+			<textarea id="id_content" class="span9" rows=10  wrap="hard" name="content">{{content}}</textarea>
 			<span class="help-block">The contents of the article in <a id="markdown" >Markdown</a>.</span>
 
 			<div class="controlls" class="form-actions">
@@ -56,8 +56,7 @@
 				{{/if}}
 				<button class="btn cancel">Cancel</button>
 			</div>
-			
-			<input type="hidden" name="lat" id="id_lat">
-			<input type="hidden" name="lng" id="id_lng"> 
+			<input type="hidden" name="lat" id="id_lat" value="{{ location_point.lat }}">
+			<input type="hidden" name="lng" id="id_lng" value="{{location_point.lng }}"> 
 	</fieldset>
 </form>
