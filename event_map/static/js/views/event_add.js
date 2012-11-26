@@ -99,8 +99,13 @@ define([
             e.preventDefault();
             //hide error messages
             $(".label").hide();
-            if(this.model.set(Utils.form2object("#event_add_form"))){
-                promise = this.model.save();
+            json = Utils.form2object("#event_add_form");
+            if(json.start_date)
+                json.start_date = json.start_date.replace(" ","T");
+            if(json.end_date)
+                json.end_date = json.start_date.replace(" ","T");
+            if(this.model.set()){
+                promise = this.model.save(json);
                 if (promise) {
                     promise.error(function(response) {
                         throw new Error("Server Error:" + response);

@@ -77,8 +77,8 @@ define([
     }
     //common time
     Date.prototype.getTimeCom = function(){
-        var hours = this.getHours()
-        var minutes = this.getMinutes()
+        var hours = this.getUTCHours()
+        var minutes = this.getUTCMinutes()
         if (minutes < 10){
             minutes = "0" + minutes
         }
@@ -100,7 +100,7 @@ define([
         weekday[4]="Thu";
         weekday[5]="Fri";
         weekday[6]="Sat";
-        return weekday[this.getDay()];    
+        return weekday[this.getUTCDay()];    
     };
     Date.prototype.month2letter = function(num) {
         var number = num?num:this.getMonth()
@@ -108,10 +108,10 @@ define([
         return m_names[number];
     };
     Date.prototype.getDateWithSlash = function(){
-        return  this.getMonth()+"/"+this.getDate()+"/"+this.getFullYear();
+        return  this.getUTCMonth()+"/"+this.getUTCDate()+"/"+this.getUTCFullYear();
     }
     Date.prototype.getDateShort = function(){
-        return  this.getMonth()+"/"+this.getDate();
+        return  this.getUTCMonth()+"/"+this.getUTCDate();
     }   
     return {
         form2object:form2object,

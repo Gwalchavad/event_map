@@ -19,7 +19,7 @@
 				<div class="span5">
 					<label for="id_link">Link &nbsp;<span id="link_error" class="label label-important hide"></span></label>
 					<input id="id_link" type="text" name="link" maxlength="255" value="{{link}}">
-					<span class="help-block">a link to other infomation on the event</span>				
+					<span class="help-block">a link to other infomation on the event</span>
 				</div>
 				<div class="span5">
                     <label for="id_location" class="required">Location &nbsp;<span id="location_error" class="label label-important hide"></span></label> 

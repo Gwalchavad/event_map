@@ -247,7 +247,6 @@ class Event(View):
         """
         Get An Events Details given its ID
         """
-        
         event = db.Event.objects.get(id=kwargs['id'])
         response = {
             "id": event.id,

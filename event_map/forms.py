@@ -18,14 +18,14 @@ class EventForm(forms.ModelForm):
              
     def clean_start_date(self):
         try:
-            start_date = dateutil.parser.parse(self.data.get('start_date'))
+            start_date = datetime.strptime(self.data.get('start_date'), '%Y-%m-%dT%H:%M:%S.%fZ')
         except ValueError:
             raise forms.ValidationError("Invalid ISO date for start_date")
         return start_date
      
     def clean_end_date(self):
         try:
-            end_date = dateutil.parser.parse(self.data.get('end_date'))
+            end_date = datetime.strptime(self.data.get('end_date'), '%Y-%m-%dT%H:%M:%S.%fZ')
         except ValueError:
             raise forms.ValidationError("Invalid ISO date for end_date")
         return end_date           
