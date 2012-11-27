@@ -42,9 +42,15 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             this.model.forEach(function(model, key) {
                 self.onAdd(model);
             });
+            //fecth events that might have been added since the last time we viewed this list
+			self.model.update(function(events){
+                if(events.length)
+                    self.render()
+            });
             app.map.map.on("popupclose", this.onPopupClose);
             app.map.map.on("popupopen", this.onPopupOpen);
             app.map.map.on('locationfound', this.onLocationFound,this);
+           
     
         },
         onMarkerClick: function(e) {
@@ -240,11 +246,17 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             this.forwardFetch();
             $("#EventsListView").on("scroll." + this.cid, self, self.onScroll);
         },
-        render: function(eventModels, prepend) {
+        /*
+         * Renders a Given list of events
+         * If No events are given it will rerender all of the events in the collection
+         * If prepend is true it will perpends the events, else it will append them
+         * It assumes that all events are in order
+         */ 
+        render: function(eventModels, prepend){
             var self = this;
             var adjustHeightOnMonthDays = function(oldEdgeDate, newEdgeDate) {
                 //check to see if the month il is already rendered
-                if (oldEdgeDate.getFullYear() == newEdgeDate.getFullYear() && oldEdgeDate.getMonth() == newEdgeDate.getMonth()) {
+                if (oldEdgeDate.getUTCFullYear() == newEdgeDate.getUTCFullYear() && oldEdgeDate.getUTCMonth() == newEdgeDate.getUTCMonth()) {
                     if (prepend) {
                         var firstMonth = months.pop();
                     } else {
@@ -254,9 +266,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     var newHeight = $("#month_" + firstMonth.month).height() + firstMonth.height;
                     $("#month_" + firstMonth.month).height(newHeight);
                     var monthText = self.month2FullNameOrLetter(firstMonth.month, newHeight);
-                    $("#month_" + firstMonth.month).children().text(monthText[0]);
+                    $("#month_" + firstMonth.month).children().text(monthText);
                     //check day
-                    if (oldEdgeDate.getDate() == newEdgeDate.getDate()) {
+                    if (oldEdgeDate.getUTCDate() == newEdgeDate.getUTCDate()) {
                         if (prepend) {
                             var firstDay = days.pop();
                         } else {
@@ -267,7 +279,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     }
                 }
             }
-            //if no events assume we are rerending
+            //if no events assume we are rerending Or we are started with no events
             if (!eventModels || $("#NoEvent").length) {
                 //if there are no events in the list
                 if (this.model.length == 0) {
@@ -339,7 +351,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 event.computeCloseValues();
                 event.computeOpenValues();
                 //check year and month
-                if (event.get("start_date").getFullYear() != current_date.getFullYear() || event.get("start_date").getMonth() != current_date.getMonth()) {
+                if (event.get("start_date").getUTCFullYear() != current_date.getUTCFullYear() || event.get("start_date").getUTCMonth() != current_date.getUTCMonth()) {
                     current_date = event.get("start_date");
                     //check to see if there is a first el
                     if (days.length > 0) {
@@ -348,29 +360,28 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                             monthHeight = month_counter * self.height;
                             var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month, monthHeight);
                             months[months.length - 1].height = monthHeight;
-                            months[months.length - 1].letter = monthArray[0];
-                            months[months.length - 1].vertical = monthArray[1];
-                            months[months.length - 1].margin = monthArray[2];
+                            months[months.length - 1].letter = monthArray;
                         }
                     }
                     months.push({
-                        month: current_date.getMonth(),
+                        month: current_date.getUTCMonth(),
                     });
                     days.push({
-                        day: current_date.getDate(),
-                        month: current_date.getMonth(),
+                        day: current_date.getUTCDate(),
+                        month: current_date.getUTCMonth(),
                     });
                     month_counter = 0;
                     day_counter = 0;
-                } else if (event.get("start_date").getDate() != current_date.getDate()) {
+                } else if (event.get("start_date").getUTCDate() != current_date.getUTCDate()) {
+                    //checks to see if days are different
                     //genreates the days ul
                     current_date = event.get("start_date");
                     if (days.length > 0) {
                         days[days.length - 1].height = day_counter * self.height;
                     }
                     days.push({
-                        day: current_date.getDate(),
-                        month: current_date.getMonth(),
+                        day: current_date.getUTCDate(),
+                        month: current_date.getUTCMonth(),
                     });
                     day_counter = 0;
                 }
@@ -379,16 +390,15 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 month_counter++;
             }, this);
             //set final heights
-            if (days.length > 0) days[days.length - 1].height = day_counter * self.height;
+            if (days.length > 0) 
+                days[days.length - 1].height = day_counter * self.height;
             if (months.length > 0) {
                 monthHeight = month_counter * self.height;
                 var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month, monthHeight);
                 months[months.length - 1].height = monthHeight;
-                months[months.length - 1].letter = monthArray[0];
-                months[months.length - 1].vertical = monthArray[1];
-                months[months.length - 1].margin = monthArray[2];
+                months[months.length - 1].letter = monthArray;
             }
-            renderEl(this);
+            renderEl();
             return this;
         },
         /*
@@ -509,13 +519,13 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             var self = this;
             var number0fChar = elHeight / 10;
             if (number0fChar < 10) {
-                return [Date.prototype.month2letter(monthNum)];
+                return Date.prototype.month2letter(monthNum);
             } else {
                 var m_names = new Array(["January", 7], ["Febuary", 7], ["March", 5], ["April", 5], ["May", 3], ["June", 4], ["July", 4], ["August", 6], ["September", 9], ["October", 7], ["November", 8], ["December", 8]);
                 month = m_names[monthNum];
 
                 //month[0] = month[0].slice(0,number0fChar);
-                return [month[0], true];
+                return month[0];
             }
         }
     });

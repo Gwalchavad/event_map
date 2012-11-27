@@ -106,18 +106,16 @@ define([
                 json.start_date = json.start_date.replace(" ","T");
             if(json.end_date)
                 json.end_date = json.start_date.replace(" ","T");
-            if(this.model.set()){
-                promise = this.model.save(json);
-                if (promise) {
-                    promise.error(function(response) {
-                        throw new Error("Server Error:" + response);
+            if(promise = this.model.save(json)){
+                promise.error(function(response) {
+                    throw new Error("Server Error:" + response);
+                });
+                promise.success(function(response) {
+                    app.navigate('event/' + self.model.id, {
+                        trigger: true
                     });
-                    promise.success(function(response) {
-                        app.navigate('event/' + self.model.id, {
-                            trigger: true
-                        });
-                    });
-                }
+                });
+             
             }
         },
         cancel: function(e) {

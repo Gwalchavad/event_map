@@ -103,12 +103,12 @@ define([
         return weekday[this.getUTCDay()];    
     };
     Date.prototype.month2letter = function(num) {
-        var number = num?num:this.getMonth()
+		var number = (typeof(num) != "undefined")?num:this.getMonth()
         var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
         return m_names[number];
     };
     Date.prototype.getDateWithSlash = function(){
-        return  this.getUTCMonth()+"/"+this.getUTCDate()+"/"+this.getUTCFullYear();
+        return  this.getUTCMonth()+1+"/"+this.getUTCDate()+"/"+this.getUTCFullYear();
     }
     Date.prototype.getDateShort = function(){
         return  this.getUTCMonth()+"/"+this.getUTCDate();

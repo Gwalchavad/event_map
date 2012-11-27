@@ -99,7 +99,7 @@ define([
         initialize: function (models,options) {
             this._attributes = {};
             this.lock = false;
-            this._attributes.modified = Date();
+            this._attributes.modified = new Date();
             $.extend(true,this._attributes,this.defaults);
             if(models && models.length != 0){
                 //this assumes that incoming initail models are in order
@@ -126,19 +126,25 @@ define([
             }
         },
         update:function(callback){
+			var self = this;
             data = {
-                offest:pastEvents.offset,
-                n:Math.abs(pastEvents.offset) + futureEvents.offset,
-                modified: this._attributes.modified
+                offest:this._attributes.pastEvents.updateOffset,
+                n:Math.abs(this._attributes.pastEvents.updateOffset) + this._attributes.futureEvents.updateOffset,
+                modified: this._attributes.modified.toJSON()
             };
             
             this.fetch({
                 data:data,
                 add: true,
-                success:function(){
-                    if(callback)    
-                        callback();
-                    this._attributes.modified =  Date();                   
+                success:function(evt, request){
+                    if(callback){ 
+                        events=request.map(function(event){
+                            event = new Event(event);
+                            return event;
+                        });  
+                        callback(events);
+                    }
+                    self._attributes.modified = new Date();                   
                 }
             });
         },
@@ -153,7 +159,6 @@ define([
             this._fetch(options);
         },
         _fetch:function(options){
-            this._attributes.modified =  Date();
             var options = options ? _.clone(options) : {};
             var self = this;
             if(typeof options.forward === "undefined" || options.forward){
