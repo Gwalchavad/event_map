@@ -45,6 +45,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             app.map.map.on("popupclose", this.onPopupClose);
             app.map.map.on("popupopen", this.onPopupOpen);
             app.map.map.on('locationfound', this.onLocationFound,this);
+    
         },
         onMarkerClick: function(e) {
             this.eventItemOpen( e.target.options.modelID);
@@ -103,6 +104,11 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             var location_point = model.get("location_point");
             model.set("coordx",location_point.coordinates[0]);
             model.set("coordy",location_point.coordinates[1]);
+            if(app.map.currentPos){
+                model.set("scoordx",app.map.currentPos.lng);
+                model.set("scoordy",app.map.currentPos.lat);
+            }
+                
             //set map icons       
             var myIcon = L.divIcon({
                 className: "icon",
@@ -395,7 +401,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //the range of colors (Hue) to use
             var colorRange = 240;
             //find the top elemetns
-            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#event_list").position().top + 20);
+            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top+ 20);
             //have we moved enought to change colors?
             if ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl || regenrate)) {
                 self.topVisbleEl = topVisbleEl;
@@ -407,7 +413,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 var bottomPos = self.isListFull() ? $("#EventsListView").height() : $("#event_list").height();
                 //add tolerance
                 bottomPos = bottomPos - 11;
-                var bottomVisbleEl = document.elementFromPoint($("#event_list").position().left, $("#event_list").position().top + bottomPos);
+                var bottomVisbleEl = document.elementFromPoint($("#event_list").position().left, $("#EventsListView").position().top + bottomPos);
 
                 var topIndex = $("#event_list").children().index(topVisbleEl);
                 var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
@@ -468,7 +474,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
          */
         setMonthSideBarPosition: function() {
             var self = this;
-            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#event_list").position().top);
+            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top);
             var topModelId = topVisbleEl.id.replace(/event_/, "");
             var top_start_date = self.model.get(topModelId).get("start_date");
             var topMonthId = top_start_date.getMonth();

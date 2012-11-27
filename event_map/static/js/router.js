@@ -77,8 +77,8 @@ define([
             });             
         },
         viewGroup:function(id){
-            this.showView(new LoadingView());
-            var self = this;
+			var self = this;
+            self.showView(new LoadingView());
 
             require(['views/list','models/groups','views/groups'],function(ListView,Group,GroupView){
                 var group = new Group({id:id});

@@ -35,10 +35,12 @@ define([
                 context.location_point.lat = context.location_point.coordinates[1];
                 context.location_point.lng = context.location_point.coordinates[0];
             }
+            if(context.start_date)
+                context.start_date = context.start_date.toISOString().replace("T"," ").substring(0,16);
+            if(context.end_date)
+                context.end_date = context.end_date.toISOString().replace("T"," ").substring(0,16);
+                     
             this.$el.html(temp_event_add(context));
-            
-
-            
             var marker = app.map.add_marker(this.model.get("location_point").coordinates,true);
             marker.on('dragend', function(e) {
                 $('#id_lat').val(e.target._latlng.lat);
