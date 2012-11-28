@@ -1,3 +1,3 @@
 {{#each days}}
-    <li id="day_{{day}}_{{month}}" style="height:{{height}}px">{{day}}</li>
+    <li id="day_{{day}}_{{month}}_{{year}}" style="height:{{height}}px">{{day}}</li>
 {{/each}}

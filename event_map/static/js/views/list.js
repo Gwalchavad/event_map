@@ -43,7 +43,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 self.onAdd(model);
             });
             //fecth events that might have been added since the last time we viewed this list
-			self.model.update(function(events){
+            self.model.update(function(events){
                 if(events.length)
                     self.render()
             });
@@ -186,19 +186,20 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 $("#event_" + id).height(self.height + self.openHeight);
                 $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
                 //set month
-                var month = model.get("start_date").getMonth();
-                var height = $("#month_" + month).height();
-                $("#month_" + month).height(height + self.openHeight);
+                var day = model.get("start_date").getUTCDate();
+                var month = model.get("start_date").getUTCMonth();
+                var year = model.get("start_date").getUTCFullYear();
+                var height = $("#month_" + month+"_"+year).height();
+                $("#month_" + month + "_" + year).height(height + self.openHeight);
                 //set day height
-                var day = model.get("start_date").getDate();
-                height = $("#day_" + day + "_" + month).height();
-                $("#day_" + day + "_" + month).height(height +  self.openHeight);
+
+                height = $("#day_" + day + "_" + month+"_"+year).height();
+                $("#day_" + day + "_" + month+"_"+year).height(height +  self.openHeight);
 
                 self.markers[id].setZIndexOffset(100);
             }
         },
         eventItemClose: function(id) {
-            var self = this;
             //close the event icon
             $("#icon-" + id).find(".circleMarker").hide();
             $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
@@ -208,21 +209,23 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             $("#event_" + id).height(self.height);
             //get model of item thata was clicked 
             var model = self.model.get(id);
-
-            var month = model.get("start_date").getMonth();
+            var day = model.get("start_date").getUTCDate();
+            var month = model.get("start_date").getUTCMonth();
+            var year = model.get("start_date").getUTCFullYear();
             //set day height
-            var day = model.get("start_date").getDate();
-            var height = $("#day_" + day + "_" + month).height();
-            $("#day_" + day + "_" + month).height(height -  self.openHeight);
+
+            var height = $("#day_" + day + "_" + month + "_" + year).height();
+            $("#day_" + day + "_" + month+"_"+year).height(height -  self.openHeight);
             //set month
-            height = $("#month_" + month).height();
-            $("#month_" + month).height(height -  self.openHeight);
+            height = $("#month_" + month+"_"+year).height();
+            $("#month_" + month+"_"+year).height(height -  self.openHeight);
             var color = $("#event_" + id).css("background-color");
             $("#event_" + id).replaceWith(
             temp_item_closed({
                 events: [model.toJSON()]
             }));
             $("#event_" + id).css("background-color", color);
+            this.setMonthSideBarPosition()
         },
         onResize: function(e) {
             var self = e ? e.data : this;
@@ -365,10 +368,12 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     }
                     months.push({
                         month: current_date.getUTCMonth(),
+                        year: current_date.getUTCFullYear()
                     });
                     days.push({
                         day: current_date.getUTCDate(),
                         month: current_date.getUTCMonth(),
+                        year: current_date.getUTCFullYear()
                     });
                     month_counter = 0;
                     day_counter = 0;
@@ -382,6 +387,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     days.push({
                         day: current_date.getUTCDate(),
                         month: current_date.getUTCMonth(),
+                        year: current_date.getUTCFullYear()
                     });
                     day_counter = 0;
                 }
@@ -394,9 +400,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 days[days.length - 1].height = day_counter * self.height;
             if (months.length > 0) {
                 monthHeight = month_counter * self.height;
-                var monthArray = self.month2FullNameOrLetter(months[months.length - 1].month, monthHeight);
+                var month_letter = self.month2FullNameOrLetter(months[months.length - 1].month, monthHeight);
                 months[months.length - 1].height = monthHeight;
-                months[months.length - 1].letter = monthArray;
+                months[months.length - 1].letter = month_letter;
             }
             renderEl();
             return this;
@@ -483,25 +489,33 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
          * user scolls
          */
         setMonthSideBarPosition: function() {
-            var self = this;
+			var tolarance = 20;
             var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top);
             var topModelId = topVisbleEl.id.replace(/event_/, "");
             var top_start_date = self.model.get(topModelId).get("start_date");
-            var topMonthId = top_start_date.getMonth();
+            var topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear();
 
-            var halfHeight = $("#EventsListView").position().top + $("#EventsListView").height() / 2
+            var halfHeight = $("#EventsListView").position().top + $("#EventsListView").height() / 2;
             var topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height();
             var topElwidth = $("#month_" + topMonthId).children().width();
             var bottomElwidth = $("#month_" + topMonthId).next().children().width();
-            var tolarance = 20;
-            //set the top month tobe fixed       
-            $(".monthFixed").removeClass("monthFixed");
+
+  
+            var current_top_month = $("#month_" + topMonthId).children();
+            if(!this.current_top_month || (this.current_top_month.selector != current_top_month.selector)){
+                $(".monthFixed").removeClass("monthFixed");
+                //this fixes an edge condition of collapsing the top event
+                if(this.current_top_month)
+                    this.current_top_month.css("top", 0);
+                this.current_top_month = current_top_month;
+            }
+            //set the top month tobe fixed  
             if (topElBottom > $("#EventsListView").position().top + topElwidth + tolarance) {
-                $("#month_" + topMonthId).children().addClass("monthFixed").removeClass("relative").css("top", $("#EventsListView").position().top);
+                current_top_month.addClass("monthFixed").removeClass("relative").css("top", $("#EventsListView").position().top);
             } else {
                 //set the top monthe to be at the bottom of the li
                 var parentHeight = $("#month_" + topMonthId).height();
-                $("#month_" + topMonthId).children().addClass("relative").removeClass("monthFixed").css("top", parentHeight - topElwidth - tolarance); //set to botto
+                current_top_month.addClass("relative").removeClass("monthFixed").css("top", parentHeight - topElwidth - tolarance); //set to botto
             }
         },
         scrollTo: function(id) {

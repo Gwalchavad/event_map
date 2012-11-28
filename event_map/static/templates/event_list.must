@@ -30,7 +30,7 @@
                 <div class="span5">
                     <ul  id="event_list_month">
                         {{#each months}}
-                            <li  id="month_{{month}}" style="height:{{height}}px">
+                            <li  id="month_{{month}}_{{year}}" style="height:{{height}}px">
                                 <div class="rot-neg-90 verticalMonth">{{letter}}</div>
                             </li>
                         {{/each}}
@@ -39,7 +39,7 @@
                 <div class="span5">
                     <ul  id="event_list_day">
                         {{#each days}}
-                            <li id="day_{{day}}_{{month}}" style="height:{{height}}px">{{day}}</li>
+                            <li id="day_{{day}}_{{month}}_{{year}}" style="height:{{height}}px">{{day}}</li>
                         {{/each}}
                     </ul>
                 </div>
