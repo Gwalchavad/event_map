@@ -269,10 +269,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                         var firstMonth = months.shift();
                     }
                     //update the last months height
-                    var newHeight = $("#month_" + firstMonth.month).height() + firstMonth.height;
-                    $("#month_" + firstMonth.month).height(newHeight);
+                    var newHeight = $("#month_" + firstMonth.month+"_"+firstMonth.year).height() + firstMonth.height;
+                    $("#month_" + firstMonth.month+"_"+firstMonth.year).height(newHeight);
                     var monthText = self.month2FullNameOrLetter(firstMonth.month, newHeight);
-                    $("#month_" + firstMonth.month).children().text(monthText);
+                    $("#month_" + firstMonth.month+"_"+firstMonth.year).children().text(monthText);
                     //check day
                     if (oldEdgeDate.getUTCDate() == newEdgeDate.getUTCDate()) {
                         if (prepend) {
