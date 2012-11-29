@@ -239,18 +239,18 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         },
         onClose: function() {
             $(window).off('resize.' + this.cid, this.onResize);
-            $("#EventsListView").off("scroll." + this.cid, self, self.onScroll).scroll();
+            $("#EventsListView").off("scroll." + this.cid, self, self.onScroll);
             app.map.off("popupclose", this.onPopupClose);
             app.map.off("popupopen", this.onPopupOpen);
         },
         onDOMadd: function() {
-            var self = this;
-            self.onResize();
+            this.onResize();
             //bind the scroll event
             //then trigger a scroll to load more events
             this.backFetch();
             this.forwardFetch();
             $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
+           // this.genarateColorsAndMonths(true);
         },
         /*
          * Renders a Given list of events

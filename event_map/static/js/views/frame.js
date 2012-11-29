@@ -12,7 +12,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
             "click #markdown": function() {
                 $('#markdown_help').modal();
             },
-            "click #loginButton": "login",
+            "click #loginButton": "onLogin",
             "click #logout": "logout",
             "hide #loginhtml": function() {
                 $('#loginError').hide();
@@ -69,7 +69,16 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
                 }
             });
         },
-        login: function(e) {
+        login: function(){
+            this.loginCallback = arguments.callee.caller;
+            this.logonmodel();
+            var hide = function () {
+                delete this.loginCallback;
+                history.back();
+            }
+            $('#loginhtml').one('hidden',hide);
+        },
+        onLogin: function(e) {
             self = this;
             e.preventDefault();
             promise = this.model.save(Utils.form2object("#loginForm"));
@@ -80,6 +89,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
                     $('#loginError').text(json.errors.message).show('fast');
                 });
                 promise.success(function(data) {
+                    if(self.loginCallback)
+                        self.loginCallback();
                     $('#loginhtml').modal('hide');
                 });
             }

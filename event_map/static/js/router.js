@@ -77,7 +77,7 @@ define([
             });             
         },
         viewGroup:function(id){
-			var self = this;
+            var self = this;
             self.showView(new LoadingView());
 
             require(['views/list','models/groups','views/groups'],function(ListView,Group,GroupView){
@@ -101,6 +101,8 @@ define([
             });  
         },
         addGroup:function(){
+            if(!app.user.is_authenticated())
+                return;
             this.showView(new LoadingView());
             var self = this;
             require(['models/groups','views/group_add'],function(Group,AddGroupView){
@@ -129,6 +131,10 @@ define([
             });
         },
         eventAdd: function(id,fevent,context){
+            if(!app.session.is_authenticated()){
+                app.appView.login();
+                return;
+            }
             var self = context ? context : this;
             self.showView(new LoadingView()); 
             //edit an evet

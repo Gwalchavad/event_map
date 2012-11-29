@@ -14,6 +14,9 @@ define([
             loggedin = false;
             username = "";
             this.save({silent: true});
+        },
+        is_authenticated: function(){
+            return this.attributes.authenticated; 
         }
     });
     

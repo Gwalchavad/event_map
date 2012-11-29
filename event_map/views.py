@@ -157,7 +157,7 @@ class EventTimeLine(View):
             try:
                 begin = dateutil.parser.parse(request.GET.get('start'))
             except ValueError:
-                raise ApiException("Invalid ISO date", "start", 401)
+                raise ApiException("Invalid ISO date", "start", 400)
         else:
             begin = datetime.now()
 
@@ -165,7 +165,7 @@ class EventTimeLine(View):
             try:
                 mod_date = dateutil.parser.parse(request.GET.get('modified'))
             except ValueError:
-                raise ApiException("Invalid ISO date", "modified", 401)
+                raise ApiException("Invalid ISO date", "modified", 400)
             events = events.filter(date_modified__gte=mod_date)
 
         if request.GET.get('user'):
@@ -286,9 +286,12 @@ class Event(View):
                     'message': "Permission Denied",
                 }
             }, status=401)
-
+    
+    @method_decorator(json_api_errors)
     def post(self, request):
         """create an event"""
+        if not request.user.is_authenticated():
+            raise ApiException("User Is not Logged In", "", 401)
         json_post = json.loads(request.raw_post_data)
         form = forms.EventForm(request.user, json_post)
         if form.is_valid():
