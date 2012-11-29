@@ -518,7 +518,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             } else {
                 //set the top monthe to be at the bottom of the li
                 var parentHeight = $("#month_" + topMonthId).height();
-                current_top_month.addClass("relative").removeClass("monthFixed").css("top", parentHeight - topElwidth - tolarance); //set to botto
+                var new_height = parentHeight - topElwidth - tolarance;
+                if (new_height < 0)
+                    new_height = 0;
+                current_top_month.addClass("relative").removeClass("monthFixed").css("top", new_height); //set to botto
             }
         },
         scrollTo: function(id) {
