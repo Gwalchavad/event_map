@@ -44,8 +44,11 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             });
             //fecth events that might have been added since the last time we viewed this list
             self.model.update(function(events){
-                if(events.length)
-                    self.render()
+                if(events.length){
+                    self.render();
+                    self.onResize();
+                    $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
+                }
             });
             app.map.map.on("popupclose", this.onPopupClose);
             app.map.map.on("popupopen", this.onPopupOpen);
@@ -247,7 +250,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //then trigger a scroll to load more events
             this.backFetch();
             this.forwardFetch();
-            $("#EventsListView").on("scroll." + this.cid, self, self.onScroll);
+            $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
         },
         /*
          * Renders a Given list of events
