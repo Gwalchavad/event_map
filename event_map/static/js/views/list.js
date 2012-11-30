@@ -21,17 +21,16 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             },
             current_date: {
                 date: new Date()
-            },
+            }
         },
         events: {
             "click .event_item": "onClick",
             "mouseenter .event_item": "onMouseenter",
-            "mouseleave .event_item": "onMouseleave",
+            "mouseleave .event_item": "onMouseleave"
         },
         initialize: function() {
             var self = this;
             app.map.group.clearLayers();
-           
             //bind
             $(window).on('resize.' + this.cid, this, this.onResize);
             //process events that are added by fetching
@@ -43,14 +42,13 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 self.onAdd(model);
             });
             //fecth events that might have been added since the last time we viewed this list
-            self.model.update(function(events){
+            this.model.update(function(events){
                 if(events.length){
                     self.render();
                     self.onResize();
-                    $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
+                    $("#EventsListView").on("scroll." + self.cid,self, self.onScroll);
                 }
             });
-            app.map.map.on("popupclose", this.onPopupClose);
             app.map.map.on("popupopen", this.onPopupOpen);
             app.map.map.on('locationfound', this.onLocationFound,this);
            
@@ -67,10 +65,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             $(event.popup._source._icon).find(".circleMarker").show();
             $(event.popup._source._icon).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
         },
-        onPopupClose: function(event) {
-
-        },
-
         onScroll: function(e) {
             //if at the bottom get more events
             var tolerance = 60;
@@ -202,7 +196,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 self.markers[id].setZIndexOffset(100);
             }
         },
-        eventItemClose: function(id) {
+        eventItemClose: function(id){
             //close the event icon
             $("#icon-" + id).find(".circleMarker").hide();
             $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
@@ -240,7 +234,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         onClose: function() {
             $(window).off('resize.' + this.cid, this.onResize);
             $("#EventsListView").off("scroll." + this.cid, self, self.onScroll);
-            app.map.off("popupclose", this.onPopupClose);
             app.map.off("popupopen", this.onPopupOpen);
         },
         onDOMadd: function() {
@@ -416,11 +409,11 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
          * And Generate the the Date Display at the top of the list
          */
         genarateColorsAndMonths: function(regenrate) {
-            var self = this;
+            var self = this,
             //the range of colors (Hue) to use
-            var colorRange = 240;
+            colorRange = 240,
             //find the top elemetns
-            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top+ 20);
+            topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top+ 20);
             //have we moved enought to change colors?
             if ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl || regenrate)) {
                 self.topVisbleEl = topVisbleEl;

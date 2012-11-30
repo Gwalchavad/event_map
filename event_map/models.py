@@ -100,3 +100,32 @@ class Event(models.Model):
     def save(self, *args, **kwargs):
         self.is_event = True
         return super(Event, self).save(*args, **kwargs)
+
+class Verbiage(models.Model):
+    """Stores arbitrary website content fragments in Markdown
+
+    See also: :py:func:`occupywallst.context_processors.verbiage`
+    """
+    name = models.CharField(max_length=255, unique=True, help_text="""
+        Arbitrary name for content fragment.  If this starts with a '/'
+        then it'll be mapped to that URL on the website.""")
+    content = models.TextField(blank=True)
+    use_markdown = models.BooleanField(default=True, help_text="""
+        If checked, your content will be parsed as markdown with
+        HTML allowed.""")
+
+    class Meta:
+        verbose_name_plural = "Verbiage"
+
+    @staticmethod
+    def get(name, language=None):
+        verb = Verbiage.objects.get(name=name)
+        if verb.use_markdown:
+            from event_map.utils import markup_parser
+            res = markup_parser(verb.content)
+        else:
+            res = verb.content
+        return res
+
+    def __unicode__(self):
+        return self.name

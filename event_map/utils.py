@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import json
 import time
 import sys
+import markdown
 
 def cal_time(dt):
     return dt.isoformat()
@@ -105,3 +106,30 @@ def json_api_errors(fn):
                     }
             },status = e.status)
     return wrapped
+    
+def _markup(text, convert):
+    """
+    Justine Tunney -  occupywallst.templatetags.ows
+    - Turn markdown text into HTML with additional hacks
+
+    - HTML comments are removed.
+
+    - Angle brackets are added around hyperlinks to make them
+      clickable because otherwise no one would know to do this.
+
+    - Any images that start with ``/media/`` will be rewritten to use
+      ``settings.MEDIA_URL``.  This is so we don't have to specify the
+      CDN address when writing articles.
+
+    """
+    text = pat_url.sub(r'<\1>', text)
+    text = pat_url_www.sub(r'[\1](http://\1)', text)
+    text = pat_comment.sub('', text)
+    html = convert(text)
+    html = html.replace('src="/media/', 'src="' + settings.MEDIA_URL)
+    return mark_safe(html)   
+     
+def markup_parser(text):
+    """Runs text through markdown, no html allowed"""
+    markdown_safe = markdown.Markdown(safe_mode='escape')
+    return _markup(text, markdown_safe.convert)

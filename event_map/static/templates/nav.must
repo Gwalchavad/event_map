@@ -1,13 +1,9 @@
-<nav id="mainNav">
-			<ul class="nav">
-				{{#if authenticated}}
-					<li> <a id="user">{{username}}</a></li>
-                    <li> <a id="logout">LOGOUT</a></li>         
-                    <li><a id="id_addevent" href="#user/{{username}}" title="Add your event" href="">MY EVENTS</a></li>       
-                {{else}}
-                    <li> <a id="login">LOGIN</a></li>                          
-                {{/if}}
-				<li><a id="id_addevent" href="#user/{{username}}" title="ABOUT MUTHUR FUCKKER" href="">ABOUT</a></li>
-			</ul>	
-		<a class="brand" href="#">Chi_Cal</a>
-</nav>
+{{#if authenticated}}
+    <li> <a id="user">{{username}}</a></li>
+    <li> <a id="logout">LOGOUT</a></li>         
+    <li><a id="id_addevent" href="#user/{{username}}" title="Add your event" href="">MY EVENTS</a></li>       
+{{else}}
+    <li> <a id="login">LOGIN</a></li>                          
+{{/if}}
+<li><a id="id_addevent" href="#user/{{username}}" title="ABOUT MUTHUR FUCKKER" href="">ABOUT</a></li>
+

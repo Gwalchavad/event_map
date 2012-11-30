@@ -25,6 +25,7 @@ def index(request):
     """
     begin = datetime.now()
     init_events = db.Event.objects.filter(start_date__gte=begin).order_by('start_date')[:10]
+    verbiage = db.Verbiage.objects.all()
     response = [{
                 'id':event.id,
                 "title":event.title,
@@ -49,7 +50,8 @@ def index(request):
     jsonsession = json.dumps(init_events, default=utils.clean_data)
     return render_to_response('base.html',
                               {'events': jsonevents,
-                              'session': jsonsession},
+                              'session': jsonsession,
+                              },
                               context_instance=RequestContext(request))
 
 

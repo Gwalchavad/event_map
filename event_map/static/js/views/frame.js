@@ -50,7 +50,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
         },
         render: function() {
             //add login template
-            $("#mainNav").html(temp_nav(this.model.toJSON()));
+            var json = this.model.toJSON();
+            json.verbiage = verbiage;
+            $("#mainNavList").html(temp_nav(json));
             return this;
         },
         logonmodel: function(e) {

@@ -13,8 +13,13 @@
 	</head>
 	<body>
 		<div class="row-fluid">
-		  <div id="nav" class="span1">
-		    <nav id="mainNav"></nav>
+		  <div id="nav" class="span1 setheight">
+            <nav id="mainNav" class="h100">
+                <ul id="mainNavList" class="nav">
+                </ul>
+                
+                <div id="site_title" class="rot-neg-90 bottom"><a href="#">{{ verbiage.title }}</a></div>
+            </nav>
 		  </div>
 		  <div class="span9">
 		    <div class="row-fluid" id="main">
@@ -23,8 +28,9 @@
 		  </div>
 		</div>
 		<script type="text/javascript">
-				var init_events = {{events|safe|escape}};
-			var init_user = {{session|safe|escape}};
+            var init_events = {{events|safe|escape}},
+            init_user = {{session|safe|escape}},
+            verbiage = "{{verbiage.description}}"
 		</script>
 		<div class="hide" id="svg">
 		<?xml version="1.0" encoding="UTF-8" standalone="no"?>

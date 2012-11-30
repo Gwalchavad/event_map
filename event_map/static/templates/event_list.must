@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<div id="EventsListView" class="replace  overflow setheightWithTop">
+<div id="EventsListView" class="replace overflow setheightWithTop">
     <div class="row-fluid">
         <div class="span1">
             <div class="row-fluid">
@@ -31,7 +31,7 @@
                     <ul  id="event_list_month">
                         {{#each months}}
                             <li  id="month_{{month}}_{{year}}" style="height:{{height}}px">
-                                <div class="rot-neg-90 verticalMonth">{{letter}}</div>
+                                <div class="rot-90 verticalMonth">{{letter}}</div>
                             </li>
                         {{/each}}
                     </ul>
