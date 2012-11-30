@@ -51,7 +51,6 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
         render: function() {
             //add login template
             var json = this.model.toJSON();
-            json.verbiage = verbiage;
             $("#mainNavList").html(temp_nav(json));
             return this;
         },
