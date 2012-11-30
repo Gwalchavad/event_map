@@ -20,13 +20,16 @@ label.required:after { content: " (required)"; }
 }
 .bottom{
     position: absolute;
-    width: 100%;
     bottom: 0;
 }
 #site_title{
-    left: 42px;
-    font-size: 24px;
-    padding-left: 20px;
+    left: 68px;
+    height: 58px;
+    font-size: 35px;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    
 }
 #event_list{
     margin-left: 0;

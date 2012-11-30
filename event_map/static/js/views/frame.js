@@ -29,12 +29,14 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
             this.model.on('change',this.render,this);
             
             $(window).on('resize', function() {
-                this.height = $(window).height();
-                this.topHeight = $(window).height() - $(".top").height();
+                self.height = $(window).height();
+                self.topHeight = $(window).height() - $(".top").height();
                 $("#heightStyle").replaceWith(temp_app_css({
-                    height: this.height,
-                    topHeight: this.topHeight
+                    height: self.height,
+                    topHeight: self.topHeight
                 }));
+                self.resizeTitleText();
+                
 
             });
 
@@ -47,6 +49,15 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
                 topHeight: this.topHeight
             }));
             self.render();
+            $(window).trigger("resize");
+        },
+        resizeTitleText: function(){
+
+            var site_title_lenght= $(window).height() - $("#mainNavList").height();
+            $("#site_title").width(site_title_lenght);
+            $("#site_title").textfill();
+            var font_height = parseInt($("#site_title span").css("font-size"),10);
+            $("#site_title").css("left",35 + font_height); 
         },
         render: function() {
             //add login template
@@ -54,6 +65,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
             $("#mainNavList").html(temp_nav(json));
             return this;
         },
+
         logonmodel: function(e) {
             //open the login model
             $('#loginhtml').modal({
