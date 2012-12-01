@@ -28,6 +28,7 @@ label.required:after { content: " (required)"; }
     font-weight: bold;
     text-align: center;
     white-space: nowrap;
+    
 }
 #event_list{
     margin-left: 0;

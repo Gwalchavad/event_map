@@ -105,7 +105,7 @@ define([
             $.extend(true,this._attributes,this.defaults);
             if(models && models.length != 0){
                 //this assumes that incoming initail models are in order
-                this._attributes.data = {start:models[0].attributes.start_date.toJSON()};
+                this._attributes.data = {start:models[0].attributes._start_date.toJSON()};
                 this._attributes.futureEvents.updateOffset = models.length;
             }
             if(options)

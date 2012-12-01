@@ -1,11 +1,9 @@
 <style id="heightStyle">
     .setheight{
         height:{{height}}px;
-        overflow-y: hidden;
     }
     .setheightWithTop{
         height:{{topHeight}}px;
-        overflow-y: hidden;
     }
 </style>
 

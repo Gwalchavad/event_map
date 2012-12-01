@@ -30,7 +30,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
             
             $(window).on('resize', function() {
                 self.height = $(window).height();
-                self.topHeight = $(window).height() - $(".top").height();
+                // shuold be $(".top").height() instead of 60, but top is not there first
+                self.topHeight = $(window).height() - 60;
                 $("#heightStyle").replaceWith(temp_app_css({
                     height: self.height,
                     topHeight: self.topHeight
