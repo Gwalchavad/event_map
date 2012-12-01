@@ -16,19 +16,21 @@ define([
             location_point:""
         },
         initialize: function () {
-            this.computeTimes();
-            this.on("change",this.computeTimes);
+            this.on("change:start_date",this.computeStartTimes);
+            this.on("change:end_date",this.computeEndTimes);
+            this.computeStartTimes();
+            this.computeEndTimes();
         },
-        computeTimes:function(){
+        computeStartTimes:function(){
             var _start_date = new Date(this.get("start_date"));
-            this.set("start_date", _start_date);
-            var _end_date = new Date(this.get("end_date"));
-            this.set("end_date", _end_date);
-            //remove the spaces in time
-            this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));
-            this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));       
+            this.set("_start_date", _start_date);
+            this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));      
         },
-
+        computeEndTimes:function(){
+            var _end_date = new Date(this.get("end_date"));
+            this.set("_end_date", _end_date);
+            this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, "")); 
+        },
         computeCloseValues:function(){
             //the lenght the title is on the list when the event is closed
             var trimmedTitleLength = 42;
@@ -113,8 +115,9 @@ define([
                 this._attributes.futureEvents.updateOffset = models.length;
             });
         },
+        //oder by UNIX time stamp and ID fraction
         comparator: function(event) {
-          return event.get("start_date").getTime() + 1/event.get("id");
+          return event.get("_start_date").getTime() + 1/event.get("id");
         },
         //Setting attributes on a collection
         //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js  

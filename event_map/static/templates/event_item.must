@@ -1,5 +1,5 @@
 <li class="event_item">
-    <p>{{start_date }}
+    <p>{{_start_date }}
     <a  href="#/event/{{ id }}">{{ title }}</a>                          
     {{#if location }}
     <b></b>{{ location }}

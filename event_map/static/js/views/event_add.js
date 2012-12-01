@@ -36,9 +36,9 @@ define([
                 context.location_point.lng = context.location_point.coordinates[0];
             }
             if(context.start_date)
-                context.start_date = context.start_date.toISOString().replace("T"," ").substring(0,16);
+                context.start_date = context._start_date.toISOString().replace("T"," ").substring(0,16);
             if(context.end_date)
-                context.end_date = context.end_date.toISOString().replace("T"," ").substring(0,16);
+                context.end_date = context._end_date.toISOString().replace("T"," ").substring(0,16);
                      
             this.$el.html(temp_event_add(context));
             var marker = app.map.add_marker(this.model.get("location_point").coordinates,true);
@@ -105,7 +105,7 @@ define([
             if(json.start_date)
                 json.start_date = json.start_date.replace(" ","T");
             if(json.end_date)
-                json.end_date = json.start_date.replace(" ","T");
+                json.end_date = json.end_date.replace(" ","T");
             if(promise = this.model.save(json)){
                 promise.error(function(response) {
                     throw new Error("Server Error:" + response);

@@ -183,9 +183,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 $("#event_" + id).height(self.height + self.openHeight);
                 $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
                 //set month
-                var day = model.get("start_date").getUTCDate();
-                var month = model.get("start_date").getUTCMonth();
-                var year = model.get("start_date").getUTCFullYear();
+                var day = model.get("_start_date").getUTCDate();
+                var month = model.get("_start_date").getUTCMonth();
+                var year = model.get("_start_date").getUTCFullYear();
                 var height = $("#month_" + month+"_"+year).height();
                 $("#month_" + month + "_" + year).height(height + self.openHeight);
                 //set day height
@@ -206,9 +206,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             $("#event_" + id).height(self.height);
             //get model of item thata was clicked 
             var model = self.model.get(id);
-            var day = model.get("start_date").getUTCDate();
-            var month = model.get("start_date").getUTCMonth();
-            var year = model.get("start_date").getUTCFullYear();
+            var day = model.get("_start_date").getUTCDate();
+            var month = model.get("_start_date").getUTCMonth();
+            var year = model.get("_start_date").getUTCFullYear();
             //set day height
 
             var height = $("#day_" + day + "_" + month + "_" + year).height();
@@ -287,8 +287,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     return this;
                 }
                 eventModels = this.model.models;
-                self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");
-                self.render_var.current_date.date = _.last(eventModels).get("start_date");
+                self.render_var.pre_current_date.date = _.first(eventModels).get("_start_date");
+                self.render_var.current_date.date = _.last(eventModels).get("_start_date");
                 var renderEl = function() {
                     var html = temp_event_list({
                         months: months,
@@ -301,8 +301,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             } else {
                 if (prepend) {
                     var oldLastDate = self.render_var.pre_current_date.date;
-                    self.render_var.pre_current_date.date = _.first(eventModels).get("start_date");
-                    var firstDate = _.last(eventModels).get("start_date");
+                    self.render_var.pre_current_date.date = _.first(eventModels).get("_start_date");
+                    var firstDate = _.last(eventModels).get("_start_date");
                     var renderEl = function() {
                         var html = temp_item_closed({
                             events: events
@@ -321,8 +321,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 } else {
                     //append event
                     var oldLastDate = self.render_var.current_date.date;
-                    self.render_var.current_date.date = _.last(eventModels).get("start_date");
-                    var firstDate = eventModels[0].get("start_date");
+                    self.render_var.current_date.date = _.last(eventModels).get("_start_date");
+                    var firstDate = eventModels[0].get("_start_date");
                     var renderEl = function() {
                         var html = temp_item_closed({
                             events: events
@@ -350,8 +350,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 event.computeCloseValues();
                 event.computeOpenValues();
                 //check year and month
-                if (event.get("start_date").getUTCFullYear() != current_date.getUTCFullYear() || event.get("start_date").getUTCMonth() != current_date.getUTCMonth()) {
-                    current_date = event.get("start_date");
+                if (event.get("_start_date").getUTCFullYear() != current_date.getUTCFullYear() || event.get("_start_date").getUTCMonth() != current_date.getUTCMonth()) {
+                    current_date = event.get("_start_date");
                     //check to see if there is a first el
                     if (days.length > 0) {
                         days[days.length - 1].height = day_counter * self.height;
@@ -373,10 +373,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     });
                     month_counter = 0;
                     day_counter = 0;
-                } else if (event.get("start_date").getUTCDate() != current_date.getUTCDate()) {
+                } else if (event.get("_start_date").getUTCDate() != current_date.getUTCDate()) {
                     //checks to see if days are different
                     //genreates the days ul
-                    current_date = event.get("start_date");
+                    current_date = event.get("_start_date");
                     if (days.length > 0) {
                         days[days.length - 1].height = day_counter * self.height;
                     }
@@ -418,7 +418,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             if ($(topVisbleEl).attr("class") && $(topVisbleEl).attr("class").split(" ")[0] == "event_item" && (self.topVisbleEl != topVisbleEl || regenrate)) {
                 self.topVisbleEl = topVisbleEl;
                 var topModelId = topVisbleEl.id.replace(/event_/, "");
-                var top_start_date = self.model.get(topModelId).get("start_date");
+                var top_start_date = self.model.get(topModelId).get("_start_date");
                 self.setMonthDay(top_start_date);
                 self.setDay(top_start_date);
                 //set map icons that are not in the current view
@@ -437,7 +437,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 $(".viewed").each(function(index, el) {
                     var id = el.id.replace(/icon-/, "");
                     var model = self.model.get(id);
-                    if (model.get("start_date") < top_start_date) {
+                    if (model.get("_start_date") < top_start_date) {
                         H = 0;
                     } else {
                         H = colorRange;
@@ -488,7 +488,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
 			var tolarance = 20;
             var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top);
             var topModelId = topVisbleEl.id.replace(/event_/, "");
-            var top_start_date = self.model.get(topModelId).get("start_date");
+            var top_start_date = self.model.get(topModelId).get("_start_date");
             var topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear();
 
             var halfHeight = $("#EventsListView").position().top + $("#EventsListView").height() / 2;

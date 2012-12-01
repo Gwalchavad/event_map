@@ -23,13 +23,11 @@ label.required:after { content: " (required)"; }
     bottom: 0;
 }
 #site_title{
-    left: 68px;
     height: 58px;
     font-size: 35px;
     font-weight: bold;
     text-align: center;
     white-space: nowrap;
-    
 }
 #event_list{
     margin-left: 0;
