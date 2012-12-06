@@ -5,6 +5,7 @@ define([
     
     var Event = Backbone.Model.extend({
         urlRoot: "/api/event",
+        idAttribute: "slug",
         defaults: {
             title:"",
             start_date:"",
@@ -129,9 +130,9 @@ define([
             }
         },
         update:function(callback){
-			var self = this;
+            var self = this;
             data = {
-                offest:this._attributes.pastEvents.updateOffset,
+                offset:this._attributes.pastEvents.updateOffset,
                 n:Math.abs(this._attributes.pastEvents.updateOffset) + this._attributes.futureEvents.updateOffset,
                 modified: this._attributes.modified.toJSON()
             };

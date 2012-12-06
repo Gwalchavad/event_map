@@ -13,6 +13,9 @@ urlpatterns = patterns('',
     url(r'^api/events$', views.EventTimeLine.as_view()),   
     url(r'^api/event$', views.Event.as_view()),
     url(r'^api/event/(?P<id>\d+)$', views.Event.as_view()),
+    url(r'^api/event/(?P<slug>[-_\d\w]+)$', views.Event.as_view()),
     url(r'^api/group$', views.Group.as_view()), 
-    url(r'^api/group/(?P<id>\d+)$', views.Group.as_view())
+    url(r'^api/group/(?P<id>\d+)$', views.Group.as_view()),
+
+    
 )

@@ -172,7 +172,7 @@ DATABASES = {
 EOF
 
 #change the permissions of the file that the server might need to read
-chmod o+r ./event_map/event_map/wsgi.py
+#chmod o+r ./event_map/event_map/wsgi.py
 chmod -R o+r ./event_map/event_map/templates/
 chmod -R o+r ./event_map/event_map/static/
 

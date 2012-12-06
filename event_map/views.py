@@ -26,21 +26,7 @@ def index(request):
     begin = datetime.now()
     init_events = db.Event.objects.filter(start_date__gte=begin).order_by('start_date')[:10]
     verbiage = db.Verbiage.objects.all()
-    response = [{
-                'id':event.id,
-                "title":event.title,
-                "start_date":event.start_date,
-                "end_date":event.end_date,
-                "organization":event.organization,
-                "content":event.content,
-                "author":event.author,
-                "contact_info":event.contact_info,
-                "city":event.city,
-                "location":event.location,
-                "venue":event.venue,
-                "location_point":event.location_point,
-                "link":event.link
-                } for event in init_events]
+    response = [ event.toJSON() for event in init_events]
     jsonevents = json.dumps(response, default=utils.clean_data)
     init_events = {
         'authenticated': request.user.is_authenticated(),
@@ -53,7 +39,6 @@ def index(request):
                               'session': jsonsession,
                               },
                               context_instance=RequestContext(request))
-
 
 class Session(View):
     """
@@ -165,7 +150,7 @@ class EventTimeLine(View):
 
         if request.GET.get('modified'):
             try:
-                mod_date = dateutil.parser.parse(request.GET.get('modified'))
+                mod_date = dateutil.parser.parse(request.GET.get('modified').replace("Z",""))
             except ValueError:
                 raise ApiException("Invalid ISO date", "modified", 400)
             events = events.filter(date_modified__gte=mod_date)
@@ -223,21 +208,7 @@ class EventTimeLine(View):
             else:
                 events = events.filter(start_date__gte=begin)[offset:]
 
-        response = [{
-            "id":event.id,
-            "title":event.title,
-            "start_date":event.start_date,
-            "end_date":event.end_date,
-            "organization":event.organization,
-            "content":event.content,
-            "author":event.author,
-            "contact_info":event.contact_info,
-            "city":event.city,
-            "location":event.location,
-            "venue":event.venue,
-            "location_point":event.location_point,
-            "link":event.link
-        } for event in events]
+        response = [ event.toJSON() for event in events]
         return utils.json_response(response)
 
 
@@ -247,25 +218,14 @@ class Event(View):
     """
     def get(self,request, **kwargs):
         """
-        Get An Events Details given its ID
+        Get An Events Details given its ID 
+        OR slug
         """
-        event = db.Event.objects.get(id=kwargs['id'])
-        response = {
-            "id": event.id,
-            "title": event.title,
-            "start_date": event.start_date,
-            "end_date": event.end_date,
-            "organization": event.organization,
-            "content": event.content,
-            "author": event.author,
-            "contact_info": event.contact_info,
-            "city": event.city,
-            "location": event.location,
-            "venue": event.venue,
-            "location_point": event.location_point,
-            "link": event.link
-        }
-        return utils.json_response(response)
+        if hasattr(kwargs, 'id'):
+            event = db.Event.objects.get(id=kwargs['id'])
+        else:
+            event = db.Event.objects.get(slug=kwargs['slug'])
+        return utils.json_response(event.toJSON())
 
     def put(self, request, **kwargs):
         """Modify an Event via a post based on it id"""
@@ -298,23 +258,7 @@ class Event(View):
         form = forms.EventForm(request.user, json_post)
         if form.is_valid():
             event = form.save()
-            response = {
-                "id": event.id,
-                "title": event.title,
-                "start_date": event.start_date,
-                "end_date": event.end_date,
-                "organization": event.organization,
-                "content": event.content,
-                "author": event.author,
-                "contact_info": event.contact_info,
-                "published": event.published,
-                "city": event.city,
-                "location": event.location,
-                "venue": event.venue,
-                "location_point": event.location_point,
-                "link": event.link
-            }
-            return utils.json_response(response)
+            return utils.json_response(event.toJSON())
         else:
             return utils.json_response({
                 'errors': dict(form.errors.items()),

@@ -100,11 +100,13 @@ define([
                    
             });  
         },
-        addGroup:function(){
-            if(!app.user.is_authenticated())
+        addGroup:function(id,context){
+            if(!app.session.is_authenticated()){
+                app.appView.login();
                 return;
-            this.showView(new LoadingView());
-            var self = this;
+            }
+            var self = context ? context : this;
+            self.showView(new LoadingView());
             require(['models/groups','views/group_add'],function(Group,AddGroupView){
                 var group = new Group();
                 var groupView = new AddGroupView({
@@ -191,7 +193,7 @@ define([
             var self = this;
             var callback = arguments.callee.caller;
             var event = new EventModel.Event({
-                id: id
+                slug: id
             });
             request = event.fetch();
             request.error(function() {
@@ -202,7 +204,6 @@ define([
             });
         }
     });
-    
     return AppRouter;
 });
 

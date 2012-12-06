@@ -115,7 +115,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //set map icons       
             var myIcon = L.divIcon({
                 className: "icon",
-                html: '<div id=\'icon-' + model.get("id") + '\'></div>',
+                html: '<div id=\'icon-' + model.get("slug") + '\'></div>',
                 iconAnchor: [9, 23],
                 iconSize: [24, 30],
                 popupAnchor: [4, - 10]
@@ -124,12 +124,12 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             var marker = L.marker(
             [loca_p.coordinates[1], loca_p.coordinates[0]], {
                 icon: myIcon,
-                modelID: model.get("id")
+                modelID: model.get("slug")
             });
             marker.bindPopup(temp_popup(model.toJSON()));
             app.map.group.addLayer(marker);
             marker.on("click", self.onMarkerClick, this);
-            this.markers[model.get("id")] = marker;
+            this.markers[model.get("slug")] = marker;
             
         },
         onLocationFound: function(e){

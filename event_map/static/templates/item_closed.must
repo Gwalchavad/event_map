@@ -1,10 +1,10 @@
 {{#each events}}
-    <li id="event_{{id}}" class="event_item">
+    <li id="event_{{slug}}" class="event_item">
         <div class="list_item_container">
             <div class="openIndt" style="">[+]</div>
             <div class="list_item_width">
                 <div class="list_item_content" >
-                    {{start_time }} - {{end_time }} <a href="#/event/{{ id }}">{{ this.titleClose }}</a>
+                    {{start_time }} - {{end_time }} <a href="#/event/{{ slug }}">{{ this.titleClose }}</a>
                 </div>
             </div>
         </div>

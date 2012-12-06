@@ -1,9 +1,9 @@
 from django.contrib.gis.db import models
 from django.db.models import Q
-from uuidfield import UUIDField
 from django.contrib.auth.models import User
+from autoslug import AutoSlugField
 
-class Group(models.Model):
+class AbstractGroup(models.Model):
     visibility_choices = (
         ('public', 'Public'),
         ('private', 'Private'),
@@ -14,8 +14,6 @@ class Group(models.Model):
         ('queue', 'Queue'),
         ('restricted', 'Restricted'),
     )
-    title =  models.CharField(unique=True,max_length=255, help_text="""
-        the name of the group""")
     description =  models.TextField(help_text="""
         the name of the group""")
     visibility = models.CharField(max_length=32, choices=visibility_choices, default="public", help_text="""
@@ -26,20 +24,38 @@ class Group(models.Model):
     subscription = models.ManyToManyField('self', blank=True, help_text="""
         What other groups are aggergated?""")
     def __unicode__(self):
+        if hasattr(self, 'group'):
+            return "group: "+self.group.__unicode__();  
+        elif hasattr(self, 'usergroup'):
+            return "usergroup: "+self.usergroup.__unicode__();
+        else:
+            return self.description
+
+class Group(AbstractGroup):
+    title =  models.CharField(unique=True,max_length=255, help_text="""        the name of the group""")
+    def __unicode__(self):
         return self.title
 
-class Feed(Group):
+class Feed(AbstractGroup):
+    title =  models.CharField(unique=True,max_length=255, help_text="""
+        the name of the group""")
     source = models.URLField()
     source_type =  models.CharField(null=True, blank=True, max_length=255)
+    def __unicode__(self):
+        return self.title
 
-class UserGroup(Group):
+class UserGroup(AbstractGroup):
+    title =  models.CharField(unique=True,max_length=255, help_text="""
+        the name of the group""")
     user = models.ForeignKey(User)
     def save(self, *args, **kwargs):
         self.title = self.user.username
         self.visibility = "public"
         self.description = "Write something about You"
         self.posting_option = "restricted"
-        return super(Group, self).save(*args, **kwargs)
+        return super(UserGroup, self).save(*args, **kwargs)
+    def __unicode__(self):
+        return self.title
 
 class Permission(models.Model): 
     banned = models.BooleanField(default=False, help_text="""
@@ -51,9 +67,9 @@ class Permission(models.Model):
     admin = models.BooleanField(default=False, help_text="""
         deos user have admin privilages?""")
     user = models.ForeignKey(User)
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(AbstractGroup)
     def __unicode__(self):
-        return  self.user.username + " --> "+ self.group.title
+        return  self.user.username + " --> "+ self.group
 
 class Event(models.Model):
     """Events!"""
@@ -63,8 +79,7 @@ class Event(models.Model):
         A one-line title to describe article.""")
     content = models.TextField(help_text="""
         The contents of the article in Markdown.""")
-    #convert to hide how many events?   
-    uuid = UUIDField(auto=True)
+    slug = AutoSlugField(populate_from='title', unique=True)
 
     date_modified = models.DateTimeField(auto_now=True)
 
@@ -89,17 +104,32 @@ class Event(models.Model):
 
     location_point = models.PointField(null=True, blank=True, help_text="""
         Aproximate coordinates of where the event will happen""")
-    groups = models.ManyToManyField(Group)
+    groups = models.ManyToManyField(AbstractGroup, blank=True)
     
     """Allow geospataul queries"""
     objects = models.GeoManager()
-
+    
     def __unicode__(self):
         return self.title
-
-    def save(self, *args, **kwargs):
-        self.is_event = True
-        return super(Event, self).save(*args, **kwargs)
+    
+    def toJSON(self):
+        rsp = {
+            "id":self.id,
+            "title":self.title,
+            "start_date":self.start_date,
+            "end_date":self.end_date,
+            "organization":self.organization,
+            "content":self.content,
+            "author":self.author,
+            "contact_info":self.contact_info,
+            "city":self.city,
+            "location":self.location,
+            "venue":self.venue,
+            "location_point":self.location_point,
+            "link":self.link,
+            "slug":self.slug
+        }
+        return rsp
 
 class Verbiage(models.Model):
     """Stores arbitrary website content fragments in Markdown
