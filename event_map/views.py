@@ -55,6 +55,7 @@ class Session(View):
             'id': request.user.id
         })
 
+    @method_decorator(json_api_errors)
     def post(self, request):
         """
         Login - create a new session
@@ -75,16 +76,10 @@ class Session(View):
                 })
             else:
                 # Return a 'disabled account' error message
-                return utils.json_response({
-                    'errors': {'message': "You have been banned"}
-                }, status=401)
+                raise ApiException("You have been banned. FOADUMF!", 401)
         else:
             # Return an 'invalid login' error message.
-            return utils.json_response({
-                'errors': {
-                    'message': "Invalid Username Or Password",
-                }
-            }, status=401)
+            raise ApiException("Invalid Username Or Password", 401)
 
     def delete(self, request):
         """Logout"""
@@ -97,6 +92,7 @@ class Session(View):
 
 class EventUser(View):
     """API for user manpulation"""
+    @method_decorator(json_api_errors)
     def post(self, request):
         """Logs user in"""
         json_post = json.loads(request.raw_post_data)
@@ -118,10 +114,7 @@ class EventUser(View):
                 'id': user.id
             })
         else:
-            return utils.json_response({
-                'errors': dict(form.errors.items()),
-            }, status=401)
-
+            raise ApiException(utils.form_errors_to_json(form), 401)
 
 class EventTimeLine(View):
     """
@@ -143,16 +136,16 @@ class EventTimeLine(View):
             #change to use actully date
             try:
                 begin = dateutil.parser.parse(request.GET.get('start'))
-            except ValueError:
-                raise ApiException("Invalid ISO date", "start", 400)
+            except (ValueError, OverflowError) as e:
+                raise ApiException({"start":"Invalid ISO date"}, 400)
         else:
             begin = datetime.now()
 
         if request.GET.get('modified'):
             try:
-                mod_date = dateutil.parser.parse(request.GET.get('modified').replace("Z",""))
-            except ValueError:
-                raise ApiException("Invalid ISO date", "modified", 400)
+                mod_date = dateutil.parser.parse(request.GET.get('modified'))
+            except (ValueError, OverflowError) as e:
+                raise ApiException({"start":"Invalid ISO date"}, 400)
             events = events.filter(date_modified__gte=mod_date)
 
         if request.GET.get('user'):
@@ -207,30 +200,41 @@ class EventTimeLine(View):
                 events = list(itertools.chain(before_events.reverse(), after_events))
             else:
                 events = events.filter(start_date__gte=begin)[offset:]
-
-        response = [ event.toJSON() for event in events]
-        return utils.json_response(response)
+        return utils.json_response([ event.toJSON() for event in events])
 
 
 class Event(View):
     """
     API for get, setting and deleting events
     """
+    @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(Event, self).dispatch(*args, **kwargs)    
+    
     def get(self,request, **kwargs):
         """
         Get An Events Details given its ID 
         OR slug
         """
-        if hasattr(kwargs, 'id'):
-            event = db.Event.objects.get(id=kwargs['id'])
-        else:
-            event = db.Event.objects.get(slug=kwargs['slug'])
+        try:
+            if 'id' in kwargs:
+                event = db.Event.objects.get(id=kwargs['id'])
+            else:
+                event = db.Event.objects.get(slug=kwargs['slug'])
+        except ObjectDoesNotExist:
+            raise ApiException("Event Not Found", 404)
         return utils.json_response(event.toJSON())
-
+        
     def put(self, request, **kwargs):
         """Modify an Event via a post based on it id"""
         json_post = json.loads(request.raw_post_data)
-        event = db.Event.objects.get(id=kwargs['id'])
+        try:
+            if 'id' in kwargs:
+                event = db.Event.objects.get(id=kwargs['id'])
+            else:
+                event = db.Event.objects.get(slug=kwargs['slug'])
+        except ObjectDoesNotExist:
+            raise ApiException("Event Not Found", 404)
         if event.author == request.user:
             form = forms.EventForm(request.user, json_post, instance=event)
             if form.is_valid():
@@ -239,30 +243,21 @@ class Event(View):
                     'success': True,
                 })
             else:
-                return utils.json_response({
-                    'errors': dict(form.errors.items()),
-                })
+                raise ApiException(utils.form_errors_to_json(form), 401)
         else:
-            return utils.json_response({
-                'errors': {
-                    'message': "Permission Denied",
-                }
-            }, status=401)
-    
-    @method_decorator(json_api_errors)
+            raise ApiException("Permission Denied", 401)
+            
     def post(self, request):
         """create an event"""
         if not request.user.is_authenticated():
-            raise ApiException("User Is not Logged In", "", 401)
+            raise ApiException("User Is not Logged In", 401)
         json_post = json.loads(request.raw_post_data)
         form = forms.EventForm(request.user, json_post)
         if form.is_valid():
             event = form.save()
             return utils.json_response(event.toJSON())
         else:
-            return utils.json_response({
-                'errors': dict(form.errors.items()),
-            }, status=401)
+            raise ApiException(utils.form_errors_to_json(form), 401)
 
     def delete(self, request, **kwargs):
         """Deletes An Event"""
@@ -274,18 +269,9 @@ class Event(View):
                     'success': True,
                 })
             else:
-                return utils.json_response({
-                    'errors': {
-                        'message': "You don not have permission to delete this event",
-                    }
-                }, status=401)
+                raise ApiException("You don not have permission to delete this event", 401)
         except ObjectDoesNotExist:
-            return utils.json_response({
-                'errors': {
-                    'message': "Event Not Found",
-                }
-            }, status=404)
-
+            raise ApiException("Event Not Found", 404)
 
 class Group(View):
     """API For groups"""

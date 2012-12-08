@@ -72,12 +72,15 @@ class JSONResponseMixin(object):
         return obj  
 
 class ApiException(Exception):
-       def __init__(self, message, param, status):
-           self.message = message
-           self.param = param
+       def __init__(self, errors, status):
+           self.errors = errors
            self.status = status
        def __str__(self):
            return repr(self.massage)
+
+def form_errors_to_json(form):
+    errors = dict(form.errors.items())
+    return [ {"message":errors[error][0],"field": error} for error in errors]
            
 def json_api_errors(fn):
     """
@@ -99,12 +102,8 @@ def json_api_errors(fn):
                 }
             },status = 404)
         except ApiException, e:
-            return json_response({
-                 'errors':{
-                    'message':e.message,
-                    'parameter':e.param
-                    }
-            },status = e.status)
+           
+            return json_response(e.errors,status = e.status)
     return wrapped
     
 def _markup(text, convert):

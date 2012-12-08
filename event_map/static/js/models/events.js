@@ -102,7 +102,7 @@ define([
         initialize: function (models,options) {
             this._attributes = {};
             this.lock = false;
-            this._attributes.modified = new Date();
+            this._attributes.modified = (new Date()).toISOString();
             $.extend(true,this._attributes,this.defaults);
             if(models && models.length != 0){
                 //this assumes that incoming initail models are in order
@@ -134,7 +134,7 @@ define([
             data = {
                 offset:this._attributes.pastEvents.updateOffset,
                 n:Math.abs(this._attributes.pastEvents.updateOffset) + this._attributes.futureEvents.updateOffset,
-                modified: this._attributes.modified.toJSON()
+                modified: this._attributes.modified
             };
             
             this.fetch({
@@ -148,7 +148,7 @@ define([
                         });  
                         callback(events);
                     }
-                    self._attributes.modified = new Date();                   
+                    self._attributes.modified = (new Date()).toISOString();                   
                 }
             });
         },

@@ -1,8 +1,8 @@
 <div class="openIndt">[-]</div>
 <div class="list_item_width">
     <div class="list_item_content">
-        <div><a href="#/event/{{id}}">{{titleOpen}}</a>
-        {{#if contentOpen}} | <a href="#/event/{{id}}">{{contentOpen}}</a>{{/if}}
+        <div><a href="#/event/{{slug}}">{{titleOpen}}</a>
+        {{#if contentOpen}} | <a href="#/event/{{slug}}">{{contentOpen}}</a>{{/if}}
         </div>
         <div>{{start_time }} - {{end_time }} <b>At</b>
          {{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}

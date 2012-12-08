@@ -1,6 +1,6 @@
 <div>
 	<h1>{{title}}{{#if edit}}
-	<a href="#/editevent/{{ id }}" class="btn btn-primary">EDIT</a>
+	<a href="#/editevent/{{ slug }}" class="btn btn-primary">EDIT</a>
 	{{/if}}</h1>
 	<div class="row-fluid">
 		<div class="span5">

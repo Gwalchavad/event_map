@@ -132,9 +132,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
                     //get the error message and display it
                     json = JSON.parse(response.responseText);
                     var list = $("<ul />");
-                    _.each(json.errors, function(error, key) {
+                    _.each(json, function(error, key) {
                         list_item = $("<li  />", {
-                            text: error
+                            text: error.message
                         });
                         list.append(list_item);
                     });
