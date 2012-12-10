@@ -47,7 +47,8 @@ class Feed(AbstractGroup):
 class UserGroup(AbstractGroup):
     title =  models.CharField(unique=True,max_length=255, help_text="""
         the name of the group""")
-    user = models.ForeignKey(User)
+    user = models.OneToOneField(User,  primary_key=True, editable=False, help_text="""
+        Reference to Django auth user.""")
     def save(self, *args, **kwargs):
         self.title = self.user.username
         self.visibility = "public"
@@ -56,6 +57,9 @@ class UserGroup(AbstractGroup):
         return super(UserGroup, self).save(*args, **kwargs)
     def __unicode__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return "/#/user/%s/" % self.user.username
 
 class Permission(models.Model): 
     banned = models.BooleanField(default=False, help_text="""
@@ -73,6 +77,7 @@ class Permission(models.Model):
 
 class Event(models.Model):
     """Events!"""
+    objects = models.GeoManager()
     author = models.ForeignKey(User, null=True, blank=True, help_text="""
         The user who wrote this article.""")
     title = models.CharField(max_length=255, help_text="""
@@ -109,6 +114,9 @@ class Event(models.Model):
     """Allow geospataul queries"""
     objects = models.GeoManager()
     
+    def get_absolute_url(self):
+        return "/#/event/%s/" % self.slug
+    
     def __unicode__(self):
         return self.title
     
@@ -130,6 +138,11 @@ class Event(models.Model):
             "slug":self.slug
         }
         return rsp
+    
+    def save(self):
+        super(Event, self).save()
+        userGroup = UserGroup.objects.get(user=self.author)
+        self.groups.add(userGroup.id)    
 
 class Verbiage(models.Model):
     """Stores arbitrary website content fragments in Markdown

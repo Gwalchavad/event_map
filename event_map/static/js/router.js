@@ -11,6 +11,7 @@ define([
  
 ], function($, _, Backbone,UserModels,EventModel,SessionModel,FrameView,MapView,LoadingView,signupView){
     var AppRouter = Backbone.Router.extend({
+        
         routes: {
             "": "list",
             "/:date": "list",
@@ -24,6 +25,15 @@ define([
         },
         initialize: function(options) {
             var self = this;
+            //remove trailing slashes
+            var re = new RegExp("(\/)+$", "g");
+            /*jshint regexp: false*/
+            this.route(/(.*)\/+$/, "trailFix", function (id) {
+                // remove all trailing slashes if more than one
+                id = id.replace(re, '');
+                this.navigate(id, true);
+            });         
+            
             //check session
             self.session = new SessionModel(init_user);
             //self.user.reset;

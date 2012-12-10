@@ -43,9 +43,7 @@ class EventForm(forms.ModelForm):
         model.end_date = self.cleaned_data['end_date']
         model.author = self.user
         model.published = datetime.now()
-        model.save()
-        userGroup = db.UserGroup.objects.get(user=self.user)
-        model.groups.add(userGroup)    
+        model.save()  
         return model
 
 class GroupForm(forms.ModelForm):
