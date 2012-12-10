@@ -94,7 +94,7 @@ class EventUser(View):
     """API for user manpulation"""
     @method_decorator(json_api_errors)
     def post(self, request):
-        """Logs user in"""
+        """Create a new user"""
         json_post = json.loads(request.raw_post_data)
         form = forms.SignUpForm(json_post)
         if form.is_valid():
