@@ -32,6 +32,10 @@ Installation
 | `Install postGIS <https://docs.djangoproject.com/en/dev/ref/contrib/gis/install/postgis/>`_
 | Then install event_map ``pip install -e event_map``
 
+Contribute
+----------
+check out what needs to be done on `trello <https://trello.com/board/event-map/500ac773cef1324c50149d2c>`_
+
 Implementation
 --------------
 | Backend: geodjango  
