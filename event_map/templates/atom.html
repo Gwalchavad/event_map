@@ -1,0 +1,26 @@
+<div>
+	<h1>{{obj.title}}</h1>
+	<div class="row-fluid">
+		<div class="span5">
+			<h3>
+			{% if obj.end_date %}
+			START: {{obj.start_date}}<br>
+			END: {{obj.end_date}}
+			{% else %}
+			{{obj.start_date}}
+			{% endif %}
+			<h3>
+		</div>
+		<div class="span5">
+			<h3>
+			WHERE:{% if obj.venue %}{{obj.venue}} ({% endif %}{% if obj.location %}{{obj.location}}{% endif %})
+			<br>
+			<a href="{{site.domain}}/#/user/{{obj.author.username}}">BY:{{obj.author.username}}</a>
+          
+			</h3>
+		</div>
+	</div>
+</div>
+<div>
+{{obj.content}}
+</div>
