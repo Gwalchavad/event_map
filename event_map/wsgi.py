@@ -19,7 +19,7 @@ PROJECT_DIR = os.path.dirname(CWD)
 #try to find the virtual env 
 sys.path.append(PROJECT_DIR)
 VIR_DIR = os.path.dirname(PROJECT_DIR)
-VER = str(sys.version_info.major) + "."+ str(sys.version_info.minor)
+VER = str(sys.version_info[0]) + "."+ str(sys.version_info[1])
 site.addsitedir(VIR_DIR+"/lib/python"+VER+"/site-packages")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "event_map.settings")
 
