@@ -9,7 +9,7 @@ import dateutil.parser
 class EventForm(forms.ModelForm):
     class Meta:
         model = db.Event
-        fields = ( 'title','organization','link','contact_info','location','venue', 'content','city','groups')
+        fields = ( 'title','organization','link','contact_info','location','venue', 'content','city','connections')
     
     start_date =  forms.CharField(required=True)
     end_date = forms.CharField(required=True)

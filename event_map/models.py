@@ -3,7 +3,18 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from autoslug import AutoSlugField
 
-class AbstractGroup(models.Model):
+class emObject(models.Model):
+    connections = models.ManyToManyField('self', blank=True, help_text="""
+        what objects are connected to this object""")
+    def __unicode__(self):
+        if hasattr(self, 'abstractgroup'):
+            return "AbstractGroup: "+self.abstractgroup.__unicode__();  
+        elif hasattr(self, 'event'):
+            return "event: "+self.event.__unicode__();  
+        else:
+            return "unkown object"
+
+class AbstractGroup(emObject):
     visibility_choices = (
         ('public', 'Public'),
         ('private', 'Private'),
@@ -20,9 +31,7 @@ class AbstractGroup(models.Model):
         Whether or not user is attending protest.""")
     posting_option = models.CharField(max_length=32, choices=posting_choices, default="restricted", help_text="""
         How post should be processed""")
-    permissions = models.ManyToManyField(User, through='Permission', blank=True)
-    subscription = models.ManyToManyField('self', blank=True, help_text="""
-        What other groups are aggergated?""")
+
     def __unicode__(self):
         if hasattr(self, 'group'):
             return "group: "+self.group.__unicode__();  
@@ -62,6 +71,8 @@ class UserGroup(AbstractGroup):
         return "/#/user/%s/" % self.user.username
 
 class Permission(models.Model): 
+    class Meta:
+        unique_together = ("subject", "emobject")
     banned = models.BooleanField(default=False, help_text="""
         is this user banned?""")
     read  = models.BooleanField(default=False, help_text="""
@@ -70,12 +81,12 @@ class Permission(models.Model):
         can the user post to this group""")
     admin = models.BooleanField(default=False, help_text="""
         deos user have admin privilages?""")
-    user = models.ForeignKey(User)
-    group = models.ForeignKey(AbstractGroup)
+    subject = models.ForeignKey(AbstractGroup, related_name='permissions')
+    emobject = models.ForeignKey(emObject)
     def __unicode__(self):
-        return  self.user.username + " --> "+ self.group
+        return  str(self.subject) + " --> "+ str(self.emobject)
 
-class Event(models.Model):
+class Event(emObject):
     """Events!"""
     objects = models.GeoManager()
     author = models.ForeignKey(User, null=True, blank=True, help_text="""
@@ -109,7 +120,7 @@ class Event(models.Model):
 
     location_point = models.PointField(null=True, blank=True, help_text="""
         Aproximate coordinates of where the event will happen""")
-    groups = models.ManyToManyField(AbstractGroup, blank=True)
+    #groups = models.ManyToManyField(AbstractGroup, blank=True)
     
     """Allow geospataul queries"""
     objects = models.GeoManager()
@@ -142,7 +153,7 @@ class Event(models.Model):
     def save(self):
         super(Event, self).save()
         userGroup = UserGroup.objects.get(user=self.author)
-        self.groups.add(userGroup.id)    
+        self.connections.add(userGroup.id)    
 
 class Verbiage(models.Model):
     """Stores arbitrary website content fragments in Markdown

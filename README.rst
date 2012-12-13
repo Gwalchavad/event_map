@@ -25,7 +25,9 @@ Installation
 | ``source ./(project name)/bin/activate``
 | then go to the root (project name/event_map) folder and run
 | ``./manage.py syncdb --all``
-| Change the site url and Verbage in the django's admin
+| Log into the admin  `/admin` with the username `admin` password `admin123`
+| Change the admin's password in the users under auth
+| Change the site url and Verbage
 | 
 | **If you need install it manually** 
 | `Install GeoDjango <https://docs.djangoproject.com/en/dev/ref/contrib/gis/install/>`_
