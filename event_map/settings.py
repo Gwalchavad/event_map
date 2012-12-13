@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.gis',
     'django.contrib.markup',
+    'subhub',
     'event_map',
     'south',
     # Uncomment the next line to enable the admin:

@@ -41,7 +41,7 @@ class AbstractGroup(emObject):
             return self.description
 
 class Group(AbstractGroup):
-    title =  models.CharField(unique=True,max_length=255, help_text="""        the name of the group""")
+    title =  models.CharField(unique=True,max_length=255, help_text=""" the name of the group""")
     def __unicode__(self):
         return self.title
 
