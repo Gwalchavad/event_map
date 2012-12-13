@@ -143,19 +143,17 @@ if [ -d $DEST/$PROJ ]; then
     exit 1
 fi
 
-
-
-cd $DEST                      || exit 1
+cd $DEST                                         || exit 1
 echo "creating virtualenv"
-sudo -u $SUDO_USER virtualenv $PROJ || exit 1
-cd $PROJ                      || exit 1
+sudo -u $SUDO_USER virtualenv $PROJ              || exit 1
+cd $PROJ                                         || exit 1
+sudo -u $SUDO_USER git clone $REPO $PROJ         || exit 1
 echo "installing pip"
 source bin/activate           || exit 1
 easy_install pip              || exit 1
-git clone $REPO event_map     || exit 1
 echo "installing event_map"
-pip install -e event_map      || exit 1
-cd event_map                  || exit 1
+pip install -e ./$PROJ        || exit 1
+cd event_map                                     || exit 1
 
 
 # these settings override what's in settings.py *only* for our local install
@@ -172,11 +170,9 @@ DATABASES = {
 EOF
 
 #change the permissions of the file that the server might need to read
-#chmod o+r ./event_map/event_map/wsgi.py
-chmod -R o+r ./event_map/event_map/templates/
-chmod -R o+r ./event_map/event_map/static/
-
+chmod o+r ./$PROJ/event_map/wsgi.py
 cd ..
-chown -R $SUDO_USER:$SUDO_USER ./event_map
-
-
+chmod -R o+r ./$PROJ/event_map/templates/
+chmod -R o+r ./$PROJ/event_map/static/
+cd ..
+chown -R $SUDO_USER:$SUDO_USER ./$PROJ
