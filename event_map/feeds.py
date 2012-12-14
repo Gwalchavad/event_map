@@ -6,8 +6,6 @@ r"""
     Tools for syndicating articles via Atom and Icalendar.
 
 """
-
-
 from django.conf import settings
 from django.utils.html import escape
 from django.contrib.syndication.views import Feed
@@ -15,6 +13,7 @@ from django.utils.feedgenerator import Atom1Feed
 from event_map import utils, models as db
 from django.contrib.gis.geos import Polygon
 from django_ical.views import ICalFeed
+import subhub.feeds as HubFeed
 
 def _str_to_bbox(val):
     try:
@@ -33,8 +32,7 @@ class geoFeed(Feed):
             events = db.Event.objects.all()
         return events
 
-class atomAllFeed(geoFeed):
-    feed_type = Atom1Feed
+class atomAllFeed(geoFeed,HubFeed.Feed):
     title_prefix = "event_Map's New Events"
     link = "/"
     description_template = "atom.html"
@@ -79,7 +77,6 @@ class iCalAllFeed(ICalFeed,geoFeed):
     
     def product_id(self):
         return "//event_map//all"+  ((" At " +  self.bounds) if self.bounds else "")+"//EN"
-        
     def items(self, obj):
         return obj.order_by('-start_date')
     def item_title(self, item):

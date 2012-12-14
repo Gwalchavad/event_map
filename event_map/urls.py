@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^ical/group/(?P<group>[-_\d\w]+)$', feeds.atomAllFeed(), name='atom-group'),
     url(r'^ical/feed/(?P<feed>[-_\d\w]+)$', feeds.atomAllFeed(), name='atom-feed'),    
     url(r'^ical/event/(?P<slug>[-_\d\w]+)$', feeds.iCalEvent(), name='atom-event'), 
+    #hub
+    url(r'^hub/', include('subhub.urls'), name="subhub-hub"),
     #api
     url(r'^api/user$', views.EventUser.as_view()),
     url(r'^api/session$', views.Session.as_view()),    

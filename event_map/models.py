@@ -1,7 +1,11 @@
 from django.contrib.gis.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
 from autoslug import AutoSlugField
+import subhub
+
 
 class emObject(models.Model):
     connections = models.ManyToManyField('self', blank=True, help_text="""
@@ -153,7 +157,11 @@ class Event(emObject):
     def save(self):
         super(Event, self).save()
         userGroup = UserGroup.objects.get(user=self.author)
-        self.connections.add(userGroup.id)    
+        self.connections.add(userGroup.id)  
+        subhub.publish(
+            ['http://%s%s' % (Site.objects.get_current().domain, reverse("subhub-hub"))],
+            'http://%s%s' % (Site.objects.get_current().domain, self.get_absolute_url()) ,
+        )  
 
 class Verbiage(models.Model):
     """Stores arbitrary website content fragments in Markdown
