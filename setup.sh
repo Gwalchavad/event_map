@@ -19,6 +19,11 @@ function doit {
     fi
 }
 
+if [[ $USER != "root" ]]; then          
+    echo You need to be root to run me	  	
+    exit 1	  	
+fi
+
 echo
 echo '----------------------------------------------------------------------'
 echo '                  INSTALLING IMPORTANT DEPENDENCIES                   '
