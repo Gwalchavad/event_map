@@ -2,7 +2,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django import http
 
-from subhub import models
+from django_push.hub import models
 
 def _get_verify(verifies):
     for v in verifies:

@@ -9,8 +9,7 @@ import dateutil.parser
 class EventForm(forms.ModelForm):
     class Meta:
         model = db.Event
-        fields = ( 'title','organization','link','contact_info','location','venue', 'content','city','connections')
-    
+        fields = ( 'title','link','contact_info','address','venue', 'content','city')
     start_date =  forms.CharField(required=True)
     end_date = forms.CharField(required=True)
     lat = forms.FloatField(required=False,widget=forms.HiddenInput)
@@ -36,12 +35,11 @@ class EventForm(forms.ModelForm):
         
     def save(self, *args, **kwargs):
         model = super(EventForm, self).save(commit=False)
-
         if self.cleaned_data['lng'] and self.cleaned_data['lat']:
             model.location_point = Point(self.cleaned_data['lng'],self.cleaned_data['lat'])
         model.start_date = self.cleaned_data['start_date']
         model.end_date = self.cleaned_data['end_date']
-        model.author = self.user
+        model.author = self.user.usergroup
         model.published = datetime.now()
         model.save()  
         return model
@@ -77,3 +75,4 @@ class SignUpForm(forms.Form):
         userGroup = db.UserGroup(user=user)
         userGroup.save()
         return user
+

@@ -8,7 +8,6 @@ define([
   'views/frame',
   'views/map',
   'views/loading',
- 
 ], function($, _, Backbone,UserModels,EventModel,SessionModel,FrameView,MapView,LoadingView,signupView){
     var AppRouter = Backbone.Router.extend({
         
@@ -21,7 +20,9 @@ define([
             "addevent": "eventAdd",
             "about": "about",
             "group/:group":"viewGroup",
-            "addGroup":"addGroup"
+            "addGroup":"addGroup",
+	    "feed/:feed":"viewFeed",
+	    "addFeed":"addFeed"
         },
         initialize: function(options) {
             var self = this;
@@ -123,6 +124,46 @@ define([
                     model: group
                 });
                 self.showView(groupView);
+            });
+        },
+	viewFeed:function(id){
+            var self = this;
+            self.showView(new LoadingView());
+
+            require(['views/list','models/feed','views/groups'],function(ListView,Group,GroupView){
+                var group = new Group({id:id});
+                group.fetch({
+                    success:function(){
+                        var groupEventList = new EventModel.EventCollection(
+                        self.eventList.where({group:id}),
+                            {
+                                data:{group:id}
+                            }
+                        );
+                        var groupEventList = new ListView.EventsListView({
+                            model:groupEventList
+                        });         
+                               
+                        self.showView([new GroupView({ model:group }),groupEventList]);    
+                    }
+                });
+                   
+            });  
+        },
+
+        addFeed:function(id,context){
+            if(!app.session.is_authenticated()){
+                app.appView.login();
+                return;
+            }
+            var self = context ? context : this;
+            self.showView(new LoadingView());
+            require(['models/feed','views/feed_add'],function(Feed,AddFeedView){
+                var feed = new Feed();
+                var feedView = new AddFeedView({
+                    model: feed
+                });
+                self.showView(feedView);
             });
         },
         eventDetails: function(id,fevent,context){

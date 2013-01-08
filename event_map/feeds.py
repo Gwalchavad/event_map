@@ -12,8 +12,10 @@ from django.contrib.syndication.views import Feed
 from django.utils.feedgenerator import Atom1Feed
 from event_map import utils, models as db
 from django.contrib.gis.geos import Polygon
+from django.contrib.sites.models import Site
 from django_ical.views import ICalFeed
-import subhub.feeds as HubFeed
+import django_push.publisher.feeds as HubFeed
+
 
 def _str_to_bbox(val):
     try:
@@ -67,7 +69,7 @@ class atomUserFeed(atomAllFeed):
     def get_object(self, request, user):
         events = super(atomUserFeed, self).get_object(request)
         user = db.User.objects.get(username=user)
-        return events.filter(groups=user.usergroup.id)
+        return events.filter(groups=user.usergroup.id,complete=True)
 
 class iCalAllFeed(ICalFeed,geoFeed):
     """
@@ -76,11 +78,13 @@ class iCalAllFeed(ICalFeed,geoFeed):
     timezone = 'America/Chicago'
     
     def product_id(self):
-        return "//event_map//all"+  ((" At " +  self.bounds) if self.bounds else "")+"//EN"
+        return "//event_map-v.1//EN"
     def items(self, obj):
         return obj.order_by('-start_date')
     def item_title(self, item):
         return item.title
+    def item_guid(self, item):
+        return item.uid
     def item_description(self, item):
         return item.content
     def item_created(self,item):
@@ -90,9 +94,9 @@ class iCalAllFeed(ICalFeed,geoFeed):
     def item_start_datetime(self, item):
         return item.start_date
     def item_end_datetime(self, item):
-        return item.start_date
+        return item.end_date
     def item_location(self,item):
-        return item.venue + ((" At " +  item.location) if item.location else "")
+        return item.venue + (( "(" + item.address + ")" ) if item.address else "")
     def item_geolocation(self,item):
         return item.location_point.y,item.location_point.x
         
@@ -107,6 +111,3 @@ class iCalEvent(iCalAllFeed):
         self.slug = slug
         event = db.Event.objects.filter(slug=slug)
         return event
-
-    def product_id(self,obj):
-        return "//event_map//"+self.slug+"//EN"

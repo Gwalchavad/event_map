@@ -15,7 +15,8 @@ class EventAdmin(OSMGeoAdmin):
  
 admin.site.register(db.Event, EventAdmin)
 admin.site.register(db.Group)
-admin.site.register(db.UserGroup)
-admin.site.register(db.Feed)
+admin.site.register(db.UserGroup,)
+admin.site.register(db.FeedGroup)
 admin.site.register(db.Permission)
 admin.site.register(db.Verbiage)
+admin.site.register(db.emObject)

@@ -20,7 +20,9 @@ urlpatterns = patterns('',
     url(r'^ical/feed/(?P<feed>[-_\d\w]+)$', feeds.atomAllFeed(), name='atom-feed'),    
     url(r'^ical/event/(?P<slug>[-_\d\w]+)$', feeds.iCalEvent(), name='atom-event'), 
     #hub
-    url(r'^hub/', include('subhub.urls'), name="subhub-hub"),
+    url(r'^hub/', include('django_push.hub.urls'), name="subhub-hub"),
+    #callback
+    url(r'^callback/', include('django_push.subscriber.urls'), name="subhub-hub"),    
     #api
     url(r'^api/user$', views.EventUser.as_view()),
     url(r'^api/session$', views.Session.as_view()),    
@@ -29,5 +31,7 @@ urlpatterns = patterns('',
     url(r'^api/event/id/(?P<id>\d+)$', views.Event.as_view()),
     url(r'^api/event/(?P<slug>[-_\d\w]+)$', views.Event.as_view()),
     url(r'^api/group$', views.Group.as_view()), 
-    url(r'^api/group/(?P<id>\d+)$', views.Group.as_view())
+    url(r'^api/group/(?P<id>\d+)$', views.Group.as_view()),
+    url(r'^api/feed$', views.FeedView.as_view()), 
+
 )

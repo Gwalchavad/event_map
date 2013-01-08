@@ -2,7 +2,7 @@ define([
     'underscore',
     'backbone',
     'utils',
-    'hbs!../../templates/group_add'
+    'hbs!../../templates/feed_add'
 ], function(_,Backbone,Utils,temp_group_add){
     var groupAdd = Backbone.View.extend({
         tagname: "div",
@@ -46,7 +46,7 @@ define([
                         });
                     });
                     promise.success(function(response) {
-                        app.navigate('feed/' + self.model.id, {
+                        app.navigate('group/' + self.model.id, {
                             trigger: true
                         });
                     });

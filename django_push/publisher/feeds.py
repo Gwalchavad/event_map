@@ -12,8 +12,6 @@ class HubAtom1Feed(Atom1Feed):
         if hub is not None:
             handler.addQuickElement(u'link', '', {u'rel': u'hub',
                                                   u'href': hub})
-
-
 class Feed(BaseFeed):
     feed_type = HubAtom1Feed
     hub = None

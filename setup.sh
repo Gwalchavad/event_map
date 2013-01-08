@@ -31,7 +31,7 @@ echo '----------------------------------------------------------------------'
 echo
 
 doit apt-get install --assume-yes build-essential \
-    python python-dev python-setuptools python-virtualenv git redis-server
+    python python-dev python-setuptools python-virtualenv git redis-server rabbitmq-server
 
 echo
 echo '----------------------------------------------------------------------'

@@ -7,7 +7,7 @@ def publish(topics, entry_id, process=True):
     - `process`: a flag to force the immediate (blocking) processing of
        all wating updates
     '''
-    from subhub.models import DistributionTask
+    from django_push.hub.models import DistributionTask
     for topic in topics:
         DistributionTask.objects.add(topic, entry_id)
     if process:

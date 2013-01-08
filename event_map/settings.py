@@ -1,6 +1,3 @@
-# Do you want to run celery? this controlls all of modules that pull data from extranal sources.
-ENABLE_CELERY = True
-BROKER_URL = 'redis://localhost:6379/0'
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -30,7 +27,7 @@ DATABASES = {
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
 TIME_ZONE = 'America/Chicago'
-
+CELERY_TIMEZONE = TIME_ZONE
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
@@ -135,8 +132,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.gis',
     'django.contrib.markup',
-    'subhub',
+    'django_push.hub',
+    'django_push.subscriber',
     'event_map',
+    'feed_import',
     'south',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
@@ -144,6 +143,15 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+# Do you want to run celery? this controlls all of modules that pull data from extranal sources.
+ENABLE_CELERY = True
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+#CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+#CELERY_TASK_SERIALIZER = 'json'
+#CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ENABLE_UTC = True
+CELERY_TASK_RESULT_EXPIRES=3600
+CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
 if ENABLE_CELERY:
     INSTALLED_APPS += ('djcelery',)
     import djcelery

@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.http import urlencode
 import httplib2
 
-from subhub import utils
+from django_push.hub import utils
 
 class SubscriptionManager(models.Manager):
     def process(self, log=None):
@@ -197,7 +197,7 @@ class SubscriptionTask(models.Model):
             self.delete()
         return False, error
 
-
+#move to publish
 class DistributionTaskManager(models.Manager):
     def add(self, topic, entry_id):
         '''

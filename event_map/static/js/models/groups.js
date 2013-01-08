@@ -1,7 +1,7 @@
 define([
     'underscore',
     'backbone',
-],function (_,Backbone,Models){
+],function (_,Backbone){
      
     var GroupModel = Backbone.Model.extend({
         urlRoot:"/api/group",

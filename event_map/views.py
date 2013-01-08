@@ -16,7 +16,6 @@ import json
 from event_map import utils, forms, models as db
 from event_map.utils import json_api_errors, ApiException
 
-
 @ensure_csrf_cookie
 def index(request):
     """
@@ -149,7 +148,7 @@ class EventTimeLine(View):
             events = events.filter(date_modified__gte=mod_date)
 
         if request.GET.get('user'):
-            events = events.select_related("author").filter(author__username=request.GET.get('user'))
+            events = events.select_related("author").filter(author__user__username=request.GET.get('user'))
 
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
@@ -328,6 +327,51 @@ class Group(View):
             }
         }, status=401)
 
+class FeedView(View):
+    """API For groups"""
+    @method_decorator(json_api_errors)
+    def get(self, request, **kwargs):
+        """Get info about a feed"""
+        group = db.Group.objects.get(id=kwargs['id'])
+        permission = group.permission_set.all().get(user=request.user)
+        permission_json = {
+            "admin":permission.admin,
+            "read":permission.read,
+            "write":permission.write,
+            "banned":permission.banned,
+        }
+        response = {
+            "id": group.id,
+            "title": group.title,
+            "description": group.description,
+            "permissions":permission_json
+        }
+        return utils.json_response(response)
+        
+    def put(self, request, **kwargs):
+        """modifiey a feed"""
+        return utils.json_response({
+            'errors': {
+                'message': "NOT Implemented",
+            }
+        }, status=401)
+        
+    @method_decorator(json_api_errors)  
+    def post(self, request):
+        """create an a feed""" 
+        from feed_import import importers
+        json_post = json.loads(request.raw_post_data)
+        imported_feed = importers.add_feed(json_post['url'],request.user)
+        if imported_feed:
+            return utils.json_response({'message':imported_feed})
+        
+    def delete(self, request):
+        """delete a group"""
+        return utils.json_response({
+            'errors': {
+                'message': "NOT Implemented",
+            }
+        }, status=401)
 
 class Subscription(View):
     """Manage subscriptions to groups"""

@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 from django.contrib import admin
-
-from subhub import models
+from django_push.hub import models
 
 admin.site.register(models.Subscription,
     list_display = ['topic', 'callback', 'expires'],
