@@ -11,7 +11,7 @@ Features
 
 Planned Features
 ----------------
-*   Fuckbook integration
+*   Facebook integration
 *   RSS import
 *   Groups
 *   Embedding
