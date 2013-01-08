@@ -6,11 +6,6 @@
 [ -z $DOMAIN ]         && DOMAIN='dev'
 [ -z $REPO ]           && REPO='git://github.com/wanderer/event_map.git'
 
-if [[ $USER != "root" ]]; then
-    echo You need to be root to run me
-    exit 1
-fi
-
 if [[ ! -f /usr/bin/apt-get ]]; then
     echo You need a debian/ubuntu linux distro
     exit 1
@@ -23,6 +18,11 @@ function doit {
         exit 1
     fi
 }
+
+if [[ $USER != "root" ]]; then          
+    echo You need to be root to run me	  	
+    exit 1	  	
+fi
 
 echo
 echo '----------------------------------------------------------------------'
