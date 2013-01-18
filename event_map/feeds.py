@@ -6,10 +6,8 @@ r"""
     Tools for syndicating articles via Atom and Icalendar.
 
 """
-from django.conf import settings
 from django.utils.html import escape
 from django.contrib.syndication.views import Feed
-from django.utils.feedgenerator import Atom1Feed
 from event_map import utils, models as db
 from django.contrib.gis.geos import Polygon
 from django.contrib.sites.models import Site

@@ -43,13 +43,14 @@ define([
             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
         }
     });
-    /*
-     * TEXT FILL
-     * Resizes the font of text in an inner element so that it fills as much space as possible in the outer element.
-     * By marcus ekwall http://stackoverflow.com/users/358556/marcus-ekwall
-     * Fount At http://jsfiddle.net/mekwall/fNyHs/
-     */
+
     $.fn.textfill = function(maxFontSize, maxWords) {
+        /*
+         * TEXT FILL
+         * Resizes the font of text in an inner element so that it fills as much space as possible in the outer element.
+         * By marcus ekwall http://stackoverflow.com/users/358556/marcus-ekwall
+         * Fount At http://jsfiddle.net/mekwall/fNyHs/
+         */
         maxFontSize = parseInt(maxFontSize, 10);
         maxWords = parseInt(maxWords, 10) || 3;
         return this.each(function(){
@@ -96,8 +97,12 @@ define([
             }
         });
     };
-    //form to json.
+
     var form2object = function(selector){
+        /*
+         * Form 2 Object: takes a select of a form and returns the contents
+         * of the form in an object
+         */
         result = {};
         formArray = $(selector).serializeArray();
         _.each(formArray,function(element){ 
@@ -106,10 +111,11 @@ define([
             } );
         return result;
     };
-    /**
-     * http://stackoverflow.com/a/10997390/11236
-     */
+
     var updateURLParameter = function(url, param, paramVal){
+        /*
+        * http://stackoverflow.com/a/10997390/11236
+        */
         var newAdditionalURL = "";
         var tempArray = url.split("?");
         var baseURL = tempArray[0];
@@ -128,8 +134,43 @@ define([
         var rows_txt = temp + "" + param + "=" + paramVal;
         return baseURL + "?" + newAdditionalURL + rows_txt;
     }
-    //common time
+    
+    Date.prototype.getWeekdayName = function(){
+        /*
+         * give a weekday num return a weekday abervation
+         */
+        var weekday=new Array(7);
+        weekday[0]="Sun";
+        weekday[1]="Mon";
+        weekday[2]="Tue";
+        weekday[3]="Wed";
+        weekday[4]="Thu";
+        weekday[5]="Fri";
+        weekday[6]="Sat";
+        return weekday[this.getUTCDay()];    
+    };
+    Date.prototype.month2letter = function(num) {
+        /*
+         * Given a month letter (0-11) return the month letter
+         */
+        var number = (typeof(num) != "undefined")?num:this.getMonth()
+        var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
+        return m_names[number];
+    };
+    Date.prototype.getDateWithSlash = function(){
+        /*
+         *  retruns a date in the format m/d/y
+         */
+        return  this.getUTCMonth()+1+"/"+this.getUTCDate()+"/"+this.getUTCFullYear();
+    };
+    Date.prototype.getDateShort = function(){
+        return  this.getUTCMonth()+"/"+this.getUTCDate();
+    };
+
     Date.prototype.getTimeCom = function(){
+        /*
+         * retruns time with AM or PM attched
+         */
         var hours = this.getUTCHours()
         var minutes = this.getUTCMinutes()
         if (minutes < 10){
@@ -144,28 +185,6 @@ define([
         var time = hours + ":" + minutes + " "+orientation;
         return time;
     };
-    Date.prototype.getWeekdayName = function(){
-        var weekday=new Array(7);
-        weekday[0]="Sun";
-        weekday[1]="Mon";
-        weekday[2]="Tue";
-        weekday[3]="Wed";
-        weekday[4]="Thu";
-        weekday[5]="Fri";
-        weekday[6]="Sat";
-        return weekday[this.getUTCDay()];    
-    };
-    Date.prototype.month2letter = function(num) {
-		var number = (typeof(num) != "undefined")?num:this.getMonth()
-        var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
-        return m_names[number];
-    };
-    Date.prototype.getDateWithSlash = function(){
-        return  this.getUTCMonth()+1+"/"+this.getUTCDate()+"/"+this.getUTCFullYear();
-    }
-    Date.prototype.getDateShort = function(){
-        return  this.getUTCMonth()+"/"+this.getUTCDate();
-    }   
     return {
         form2object:form2object,
         updateURLParameter:updateURLParameter

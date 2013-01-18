@@ -4,10 +4,11 @@ define([
     'backbone',
     'utils',
     'settings',
+    'views/map',
     'hbs!../../templates/event_add',
     'timeDatePicker',
   // Load our app module and pass it to our definition function
-], function($,_,Backbone,Utils,settings,temp_event_add){
+], function($,_,Backbone,Utils,settings,map,temp_event_add){
 
     var EventAddView = Backbone.View.extend({
         tagname: "div",
@@ -18,15 +19,19 @@ define([
             "click .cancel": "cancel",
             "click #delete_event": "delete_event"
         },
-        initialize: function() {            
+        initialize: function() {
             this.model.on("error", function(model, errors) {
                 _.each(errors, function(error, key) {
+                    if(key == "latlng"){
+                        map.marker.unbindPopup();
+                        map.marker.bindPopup("<b>You Need To Move The Maker<br> To Where This Event Is Happening</b>").openPopup();
+                    }
                     $("#" + key + "_error").show().html(error);
                 });
             });
         },
         render: function() {
-            app.map.group.clearLayers();
+            map.group.clearLayers();
             var context = _.extend({
                 "settings": settings
             }, this.model.toJSON());
@@ -39,13 +44,18 @@ define([
                 context.start_date = context._start_date.toISOString().replace("T"," ").substring(0,16);
             if(context.end_date)
                 context.end_date = context._end_date.toISOString().replace("T"," ").substring(0,16);
-                     
+
             this.$el.html(temp_event_add(context));
-            var marker = app.map.add_marker(this.model.get("location_point").coordinates,true);
+            if(this.model.get("location_point")){
+                var marker = map.add_marker(this.model.get("location_point").coordinates,true);
+            }else{
+                var marker = map.add_marker(null,true);
+            }
             marker.on('dragend', function(e) {
                 $('#id_lat').val(e.target._latlng.lat);
                 $('#id_lng').val(e.target._latlng.lng);
             });
+            marker.bindPopup("Move the maker to where the events will be").openPopup();
             //trigger resive event            
             //set up datetime picker. destroy?
             this.$el.find("#id_start_date").datetimepicker({
@@ -85,7 +95,7 @@ define([
             return this;
         },
         geocode: function() {
-            app.map.geocode($("#id_street").val() + " " + $("#id_city").val(), {
+            map.geocode($("#id_street").val() + " " + $("#id_city").val(), {
                 onSuccess: function(lat, lng) {
                     $('#id_lat').val(lat);
                     $('#id_lng').val(lng);
@@ -106,7 +116,7 @@ define([
                 json.start_date = json.start_date.replace(" ","T");
             if(json.end_date)
                 json.end_date = json.end_date.replace(" ","T");
-            if(promise = this.model.save(json)){
+            if(promise = this.model.save(json,{isComplete:true})){
                 promise.error(function(response) {
                     throw new Error("Server Error:" + response);
                 });
@@ -115,7 +125,6 @@ define([
                         trigger: true
                     });
                 });
-             
             }
         },
         cancel: function(e) {
@@ -139,7 +148,7 @@ define([
             }
         }
     });
-    
+
     return {
         EventAddView:EventAddView
     };

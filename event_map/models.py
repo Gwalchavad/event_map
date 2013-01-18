@@ -2,6 +2,7 @@ from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
+from django.db.models import Q
 from autoslug import AutoSlugField
 import uuid
 import django_push.hub
@@ -13,7 +14,10 @@ def generate_uuid():
 
 
 class emObject(models.Model):
-    uid = models.CharField(max_length=255, unique=True, default=generate_uuid)
+    uid = models.CharField(
+        max_length=255,
+        unique=True,
+        default=generate_uuid)
 
     def __unicode__(self):
         if hasattr(self, 'abstractgroup'):
@@ -35,13 +39,13 @@ class AbstractGroup(emObject):
         ('queue', 'Queue'),
         ('restricted', 'Restricted'),
     )
-    description = models.TextField(help_text="""the name of the group""")
+    description = models.TextField(
+        help_text="""the name of the group""")
     visibility = models.CharField(
         max_length=32,
         choices=visibility_choices,
         default="public",
-        help_text="""Whether or not user is attending protest."""
-    )
+        help_text="""Whether or not user is attending protest.""")
     posting_option = models.CharField(
         max_length=32,
         choices=posting_choices,
@@ -51,7 +55,10 @@ class AbstractGroup(emObject):
         'self',
         symmetrical=False,
         through='Subscription',
-        help_text="""How wants updates on this on events here?""")
+        help_text="""Who wants updates  on events in this group?""")
+    events = models.ManyToManyField(
+        'Event',
+        through="SubGroupEvent")
 
     def __unicode__(self):
         if hasattr(self, 'group'):
@@ -68,6 +75,57 @@ class AbstractGroup(emObject):
             return self.usergroup.title
         else:
             return self.description
+
+    def get_all_events(self):
+        """returns all events in the groups and in the subcriptions"""
+        return SubGroupEvent.objects.filter(group=self)
+
+    def add_events(self, events, created=False, subscription=None):
+        """takes a list of events and addes them to the group and also
+        propagates them. If the events were newly created use the created
+        argument"""
+        if events:
+            if not created:
+                #if some of the events happen to be in a subscription, remove it.
+                #Cuz now its going to be in the group
+                qset = Q()
+                for event in events:
+                    qset |= Q(pk=event.pk)
+                if subscription:
+                    #only add events not 'saved'(in the group but not in a
+                    #subscription) to the group
+                    old_events = set(Event.objects.filter(
+                        qset,
+                        subgroupevent__subscription__isnull=True,
+                        subgroupevent__group=self))
+                    events = set(events).difference(old_events)
+                else:
+                    SubGroupEvent.objects.filter(qset, group=self).delete()
+            #add new events that are not already in the group
+            SubGroupEvent.objects.bulk_create(
+                [SubGroupEvent(
+                    event=event,
+                    group=self,
+                    subscription=subscription) for event in events])
+
+    def subscribe(self, events):
+        pass
+
+    def bfs_propagation(self, events, created=False):
+        """Propgate events from this group using BFS"""
+        visited = set([self])
+        frontier = [self]
+        self.add_events(events, created=created)
+        while frontier:
+            vertext = frontier.pop()
+            for subscription in vertext.publisher.all():
+                if subscription.subscriber not in visited:
+                    visited.add(subscription.subscriber)
+                    frontier.append(subscription.subscriber)
+                subscription.subscriber.add_events(
+                    events,
+                    subscription=subscription,
+                    created=created)
 
 
 class UserGroup(AbstractGroup):
@@ -96,7 +154,8 @@ class UserGroup(AbstractGroup):
 
 
 class Group(AbstractGroup):
-    creator = models.ForeignKey(UserGroup)
+    creator = models.ForeignKey(
+        UserGroup)
     title = models.CharField(
         unique=True,
         max_length=255,
@@ -106,29 +165,18 @@ class Group(AbstractGroup):
         return self.title
 
 
-class FeedGroup(Group):
-    feed = models.OneToOneField(fi_db.Feed, related_name='feed_model')
+class FeedGroup(AbstractGroup):
+    creator = models.ForeignKey(
+        UserGroup)
+    title = models.CharField(
+        max_length=255,
+        help_text=""" the name of the group""")
+    feed = models.OneToOneField(
+        fi_db.Feed,
+        related_name='feed_model')
 
     def __unicode__(self):
         return self.title
-
-
-class Permission(models.Model):
-    class Meta:
-        unique_together = ("subject", "emobject")
-    banned = models.BooleanField(default=False, help_text="""
-        is this user banned?""")
-    read = models.BooleanField(default=False, help_text="""
-        can this user view the group?""")
-    write = models.BooleanField(default=False, help_text="""
-        can the user post to this group""")
-    admin = models.BooleanField(default=False, help_text="""
-        deos user have admin privilages?""")
-    subject = models.ForeignKey(AbstractGroup, related_name='permissions')
-    emobject = models.ForeignKey(emObject)
-
-    def __unicode__(self):
-        return str(self.subject) + " --> " + str(self.emobject)
 
 
 class Event(emObject):
@@ -139,25 +187,30 @@ class Event(emObject):
         blank=True,
         related_name='event_author',
         help_text="""The user who wrote this article.""")
-    title = models.CharField(max_length=255, help_text="""
-        A one-line title to describe article.""")
+    title = models.CharField(
+        max_length=255,
+        help_text="""A one-line title to describe article.""")
     content = models.TextField(
         default="please add some content here",
         help_text="""The contents of the article in Markdown.""")
-    slug = AutoSlugField(populate_from='title', unique=True)
-    date_modified = models.DateTimeField(auto_now=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateTimeField(help_text="""
-        What Date is this event Happening On?""")
-    end_date = models.DateTimeField(null=True, blank=True, help_text="""
-        When is your event ending?""")
-    address = models.CharField(
+    slug = AutoSlugField(
+        populate_from='title',
+        unique=True)
+    date_modified = models.DateTimeField(
+        auto_now=True)
+    date_created = models.DateTimeField(
+        auto_now_add=True)
+    start_date = models.DateTimeField(
+        help_text="""What Date is this event Happening On?""")
+    end_date = models.DateTimeField(
         null=True,
+        blank=True,
+        help_text="""When is your event ending?""")
+    address = models.CharField(
         blank=True,
         max_length=255,
         help_text="""the location of the event""")
     city = models.CharField(
-        null=True,
         blank=True,
         max_length=255,
         help_text="""the location of the event""")
@@ -185,10 +238,10 @@ class Event(emObject):
         blank=True,
         help_text="""The Event that this was cloned from""")
 
-    location_point = models.PointField(null=True, blank=True, help_text="""
-        Aproximate coordinates of where the event will happen""")
-
-    groups = models.ManyToManyField(AbstractGroup, blank=True)
+    location_point = models.PointField(
+        null=True,
+        blank=True,
+        help_text="""Aproximate coordinates of where the event will happen""")
 
     """Allow geospataul queries"""
     objects = models.GeoManager()
@@ -199,7 +252,7 @@ class Event(emObject):
     def __unicode__(self):
         return self.title
 
-    def toJSON(self):
+    def to_JSON(self):
         return {
             "id": self.id,
             "title": self.title,
@@ -213,13 +266,15 @@ class Event(emObject):
             "venue": self.venue,
             "location_point": self.location_point,
             "link": self.link,
-            "slug": self.slug
+            "slug": self.slug,
+            "complete": self.complete
         }
 
     def save(self, *args, **kwargs):
+        if self.start_date and self.location_point and self.title and self.content:
+            self.complete = True
         super(Event, self).save()
-        userGroup = UserGroup.objects.get(user=self.author)
-        self.groups.add(userGroup.id)
+        #publish
         django_push.hub.publish(
             ['http://%s%s' % (Site.objects.get_current().domain,
                               reverse("subhub-hub"))],
@@ -228,26 +283,91 @@ class Event(emObject):
         )
 
 
+class Permission(models.Model):
+    class Meta:
+        unique_together = ("subject", "emobject")
+    banned = models.BooleanField(
+        default=False,
+        help_text="""is this user banned?""")
+    read = models.BooleanField(
+        default=False,
+        help_text="""can this user view the group?""")
+    write = models.BooleanField(
+        default=False,
+        help_text="""can the user post to this group""")
+    admin = models.BooleanField(
+        default=False, help_text="""does user have admin privilages?""")
+    subject = models.ForeignKey(
+        AbstractGroup,
+        related_name='permissions')
+    emobject = models.ForeignKey(emObject)
+
+    def __unicode__(self):
+        return str(self.subject) + " --> " + str(self.emobject)
+
+
 class Subscription(models.Model):
     class Meta:
         unique_together = ("subscriber", "publisher")
-    subscriber = models.ForeignKey(AbstractGroup, related_name='subcriber')
-    publisher = models.ForeignKey(AbstractGroup, related_name='publisher')
-    events = models.ManyToManyField(Event)
+    subscriber = models.ForeignKey(
+        AbstractGroup,
+        related_name='subscriber')
+    publisher = models.ForeignKey(
+        AbstractGroup,
+        related_name='publisher')
+    sub_events = models.ManyToManyField(Event, through='SubGroupEvent')
+
+    def __unicode__(self):
+        return str(self.publisher) + "-->" + str(self.subscriber)
+
+    def to_JSON(self):
+        j_events = []
+        #add subrciption info to the events in the subscription
+        for event in self.events:
+            j_event = event.to_JSON()
+            j_event['subscipition'] = {
+                'type': 'feed',
+                'title': self.subscriber.title,
+                'id': self.subscriber.id,
+                'url': self.subscriber.to_absolute_url()}
+            j_events.push(j_event)
+        return j_events
+
+
+class SubGroupEvent(models.Model):
+    """this creates a table for managing events related to subriptions and
+    groups that way we don't have two tables for group->events and
+    subscription->events"""
+    class Meta:
+        unique_together = ('subscription', 'group', 'event')
+    subscription = models.ForeignKey(Subscription, null=True, blank=True)
+    group = models.ForeignKey(AbstractGroup)
+    event = models.ForeignKey(Event)
+    group_name = models.CharField(
+        blank=True,
+        max_length=255,
+        help_text=""" the name of the group subdcribed to""")
+
+    def __unicode__(self):
+        if self.subscription:
+            return str(self.subscription) + " (" + str(self.event) + ")"
+        else:
+            return str(self.group) + " (" + str(self.event) + ")"
 
 
 class Verbiage(models.Model):
     """Stores arbitrary website content fragments in Markdown
-
     See also: :py:func:`occupywallst.context_processors.verbiage`
     """
-    name = models.CharField(max_length=255, unique=True, help_text="""
-        Arbitrary name for content fragment.  If this starts with a '/'
-        then it'll be mapped to that URL on the website.""")
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="""Arbitrary name for content fragment.""")
     content = models.TextField(blank=True)
-    use_markdown = models.BooleanField(default=True, help_text="""
-        If checked, your content will be parsed as markdown with
-        HTML allowed.""")
+    use_markdown = models.BooleanField(
+        default=True,
+        help_text="""If checked, your content will be parsed as markdown
+         with HTML allowed.""")
 
     class Meta:
         verbose_name_plural = "Verbiage"
@@ -255,11 +375,7 @@ class Verbiage(models.Model):
     @staticmethod
     def get(name, language=None):
         verb = Verbiage.objects.get(name=name)
-        if verb.use_markdown:
-            from event_map.utils import markup_parser
-            res = markup_parser(verb.content)
-        else:
-            res = verb.content
+        res = verb.content
         return res
 
     def __unicode__(self):
@@ -267,12 +383,24 @@ class Verbiage(models.Model):
 
 
 class Notification(models.Model):
-    content = models.CharField(max_length=255, help_text="""
-        Arbitrary content of the notification""")
-    href = models.CharField(max_length=255, help_text="""
-        the link to whats going on""")
-    to = models.ForeignKey(UserGroup, help_text="""
-        The user this is to""")
-    date_created = models.DateTimeField(auto_now_add=True)
-    read = models.BooleanField(default=False, help_text="""
-        Has this notification been read?""")
+    content = models.CharField(
+        max_length=255,
+        help_text="""Arbitrary content of the notification""")
+    href = models.CharField(
+        max_length=255,
+        help_text="""the link to whats going on""")
+    to = models.ForeignKey(
+        UserGroup,
+        help_text="""The user this is to""")
+    date_created = models.DateTimeField(
+        auto_now_add=True)
+    read = models.BooleanField(
+        default=False,
+        help_text="""Has this notification been read?""")
+
+    def toJSON(self):
+        return {
+            'content': self.content,
+            'href': self.href,
+            'read': self.read
+        }

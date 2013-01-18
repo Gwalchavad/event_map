@@ -22,9 +22,9 @@
 					<span class="help-block">a link to other infomation on the event</span>
 				</div>
 				<div class="span5">
-                    <label for="id_location" class="required">Location &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
+                    <label for="id_address" class="required">Location &nbsp;<span id="location_error" class="label label-important hide"></span></label> 
 					<div class="form-inline">
-						<input id="id_street" class="input-medium" type="text" placeholder="Steet" name="location" maxlength="255" value="{{location}}">					
+						<input id="id_street" class="input-medium" type="text" placeholder="Steet" name="address" maxlength="255" value="{{address}}">					
 						<div class="input-append">
 							<input class="input-mini" id="id_city" type="text" value="{{settings.city}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
 						</div>

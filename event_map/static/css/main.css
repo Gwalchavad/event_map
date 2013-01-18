@@ -33,6 +33,7 @@ label.required:after { content: " (required)"; }
 #event_list{
     margin-left: 0;
     list-style: none;
+    background-color: grey;
 }
 #event_list_day{
     list-style: none;

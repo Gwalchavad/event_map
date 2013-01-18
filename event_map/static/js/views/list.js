@@ -1,10 +1,10 @@
-define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_list', 'hbs!../../templates/event_list_empty',
+define(['jquery', 'underscore', 'backbone', 'utils', 'views/map','hbs!../../templates/event_list', 'hbs!../../templates/event_list_empty',
 
-'hbs!../../templates/item_open', 'hbs!../../templates/item_closed',
+'hbs!../../templates/item_open', 'hbs!../../templates/EventClosedPartial',
 
 'hbs!../../templates/li_months', 'hbs!../../templates/li_days', 'hbs!../../templates/popup'
 // Load our app module and pass it to our definition function
-], function($, _, Backbone,utils, temp_event_list, temp_event_list_empty, temp_item_open, temp_item_closed, temp_li_months, temp_li_days, temp_popup) {
+], function($, _, Backbone,utils,map, temp_event_list, temp_event_list_empty, temp_item_open, temp_item_closed, temp_li_months, temp_li_days, temp_popup) {
 
     var EventsListView = Backbone.View.extend({
         tagName: "div",
@@ -30,7 +30,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         },
         initialize: function() {
             var self = this;
-            app.map.group.clearLayers();
+            map.group.clearLayers();
             //bind
             $(window).on('resize.' + this.cid, this, this.onResize);
             //process events that are added by fetching
@@ -42,6 +42,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                 self.onAdd(model);
             });
             //fecth events that might have been added since the last time we viewed this list
+            /*
             this.model.update(function(events){
                 if(events.length){
                     self.render();
@@ -49,9 +50,9 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     $("#EventsListView").on("scroll." + self.cid,self, self.onScroll);
                 }
             });
-            app.map.map.on("popupopen", this.onPopupOpen);
-            app.map.map.on('locationfound', this.onLocationFound,this);
-           
+            */
+            map.map.on("popupopen", this.onPopupOpen);
+            map.map.on('locationfound', this.onLocationFound,this);
     
         },
         onMarkerClick: function(e) {
@@ -77,13 +78,17 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             e.data.setMonthSideBarPosition();
         },
         backFetch: function(context) {
+            
             self = context ? context : this;
             self.model.rfetch({
                 successCallback: function(events) {
                     self.render(events, true);
+                    //bind event incase it wasn't bond in onDOM
+                    $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
                     scrollPosistion = events.length * self.height;
                     $("#EventsListView").scrollTop(scrollPosistion);
                     self.genarateColorsAndMonths(true);
+
                 }
             });
         },
@@ -92,6 +97,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             self.model.ffetch({
                 successCallback: function(events) {
                     self.render(events);
+                    //bind event incase it wasn't bond in onDOM
+                    $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
                     self.genarateColorsAndMonths(true);
                 }
             });
@@ -101,35 +108,38 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //compute the vaules for open and close 
             //this is also compute on render becuase model appended are not
             //a refence to models in the collection
-            model.computeCloseValues();
-            model.computeOpenValues();
-            //for the handlebars temp
             var location_point = model.get("location_point");
-            model.set("coordx",location_point.coordinates[0]);
-            model.set("coordy",location_point.coordinates[1]);
-            if(app.map.currentPos){
-                model.set("scoordx",app.map.currentPos.lng);
-                model.set("scoordy",app.map.currentPos.lat);
+            if(location_point){
+                model.computeCloseValues();
+                model.computeOpenValues();
+                //for the handlebars temp
+                //set coordinates for google maps directions
+                model.set("coordx",location_point.coordinates[0]);
+                model.set("coordy",location_point.coordinates[1]);
+                if(map.currentPos){
+                    model.set("scoordx",map.currentPos.lng);
+                    model.set("scoordy",map.currentPos.lat);
+                }
+                    
+                //set map icons       
+                var myIcon = L.divIcon({
+                    className: "icon",
+                    html: '<div id=\'icon-' + model.get("slug") + '\'></div>',
+                    iconAnchor: [9, 23],
+                    iconSize: [24, 30],
+                    popupAnchor: [4, - 10]
+                });
+                loca_p = model.get("location_point");
+                var marker = L.marker(
+                    [loca_p.coordinates[1], loca_p.coordinates[0]], {
+                        icon: myIcon,
+                        modelID: model.get("slug")
+                });
+                marker.bindPopup(temp_popup(model.toJSON()));
+                map.group.addLayer(marker);
+                marker.on("click", self.onMarkerClick, this);
+                this.markers[model.get("slug")] = marker;
             }
-                
-            //set map icons       
-            var myIcon = L.divIcon({
-                className: "icon",
-                html: '<div id=\'icon-' + model.get("slug") + '\'></div>',
-                iconAnchor: [9, 23],
-                iconSize: [24, 30],
-                popupAnchor: [4, - 10]
-            });
-            loca_p = model.get("location_point");
-            var marker = L.marker(
-            [loca_p.coordinates[1], loca_p.coordinates[0]], {
-                icon: myIcon,
-                modelID: model.get("slug")
-            });
-            marker.bindPopup(temp_popup(model.toJSON()));
-            app.map.group.addLayer(marker);
-            marker.on("click", self.onMarkerClick, this);
-            this.markers[model.get("slug")] = marker;
             
         },
         onLocationFound: function(e){
@@ -147,15 +157,17 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         onClick: function(event) {
             var self = this;
             var id = event.currentTarget.id.replace(/event_/, "");
+           
+                if ($(event.currentTarget).hasClass("open")) {
+                    self.eventItemClose(id);
+                    if(self.markers[id])
+                        self.markers[id].closePopup();
+                } else {
+                    self.eventItemOpen(id);
+                    if(self.markers[id])
+                        self.markers[id].openPopup();
+                }
 
-            if ($(event.currentTarget).hasClass("open")) {
-                self.eventItemClose(id);
-                self.markers[id].closePopup();
-            } else {
-                self.eventItemOpen(id);
-                //open maker
-                self.markers[id].openPopup();
-            }
         },
         onMouseenter: function(target) {
             var self = this;
@@ -163,16 +175,20 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             //test.attr("transform","scale(1.4)")
             if (!$(target.currentTarget).hasClass("open")) {
                 var id = target.currentTarget.id.replace(/event_/, "");
-                $("#icon-" + id).parent().css("margin-left", - 11).css("margin-top", - 27).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
-                self.markers[id].setZIndexOffset(200);
+                if(self.markers[id]){
+                    $("#icon-" + id).parent().css("margin-left", - 11).css("margin-top", - 27).find(".layer1").attr("transform", "scale(1.2) translate(-1, -3)");
+                    self.markers[id].setZIndexOffset(200);
+                }
             }
         },
         onMouseleave: function(target) {
             var self = this;
             if (!$(target.currentTarget).hasClass("open")) {
                 var id = target.currentTarget.id.replace(/event_/, "");
-                $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
-                self.markers[id].setZIndexOffset(10);
+                if(self.markers[id]){
+                    $("#icon-" + id).parent().css("margin-left", - 9).css("margin-top", - 23).find(".layer1").attr("transform", "scale(1)");
+                    self.markers[id].setZIndexOffset(10);
+                }
             }
         },
         eventItemOpen: function(id) {
@@ -192,8 +208,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
 
                 height = $("#day_" + day + "_" + month+"_"+year).height();
                 $("#day_" + day + "_" + month+"_"+year).height(height +  self.openHeight);
-
-                self.markers[id].setZIndexOffset(100);
+                if(self.markers[id])
+                    self.markers[id].setZIndexOffset(100);
             }
         },
         eventItemClose: function(id){
@@ -218,9 +234,8 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             $("#month_" + month+"_"+year).height(height -  self.openHeight);
             var color = $("#event_" + id).css("background-color");
             $("#event_" + id).replaceWith(
-            temp_item_closed({
-                events: [model.toJSON()]
-            }));
+                temp_item_closed({
+                    events: [model.toJSON()]}));
             $("#event_" + id).css("background-color", color);
             this.setMonthSideBarPosition()
         },
@@ -234,16 +249,18 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
         onClose: function() {
             $(window).off('resize.' + this.cid, this.onResize);
             $("#EventsListView").off("scroll." + this.cid, self, self.onScroll);
-            app.map.off("popupopen", this.onPopupOpen);
         },
         onDOMadd: function() {
             this.onResize();
             //bind the scroll event
             //then trigger a scroll to load more events
+            
             this.backFetch();
+            //console.log((app.currentView[1]).model._attributes.pastEvents.updateOffset,(app.currentView[1]).model._attributes.futureEvents.updateOffset)
             this.forwardFetch();
+            //console.log((app.currentView[1]).model._attributes.pastEvents.updateOffset,(app.currentView[1]).model._attributes.futureEvents.updateOffset)            
             $("#EventsListView").on("scroll." + this.cid,self, self.onScroll);
-           // this.genarateColorsAndMonths(true);
+            //this.genarateColorsAndMonths(true);
         },
         /*
          * Renders a Given list of events
@@ -409,6 +426,10 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
          * And Generate the the Date Display at the top of the list
          */
         genarateColorsAndMonths: function(regenrate) {
+            //if this is a list of uncomplete events then don't color them
+            if(this.options.uncomplete)
+                return
+            
             var self = this,
             //the range of colors (Hue) to use
             colorRange = 240,
@@ -452,12 +473,15 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
                     var id = $(".event_item")[i + topIndex].id.replace(/event_/, "");
                     var H = (i / numberOfEl) * colorRange;
                     $("#event_" + id).css("background-color", "hsl(" + H + ",100%, 50%)");
-                    //add colors to icons
-                    if (!$("#icon-" + id).hasClass("viewed")) {
-                        $("#icon-" + id).html($('#svg svg').clone());
+
+                    if(self.markers[id]){
+                        //add colors to icons
+                        if (!$("#icon-" + id).hasClass("viewed")) {
+                            $("#icon-" + id).html($('#svg svg').clone());
+                        }
+                        $("#icon-" + id).addClass("viewed").addClass("viewing").find(".svgForeground").css("fill", "hsl(" + H + ",100%, 50%)").css("fill-opacity", 1).css("stroke", "black");
+                        self.markers[id].setZIndexOffset(10);
                     }
-                    $("#icon-" + id).addClass("viewed").addClass("viewing").find(".svgForeground").css("fill", "hsl(" + H + ",100%, 50%)").css("fill-opacity", 1).css("stroke", "black");
-                    self.markers[id].setZIndexOffset(10);
                 }
             }
         },
@@ -485,17 +509,15 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
          * user scolls
          */
         setMonthSideBarPosition: function() {
-			var tolarance = 20;
-            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#EventsListView").position().top);
+            var tolarance = 20;
+            var topVisbleEl = document.elementFromPoint($("#event_list").position().left + .5, $("#event_list_top_date").height());
             var topModelId = topVisbleEl.id.replace(/event_/, "");
             var top_start_date = self.model.get(topModelId).get("_start_date");
             var topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear();
 
-            var halfHeight = $("#EventsListView").position().top + $("#EventsListView").height() / 2;
             var topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height();
             var topElwidth = $("#month_" + topMonthId).children().width();
             var bottomElwidth = $("#month_" + topMonthId).next().children().width();
-
   
             var current_top_month = $("#month_" + topMonthId).children();
             if(!this.current_top_month || (this.current_top_month.selector != current_top_month.selector)){
@@ -509,7 +531,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'hbs!../../templates/event_
             if (topElBottom > $("#EventsListView").position().top + topElwidth + tolarance) {
                 current_top_month.addClass("monthFixed").removeClass("relative").css("top", $("#EventsListView").position().top);
             } else {
-                //set the top monthe to be at the bottom of the li
+                //set the top month to be at the bottom of the li
                 var parentHeight = $("#month_" + topMonthId).height();
                 var new_height = parentHeight - topElwidth - tolarance;
                 if (new_height < 0)

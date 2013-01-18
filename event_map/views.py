@@ -16,6 +16,7 @@ import json
 from event_map import utils, forms, models as db
 from event_map.utils import json_api_errors, ApiException
 
+
 @ensure_csrf_cookie
 def index(request):
     """
@@ -23,9 +24,8 @@ def index(request):
     and get the initail session status for the user
     """
     begin = datetime.now()
-    init_events = db.Event.objects.filter(start_date__gte=begin).order_by('start_date')[:10]
-    verbiage = db.Verbiage.objects.all()
-    response = [ event.toJSON() for event in init_events]
+    init_events = db.Event.objects.filter(start_date__gte=begin, complete=True).order_by('start_date')[:10]
+    response = [event.to_JSON() for event in init_events]
     jsonevents = json.dumps(response, default=utils.clean_data)
     init_events = {
         'authenticated': request.user.is_authenticated(),
@@ -33,16 +33,20 @@ def index(request):
         'id': request.user.id
     }
     jsonsession = json.dumps(init_events, default=utils.clean_data)
-    return render_to_response('base.html',
-                              {'events': jsonevents,
-                              'session': jsonsession,
-                              },
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'base.html',
+        {'events': jsonevents, 'session': jsonsession},
+        context_instance=RequestContext(request))
+
 
 class Session(View):
     """
     Log In, Log out and check the session
     """
+    @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(Session, self).dispatch(*args, **kwargs)
+
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
         """
@@ -51,10 +55,8 @@ class Session(View):
         return utils.json_response({
             'authenticated': request.user.is_authenticated(),
             'username': request.user.username,
-            'id': request.user.id
-        })
+            'id': request.user.id})
 
-    @method_decorator(json_api_errors)
     def post(self, request):
         """
         Login - create a new session
@@ -71,8 +73,7 @@ class Session(View):
                 return utils.json_response({
                     'authenticated': True,
                     'username': username,
-                    'id': user.id
-                })
+                    'id': user.id})
             else:
                 # Return a 'disabled account' error message
                 raise ApiException("You have been banned. FOADUMF!", 401)
@@ -92,6 +93,9 @@ class Session(View):
 class EventUser(View):
     """API for user manpulation"""
     @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(Event, self).dispatch(*args, **kwargs)
+
     def post(self, request):
         """Create a new user"""
         json_post = json.loads(request.raw_post_data)
@@ -115,12 +119,16 @@ class EventUser(View):
         else:
             raise ApiException(utils.form_errors_to_json(form), 401)
 
+
 class EventTimeLine(View):
     """
     get events
     offset is the strating index
     """
     @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(EventTimeLine, self).dispatch(*args, **kwargs)
+
     def get(self, request):
         """
         Gets a list of events.
@@ -131,24 +139,30 @@ class EventTimeLine(View):
         """
         events = db.Event.objects.order_by('start_date')
 
+        if request.GET.get('uncomplete'):
+            events = events.filter(complete=False)
+        else:
+            events = events.filter(complete=True)
+
         if request.GET.get('start'):
             #change to use actully date
             try:
                 begin = dateutil.parser.parse(request.GET.get('start'))
-            except (ValueError, OverflowError) as e:
-                raise ApiException({"start":"Invalid ISO date"}, 400)
+            except (ValueError, OverflowError):
+                raise ApiException("Invalid ISO date", 400, "start")
         else:
             begin = datetime.now()
 
         if request.GET.get('modified'):
             try:
                 mod_date = dateutil.parser.parse(request.GET.get('modified'))
-            except (ValueError, OverflowError) as e:
-                raise ApiException({"start":"Invalid ISO date"}, 400)
+            except (ValueError, OverflowError):
+                raise ApiException("Invalid ISO date", 400, "start")
             events = events.filter(date_modified__gte=mod_date)
 
         if request.GET.get('user'):
-            events = events.select_related("author").filter(author__user__username=request.GET.get('user'))
+            events = events.select_related("author").filter(
+                author__user__username=request.GET.get('user'))
 
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
@@ -161,34 +175,49 @@ class EventTimeLine(View):
             if offset >= 0:
                 #3, 4 works
                 if end >= 0:
-                    events = events.filter(start_date__gte=begin)[offset: offset + end]
+                    events = events.\
+                        filter(start_date__gte=begin)[offset: offset + end]
                 #3 -2 works
                 elif offset + end >= 0:
-                    events = events.filter(start_date__gte=begin).order_by('start_date')[offset + end: offset]
+                    events = events.\
+                        filter(start_date__gte=begin).\
+                        order_by('start_date')[offset + end: offset]
                     events = list(events)
                     events.reverse()
                 #3 - 5 works
                 else:
-                    before_events = events.filter(start_date__lte=begin).order_by('-start_date')[:abs(offset + end)]
-                    events = events.filter(start_date__gte=begin).order_by('start_date')[:offset]
+                    before_events = events.\
+                        filter(start_date__lte=begin).\
+                        order_by('-start_date')[:abs(offset + end)]
+                    events = events.\
+                        filter(start_date__gte=begin).\
+                        order_by('start_date')[:offset]
                     events = list(events)
                     events.reverse()
                     events.extend(before_events)
             #-1,
             else:
                 #-1 -5
-                if  end <= 0:
-                    events = events.filter(start_date__lte=begin).order_by('-start_date')[abs(offset): abs(offset + end)]
+                if end <= 0:
+                    events = events.\
+                        filter(start_date__lte=begin).\
+                        order_by('-start_date')[abs(offset): abs(offset + end)]
                 #-1, 4
                 elif end + offset >= 0:
-                    after_events = events.filter(start_date__gte=begin).order_by('start_date')[:abs(end + offset)]
-                    events = events.filter(start_date__lte=begin).order_by('-start_date')[:abs(offset)]
+                    after_events = events.\
+                        filter(start_date__gte=begin).\
+                        order_by('start_date')[:abs(end + offset)]
+                    events = events.\
+                        filter(start_date__lte=begin).\
+                        order_by('-start_date')[:abs(offset)]
                     events = list(events)
                     events.reverse()
                     events.extend(after_events)
                 #-10 6
                 else:
-                    events = events.filter(start_date__lte=begin).order_by('-start_date')[abs(offset + end): abs(offset)]
+                    events = events.\
+                        filter(start_date__lte=begin).\
+                        order_by('-start_date')[abs(offset + end): abs(offset)]
                     events = list(events)
                     events.reverse()
         else:
@@ -199,7 +228,7 @@ class EventTimeLine(View):
                 events = list(itertools.chain(before_events.reverse(), after_events))
             else:
                 events = events.filter(start_date__gte=begin)[offset:]
-        return utils.json_response([ event.toJSON() for event in events])
+        return utils.json_response([event.to_JSON() for event in events])
 
 
 class Event(View):
@@ -208,11 +237,11 @@ class Event(View):
     """
     @method_decorator(json_api_errors)
     def dispatch(self, *args, **kwargs):
-        return super(Event, self).dispatch(*args, **kwargs)    
-    
-    def get(self,request, **kwargs):
+        return super(Event, self).dispatch(*args, **kwargs)
+
+    def get(self, request, **kwargs):
         """
-        Get An Events Details given its ID 
+        Get An Events Details given its ID
         OR slug
         """
         try:
@@ -222,8 +251,8 @@ class Event(View):
                 event = db.Event.objects.get(slug=kwargs['slug'])
         except ObjectDoesNotExist:
             raise ApiException("Event Not Found", 404)
-        return utils.json_response(event.toJSON())
-        
+        return utils.json_response(event.to_JSON())
+
     def put(self, request, **kwargs):
         """Modify an Event via a post based on it id"""
         json_post = json.loads(request.raw_post_data)
@@ -234,7 +263,7 @@ class Event(View):
                 event = db.Event.objects.get(slug=kwargs['slug'])
         except ObjectDoesNotExist:
             raise ApiException("Event Not Found", 404)
-        if event.author == request.user:
+        if event.author.user == request.user:
             form = forms.EventForm(request.user, json_post, instance=event)
             if form.is_valid():
                 event = form.save()
@@ -245,7 +274,7 @@ class Event(View):
                 raise ApiException(utils.form_errors_to_json(form), 401)
         else:
             raise ApiException("Permission Denied", 401)
-            
+
     def post(self, request):
         """create an event"""
         if not request.user.is_authenticated():
@@ -254,15 +283,15 @@ class Event(View):
         form = forms.EventForm(request.user, json_post)
         if form.is_valid():
             event = form.save()
-            return utils.json_response(event.toJSON())
+            return utils.json_response(event.to_JSON())
         else:
             raise ApiException(utils.form_errors_to_json(form), 401)
 
     def delete(self, request, **kwargs):
         """Deletes An Event"""
         try:
-            event = db.Event.objects.get(id=kwargs['id'])
-            if event.author == request.user:
+            event = db.Event.objects.get(slug=kwargs['slug'])
+            if event.author.user == request.user:
                 event.delete()
                 return utils.json_response({
                     'success': True,
@@ -272,42 +301,42 @@ class Event(View):
         except ObjectDoesNotExist:
             raise ApiException("Event Not Found", 404)
 
+
 class Group(View):
     """API For groups"""
     @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(Group, self).dispatch(*args, **kwargs)
+
     def get(self, request, **kwargs):
         """Get info about a group"""
         group = db.Group.objects.get(id=kwargs['id'])
         permission = group.permission_set.all().get(user=request.user)
         permission_json = {
-            "admin":permission.admin,
-            "read":permission.read,
-            "write":permission.write,
-            "banned":permission.banned,
+            "admin": permission.admin,
+            "read": permission.read,
+            "write": permission.write,
+            "banned": permission.banned,
         }
         response = {
             "id": group.id,
             "title": group.title,
             "description": group.description,
-            "permissions":permission_json
+            "permissions": permission_json
         }
         return utils.json_response(response)
-        
+
     def put(self, request, **kwargs):
         """modifiey a group"""
-        return utils.json_response({
-            'errors': {
-                'message': "NOT Implemented",
-            }
-        }, status=401)
-        
+        raise ApiException("NOT Implemented", 401)
+
     def post(self, request):
         """create an a group"""
         json_post = json.loads(request.raw_post_data)
         form = forms.GroupForm(json_post)
         if form.is_valid():
             group = form.save()
-            db.Permission.objects.create(admin=True,user=request.user,group=group)
+            db.Permission.objects.create(admin=True, user=request.user, group=group)
             response = {
                 "id": group.id,
                 "title": group.title,
@@ -315,71 +344,82 @@ class Group(View):
             }
             return utils.json_response(response)
         else:
-            return utils.json_response({
-                'errors': dict(form.errors.items()),
-            }, status=401)
-        
+            raise ApiException(utils.form_errors_to_json(form), 401)
+
     def delete(self, request):
         """delete a group"""
-        return utils.json_response({
-            'errors': {
-                'message': "NOT Implemented",
-            }
-        }, status=401)
+        raise ApiException("NOT Implemented", 401)
+
 
 class FeedView(View):
     """API For groups"""
     @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(FeedView, self).dispatch(*args, **kwargs)
+
     def get(self, request, **kwargs):
         """Get info about a feed"""
         group = db.Group.objects.get(id=kwargs['id'])
         permission = group.permission_set.all().get(user=request.user)
         permission_json = {
-            "admin":permission.admin,
-            "read":permission.read,
-            "write":permission.write,
-            "banned":permission.banned,
+            "admin": permission.admin,
+            "read": permission.read,
+            "write": permission.write,
+            "banned": permission.banned,
         }
         response = {
             "id": group.id,
             "title": group.title,
             "description": group.description,
-            "permissions":permission_json
+            "permissions": permission_json
         }
         return utils.json_response(response)
-        
+
     def put(self, request, **kwargs):
         """modifiey a feed"""
-        return utils.json_response({
-            'errors': {
-                'message': "NOT Implemented",
-            }
-        }, status=401)
-        
-    @method_decorator(json_api_errors)  
+        raise ApiException("NOT Implemented", 401)
+
     def post(self, request):
-        """create an a feed""" 
+        """create an a feed"""
         from feed_import import importers
         json_post = json.loads(request.raw_post_data)
-        imported_feed = importers.add_feed(json_post['url'],request.user)
+        imported_feed = importers.add_feed(json_post['url'], request.user)
         if imported_feed:
-            return utils.json_response({'message':imported_feed})
-        
+            return utils.json_response({'message': imported_feed})
+
     def delete(self, request):
         """delete a group"""
-        return utils.json_response({
-            'errors': {
-                'message': "NOT Implemented",
-            }
-        }, status=401)
+        raise ApiException("NOT Implemented", 401)
+
 
 class Subscription(View):
+
+    @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(Subscription, self).dispatch(*args, **kwargs)
+
     """Manage subscriptions to groups"""
-    def get(self,request):
+    def get(self, request):
         """get a list of subscriptions"""
-        
-    def post(self,request):
+
+    def post(self, request):
         """create a new subscription"""
 
-    def delete(self,request):
+    def delete(self, request):
         """delete a subscription"""
+
+
+class Notifications(View):
+
+    @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(Notifications, self).dispatch(*args, **kwargs)
+
+    """Recieve and mark read Notifications"""
+    def get(self, request):
+        """get Notifications"""
+        notes = db.Notification.objects.filter(to=request.user)
+        return utils.json_response([note.to_JSON() for note in notes])
+
+    def put(self, request):
+        """Mark read Notifications"""

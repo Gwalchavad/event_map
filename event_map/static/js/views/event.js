@@ -17,7 +17,8 @@ define([
         },
         render: function() {
             app.map.group.clearLayers();
-            var marker = app.map.add_marker(this.model.get("location_point").coordinates)
+            if(this.model.get("location_point"))
+                var marker = app.map.add_marker(this.model.get("location_point").coordinates)
             if (this.model.get("author") == app.session.get("username")) {
                 this.edit = true;
             } else {

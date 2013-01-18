@@ -10,19 +10,19 @@ define([
   'views/loading',
 ], function($, _, Backbone,UserModels,EventModel,SessionModel,FrameView,MapView,LoadingView,signupView){
     var AppRouter = Backbone.Router.extend({
-        
+
         routes: {
             "": "list",
             "/:date": "list",
             "event/:id": "eventDetails",
-            "editevent/:id": "eventAdd",
-            "user/:user": "viewUser",
-            "addevent": "eventAdd",
+            "event/:id/edit": "eventAdd",
+            "event/add": "eventAdd",
+            "user/:user(/:status)": "viewUser",
             "about": "about",
-            "group/:group":"viewGroup",
-            "addGroup":"addGroup",
-	    "feed/:feed":"viewFeed",
-	    "addFeed":"addFeed"
+            "group/:group(/:status)":"viewGroup",
+            "group/add":"addGroup",
+            "feed/:feed(/:status)":"viewFeed",
+            "feed/add":"addFeed"
         },
         initialize: function(options) {
             var self = this;
@@ -33,8 +33,8 @@ define([
                 // remove all trailing slashes if more than one
                 id = id.replace(re, '');
                 this.navigate(id, true);
-            });         
-            
+            });
+
             //check session
             self.session = new SessionModel(init_user);
             //self.user.reset;
@@ -43,11 +43,10 @@ define([
                 model: self.session
             });
             self.appView.render()
-            
-    
-            self.showView(new LoadingView());
-            self.map = new MapView();
 
+            self.showView(new LoadingView());
+            self.map = MapView;
+            self.map.initialize();
             this.eventList = new EventModel.EventCollection();
             this.eventList.reset(init_events);
         },
@@ -66,26 +65,30 @@ define([
                 }
             );
         },
-        viewUser:function(user){
+        viewUser:function(user,status){
             this.showView(new LoadingView());
             var self = this;
             var fuser = user;
+            var data = {user:fuser};
+            if(status == "uncomplete")
+                data.uncomplete = true
+
             require(['views/list','views/list_info'],function(list,ListInfoView){
                 var UserEventList = new EventModel.EventCollection(
                     self.eventList.where({author:fuser}),
                     {
-                        data:{user:fuser}
+                        data:data
                     }
                 );
                 var EventList = new list.EventsListView({
-                    model:UserEventList
+                    model:UserEventList, uncomplete:data.uncomplete
                 });
                 var user = new UserModels({username:fuser});
                 var information = new ListInfoView({
                     model:user
                 });
-                self.showView([information,EventList]);        
-            });             
+                self.showView([information,EventList]);
+            });
         },
         viewGroup:function(id){
             var self = this;
@@ -103,13 +106,12 @@ define([
                         );
                         var groupEventList = new ListView.EventsListView({
                             model:groupEventList
-                        });         
-                               
+                        });
+
                         self.showView([new GroupView({ model:group }),groupEventList]);    
                     }
                 });
-                   
-            });  
+            });
         },
         addGroup:function(id,context){
             if(!app.session.is_authenticated()){
@@ -126,7 +128,7 @@ define([
                 self.showView(groupView);
             });
         },
-	viewFeed:function(id){
+        viewFeed:function(id){
             var self = this;
             self.showView(new LoadingView());
 
@@ -234,11 +236,12 @@ define([
                 fragment.appendChild(view.render().el);
             });
             $("#main").prepend(fragment);
+            this.currentView = views;
             views.forEach(function(view){
                 if(view.onDOMadd)
                     view.onDOMadd();   
             });
-            this.currentView = views;
+
         },
         fetchEvent:function(id, context){
             var self = this;

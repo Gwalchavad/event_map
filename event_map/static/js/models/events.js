@@ -2,8 +2,11 @@ define([
     'underscore',
     'backbone'
 ],function (_,Backbone,Models){
-    
+
     var Event = Backbone.Model.extend({
+        /*
+         * The backbone model for an event
+         */
         urlRoot: "/api/event",
         idAttribute: "slug",
         defaults: {
@@ -17,23 +20,35 @@ define([
             location_point:""
         },
         initialize: function () {
+            /*
+             * Backbone Init
+             */
             this.on("change:start_date",this.computeStartTimes);
             this.on("change:end_date",this.computeEndTimes);
             this.computeStartTimes();
             this.computeEndTimes();
         },
         computeStartTimes:function(){
+            /*
+             * Turns the time into a javascipt object "_start_date"
+             * And Creates an nice looking version of time to be displayed
+             */
             var _start_date = new Date(this.get("start_date"));
             this.set("_start_date", _start_date);
             this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));      
         },
         computeEndTimes:function(){
+            /*
+             * does the same thing as `computeStartTimes` except for the end times
+             */
             var _end_date = new Date(this.get("end_date"));
             this.set("_end_date", _end_date);
             this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, "")); 
         },
         computeCloseValues:function(){
-            //the lenght the title is on the list when the event is closed
+            /*
+             * the lenght the title is on the list when the event is closed
+             */
             var trimmedTitleLength = 42;
             if(this.get("title").length > trimmedTitleLength){
                 this.set("titleClose",this.get("title").slice(0,trimmedTitleLength)+"...");
@@ -42,7 +57,9 @@ define([
             }
         },
         computeOpenValues:function(){
-            //the length of the content and the title when a event on the list is open
+            /*
+             * the length of the content and the title when a event on the list is open
+             */
             var trimmedTitleContentLength = 58;
             //for item open,
             if(this.get("title").length > trimmedTitleContentLength){
@@ -58,7 +75,10 @@ define([
                 }
             }
         },
-        validate: function(attrs) {
+        validate: function(attrs,options) {
+            /*
+             *  Backbone validation for the event model
+             */
             var errors = new Object();
             if (attrs.title == "" ) {
                errors['title']= "please enter a title";
@@ -66,17 +86,19 @@ define([
             if (attrs.start_date == "" ) {
                errors['start_date']= "please enter a start date";
             }
-            if (attrs.end_date == "" ) {
-               errors['end_date']= "please enter an end date";
-            }
-            if(attrs.content == ""){
-                errors['content'] = "remind me agian, why should should I come?";
-            }
-            if(attrs.street == ""){
-                errors['location'] =  "where's the party at bro?";
-            }
-            if(attrs.lat == "" || attrs.lng == ""  ){
-                errors['latlng'] = "drag the maker somewhere";
+            if(options.isComplete){
+                if (attrs.end_date == "" ) {
+                   errors['end_date']= "please enter an end date";
+                }
+                if(attrs.content == ""){
+                    errors['content'] = "remind me agian, why should should I come?";
+                }
+                if(attrs.address == ""){
+                    errors['address'] =  "where's the party at bro?";
+                }
+                if(attrs.lat == "" || attrs.lng == ""  ){
+                    errors['latlng'] = "drag the maker somewhere";
+                }
             }
             //count keys
             if(Object.keys(errors).length > 0){
@@ -84,9 +106,14 @@ define([
             }
         }
     });
+
     var EventCollection = Backbone.Collection.extend({
+        /*
+         * Backbone collection for a list of events
+         */ 
         model: Event,
         defaults:{
+            lock:false,
             futureEvents:{
                 numOfEventsToFetch:10,
                 more:true,
@@ -100,112 +127,146 @@ define([
         },
         url: "/api/events",
         initialize: function (models,options) {
+            /*
+             * Backbone init for collection
+             */
+            console.log("init")
             this._attributes = {};
             this.lock = false;
             this._attributes.modified = (new Date()).toISOString();
             $.extend(true,this._attributes,this.defaults);
             if(models && models.length != 0){
                 //this assumes that incoming initail models are in order
-                this._attributes.data = {start:models[0].attributes._start_date.toJSON()};
-                this._attributes.futureEvents.updateOffset = models.length;
+                this.attr("data",{start:models[0].attributes._start_date.toJSON()});
+                var fe =  this.attr("futureEvents");
+                fe.updateOffset = models.length;
+                this.attr("futureEvents",fe);
             }
             if(options)
                 $.extend(true,this._attributes,options);
             this.on("reset",function(models){
+                console.log("reset")
                 $.extend(true,this._attributes,this.defaults);
                 this._attributes.futureEvents.updateOffset = models.length;
             });
         },
-        //oder by UNIX time stamp and ID fraction
         comparator: function(event) {
-          return event.get("_start_date").getTime() + 1/event.get("id");
+            /*
+             *  backbone comparator. Sorts events by date and by 1/id to 
+             * garentee that events with the same date will be in the same order
+             */
+            return event.get("_start_date").getTime() + 1/event.get("id");
         },
-        //Setting attributes on a collection
-        //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js  
+
         attr: function(prop, value) {
+            //Setting attributes on a collection
+            //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js 
             if (value === undefined) {
+                console.log("read",prop,JSON.stringify(this._attributes))
                 return this._attributes[prop]
             } else {
                 this._attributes[prop] = value;
+                console.log("wrote",prop,JSON.stringify(value))
             }
+           
         },
-        update:function(callback){
+        update_modified:function(callback){
+            /*
+             * Ask the server to see if any new events where posted
+             * since the "modified" attribute 
+             */
             var self = this;
-            data = {
+            var data = {
                 offset:this._attributes.pastEvents.updateOffset,
                 n:Math.abs(this._attributes.pastEvents.updateOffset) + this._attributes.futureEvents.updateOffset,
                 modified: this._attributes.modified
             };
-            
+
             this.fetch({
-                data:data,
-                add: true,
+                update: true,
+                remove: false,
                 success:function(evt, request){
-                    if(callback){ 
+                    if(callback){
                         events=request.map(function(event){
                             event = new Event(event);
                             return event;
-                        });  
+                        });
                         callback(events);
                     }
-                    self._attributes.modified = (new Date()).toISOString();                   
+                    self._attributes.modified = (new Date()).toISOString();
                 }
             });
         },
-        //forward fetch
         ffetch:function(options){
+            /*
+             * Forward Fecth get events going forward in time
+             */
             options.forward = true;
             this._fetch(options);
         },
-        //reverse fetch
         rfetch: function(options){
+            /*
+             *  Revese Fetch: get events going backward in time
+             */
             options.forward = false;
             this._fetch(options);
         },
         _fetch:function(options){
+            /*
+             * Fetch get events
+             * options.forward: bool, detemines with we a fecthing goin
+             * forward in time or reverse
+             */
             var options = options ? _.clone(options) : {};
             var self = this;
             if(typeof options.forward === "undefined" || options.forward){
-                var eventSettings = this._attributes.futureEvents;
+                var direction  = "futureEvents";
             }else{
-                var eventSettings = this._attributes.pastEvents;
+                var direction  = "pastEvents";
             }
             var successCallback = function(evt, request) {
+                self.attr("lock",false);
+                var eventSettings = self.attr(direction);
+                if (request.length < Math.abs(eventSettings.numOfEventsToFetch)){
+                    eventSettings.more = false;
+                }
+                self.attr(direction,eventSettings);
                 if(request.length != 0){
                     events=request.map(function(event){
                         event = new Event(event);
                         return event;
-                    });      
-                    eventSettings.updateOffset += eventSettings.numOfEventsToFetch;  
+                    });
+                    
                     if(options.successCallback)
                         options.successCallback(events);
                 }
-                if (request.length < Math.abs(eventSettings.numOfEventsToFetch)){
-                    eventSettings.more = false;
-                }
-                self.lock  = false;
             };
-            if(eventSettings.more && !this.lock){
+            if(this.attr(direction).more && !this.attr(direction).lock){
+                var eventSettings = this.attr(direction);
                 data = {
                     n: Math.abs(eventSettings.numOfEventsToFetch),
                     offset: eventSettings.updateOffset,
                 };
-                if(this._attributes.data)
-                    _.extend(data, this._attributes.data);              
+                eventSettings.updateOffset += eventSettings.numOfEventsToFetch;
+                this.attr(direction,eventSettings);
+
+                if(this.attr("data"))
+                    _.extend(data, this.attr("data"));              
                 
                 if(options.data)
                     _.extend(data, options.data);
-                
-                this.lock  =true;
+                this.attr("lock",true);
                 this.fetch({
+                    update: true,
+                    remove: false,
                     data:data,
                     add: true,
                     success: successCallback
+                    error: function(){this.attr("lock",false);}
                 });
             }        
         }
     });
-
     return {
         Event:Event,
         EventCollection:EventCollection
