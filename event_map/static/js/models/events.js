@@ -1,8 +1,10 @@
+/*global define*/
 define([
     'underscore',
-    'backbone'
-],function (_,Backbone,Models){
-
+    'backbone',
+    'jquery'
+],function (_,Backbone,$){
+    "use strict";
     var Event = Backbone.Model.extend({
         /*
          * The backbone model for an event
@@ -35,7 +37,7 @@ define([
              */
             var _start_date = new Date(this.get("start_date"));
             this.set("_start_date", _start_date);
-            this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));      
+            this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));
         },
         computeEndTimes:function(){
             /*
@@ -43,7 +45,7 @@ define([
              */
             var _end_date = new Date(this.get("end_date"));
             this.set("_end_date", _end_date);
-            this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, "")); 
+            this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));
         },
         computeCloseValues:function(){
             /*
@@ -79,25 +81,25 @@ define([
             /*
              *  Backbone validation for the event model
              */
-            var errors = new Object();
-            if (attrs.title == "" ) {
-               errors['title']= "please enter a title";
+            var errors = {};
+            if (!attrs.title) {
+               errors.title= "please enter a title";
             }
-            if (attrs.start_date == "" ) {
-               errors['start_date']= "please enter a start date";
+            if (!attrs.start_date) {
+               errors.start_date= "please enter a start date";
             }
             if(options.isComplete){
-                if (attrs.end_date == "" ) {
-                   errors['end_date']= "please enter an end date";
+                if (!attrs.end_date) {
+                   errors.end_date= "please enter an end date";
                 }
-                if(attrs.content == ""){
-                    errors['content'] = "remind me agian, why should should I come?";
+                if(!attrs.content){
+                    errors.content = "remind me agian, why should should I come?";
                 }
-                if(attrs.address == ""){
-                    errors['address'] =  "where's the party at bro?";
+                if(!attrs.address){
+                    errors.address =  "where's the party at bro?";
                 }
-                if(attrs.lat == "" || attrs.lng == ""  ){
-                    errors['latlng'] = "drag the maker somewhere";
+                if(!attrs.lat || !attrs.lng){
+                    errors.latlng = "drag the maker somewhere";
                 }
             }
             //count keys
@@ -123,19 +125,18 @@ define([
                 numOfEventsToFetch:-10,
                 more:true,
                 updateOffset:-10
-            },
+            }
         },
         url: "/api/events",
         initialize: function (models,options) {
             /*
              * Backbone init for collection
              */
-            console.log("init")
             this._attributes = {};
             this.lock = false;
             this._attributes.modified = (new Date()).toISOString();
             $.extend(true,this._attributes,this.defaults);
-            if(models && models.length != 0){
+            if(models && models.length){
                 //this assumes that incoming initail models are in order
                 this.attr("data",{start:models[0].attributes._start_date.toJSON()});
                 var fe =  this.attr("futureEvents");
@@ -145,14 +146,13 @@ define([
             if(options)
                 $.extend(true,this._attributes,options);
             this.on("reset",function(models){
-                console.log("reset")
                 $.extend(true,this._attributes,this.defaults);
                 this._attributes.futureEvents.updateOffset = models.length;
             });
         },
         comparator: function(event) {
             /*
-             *  backbone comparator. Sorts events by date and by 1/id to 
+             *  backbone comparator. Sorts events by date and by 1/id to
              * garentee that events with the same date will be in the same order
              */
             return event.get("_start_date").getTime() + 1/event.get("id");
@@ -160,19 +160,17 @@ define([
 
         attr: function(prop, value) {
             //Setting attributes on a collection
-            //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js 
+            //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js
             if (value === undefined) {
-                console.log("read",prop,JSON.stringify(this._attributes))
-                return this._attributes[prop]
+                return this._attributes[prop];
             } else {
                 this._attributes[prop] = value;
-                console.log("wrote",prop,JSON.stringify(value))
             }
         },
         update_modified:function(callback){
             /*
              * Ask the server to see if any new events where posted
-             * since the "modified" attribute 
+             * since the "modified" attribute
              */
             var self = this;
             var data = {
@@ -186,7 +184,7 @@ define([
                 remove: false,
                 success:function(evt, request){
                     if(callback){
-                        events=request.map(function(event){
+                        var events=request.map(function(event){
                             event = new Event(event);
                             return event;
                         });
@@ -216,12 +214,13 @@ define([
              * options.forward: bool, detemines with we a fecthing goin
              * forward in time or reverse
              */
-            var options = options ? _.clone(options) : {};
-            var self = this;
+            options = options ? options : {};
+            var self = this,
+            direction;
             if(typeof options.forward === "undefined" || options.forward){
-                var direction  = "futureEvents";
+                direction  = "futureEvents";
             }else{
-                var direction  = "pastEvents";
+                direction  = "pastEvents";
             }
             var successCallback = function(evt, request) {
                 self.attr("lock",false);
@@ -230,8 +229,8 @@ define([
                     eventSettings.more = false;
                 }
                 self.attr(direction,eventSettings);
-                if(request.length != 0){
-                    events=request.map(function(event){
+                if(request.length){
+                    var events=request.map(function(event){
                         event = new Event(event);
                         return event;
                     });
@@ -242,9 +241,9 @@ define([
             };
             if(this.attr(direction).more && !this.attr(direction).lock){
                 var eventSettings = this.attr(direction);
-                data = {
+                var data = {
                     n: Math.abs(eventSettings.numOfEventsToFetch),
-                    offset: eventSettings.updateOffset,
+                    offset: eventSettings.updateOffset
                 };
                 eventSettings.updateOffset += eventSettings.numOfEventsToFetch;
                 this.attr(direction,eventSettings);
@@ -269,5 +268,5 @@ define([
     return {
         Event:Event,
         EventCollection:EventCollection
-    }
+    };
 });
