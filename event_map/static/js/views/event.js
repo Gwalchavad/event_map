@@ -34,12 +34,12 @@ define([
             json.start = this.model.get("_start_date").getTimeCom();
             json.end = this.model.get("_end_date").getTimeCom();
             if(this.model.get("_end_date").toDateString() != this.model.get("_start_date").toDateString()){
-                json.end_date = this.model.get("_end_date").getWeekdayName() 
+                json.end_date = this.model.get("_end_date").getWeekdayName()
                 + " "+this.model.get("_start_date").getDateWithSlash();
             }else{
                 delete json.end_date;
             }
-           
+
             this.$el.html(temp_event(json));
             return this;
         },

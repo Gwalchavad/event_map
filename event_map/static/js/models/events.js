@@ -110,7 +110,7 @@ define([
     var EventCollection = Backbone.Collection.extend({
         /*
          * Backbone collection for a list of events
-         */ 
+         */
         model: Event,
         defaults:{
             lock:false,
@@ -168,7 +168,6 @@ define([
                 this._attributes[prop] = value;
                 console.log("wrote",prop,JSON.stringify(value))
             }
-           
         },
         update_modified:function(callback){
             /*
@@ -236,7 +235,7 @@ define([
                         event = new Event(event);
                         return event;
                     });
-                    
+
                     if(options.successCallback)
                         options.successCallback(events);
                 }
@@ -251,8 +250,8 @@ define([
                 this.attr(direction,eventSettings);
 
                 if(this.attr("data"))
-                    _.extend(data, this.attr("data"));              
-                
+                    _.extend(data, this.attr("data"));
+
                 if(options.data)
                     _.extend(data, options.data);
                 this.attr("lock",true);
@@ -261,10 +260,10 @@ define([
                     remove: false,
                     data:data,
                     add: true,
-                    success: successCallback
-                    error: function(){this.attr("lock",false);}
+                    success: successCallback,
+                    error: options.fail_callback
                 });
-            }        
+            }
         }
     });
     return {

@@ -1,3 +1,4 @@
+/*global define require init_user init_events*/
 define([
   'jquery',
   'underscore',
@@ -7,25 +8,24 @@ define([
   'models/session',
   'views/frame',
   'views/map',
-  'views/loading',
+  'views/loading'
 ], function($, _, Backbone,UserModels,EventModel,SessionModel,FrameView,MapView,LoadingView,signupView){
+    "use strict";
     var AppRouter = Backbone.Router.extend({
-
         routes: {
             "": "list",
             "/:date": "list",
             "event/:id": "eventDetails",
             "event/:id/edit": "eventAdd",
-            "event/add": "eventAdd",
+            "add/event": "eventAdd",
             "user/:user(/:status)": "viewUser",
             "about": "about",
             "group/:group(/:status)":"viewGroup",
-            "group/add":"addGroup",
+            "add/group":"addGroup",
             "feed/:feed(/:status)":"viewFeed",
-            "feed/add":"addFeed"
+            "add/feed":"addFeed"
         },
         initialize: function(options) {
-            var self = this;
             //remove trailing slashes
             var re = new RegExp("(\/)+$", "g");
             /*jshint regexp: false*/
@@ -36,17 +36,17 @@ define([
             });
 
             //check session
-            self.session = new SessionModel(init_user);
+            this.session = new SessionModel(init_user);
             //self.user.reset;
             //start app
-            self.appView = new FrameView({
-                model: self.session
+            this.appView = new FrameView({
+                model: this.session
             });
-            self.appView.render()
+            this.appView.render();
 
-            self.showView(new LoadingView());
-            self.map = MapView;
-            self.map.initialize();
+            this.showView(new LoadingView());
+            this.map = MapView;
+            this.map.initialize();
             this.eventList = new EventModel.EventCollection();
             this.eventList.reset(init_events);
         },
@@ -55,7 +55,7 @@ define([
             var self= this;
             require(['views/list','views/list_info'],function(list,ListInfoView){
                     //create a event list
-                    EventList = new list.EventsListView({
+                    var EventList = new list.EventsListView({
                         model: self.eventList
                     });
                     //self.appView.addChildren(ListOptionView(),EventList)
@@ -67,15 +67,20 @@ define([
         },
         viewUser:function(user,status){
             this.showView(new LoadingView());
-            var self = this;
-            var fuser = user;
-            var data = {user:fuser};
-            if(status == "uncomplete")
-                data.uncomplete = true
+            var self = this,
+            fuser = user,
+            data = {user:fuser},
+            complete;
+            if(status == "uncomplete"){
+                data.uncomplete = true;
+                complete = false;
+            }else{
+                complete = true;
+            }
 
             require(['views/list','views/list_info'],function(list,ListInfoView){
                 var UserEventList = new EventModel.EventCollection(
-                    self.eventList.where({author:fuser}),
+                    self.eventList.where({author:fuser,complete:complete}),
                     {
                         data:data
                     }
@@ -104,18 +109,14 @@ define([
                                 data:{group:id}
                             }
                         );
-                        var groupEventList = new ListView.EventsListView({
-                            model:groupEventList
-                        });
-
-                        self.showView([new GroupView({ model:group }),groupEventList]);    
+                        self.showView([new GroupView({ model:group }),groupEventList]);
                     }
                 });
             });
         },
         addGroup:function(id,context){
-            if(!app.session.is_authenticated()){
-                app.appView.login();
+            if(!this.session.is_authenticated()){
+                this.appView.login();
                 return;
             }
             var self = context ? context : this;
@@ -142,20 +143,14 @@ define([
                                 data:{group:id}
                             }
                         );
-                        var groupEventList = new ListView.EventsListView({
-                            model:groupEventList
-                        });         
-                               
-                        self.showView([new GroupView({ model:group }),groupEventList]);    
+                        self.showView([new GroupView({ model:group }),groupEventList]);
                     }
                 });
-                   
-            });  
+            });
         },
-
         addFeed:function(id,context){
-            if(!app.session.is_authenticated()){
-                app.appView.login();
+            if(!this.session.is_authenticated()){
+                this.appView.login();
                 return;
             }
             var self = context ? context : this;
@@ -169,13 +164,13 @@ define([
             });
         },
         eventDetails: function(id,fevent,context){
-            var self = context ? context : this; 
+            var self = context ? context : this;
             self.showView(new LoadingView());
             var event = fevent ? fevent : self.eventList.get(id);
             //check to see if we already have the event and if not fetch it
             if (!event) {
-                //recusive 
-                self.fetchEvent(id);
+                //recusive
+                self.fetchEvent(id,this.eventDetails);
                 return;
             }
             require(['views/event'],function(EventView){
@@ -186,33 +181,33 @@ define([
             });
         },
         eventAdd: function(id,fevent,context){
-            if(!app.session.is_authenticated()){
-                app.appView.login();
+            if(!this.session.is_authenticated()){
+                this.appView.login();
                 return;
             }
-            var self = context ? context : this;
-            self.showView(new LoadingView()); 
+            var self = context ? context : this,
+            event;
+            self.showView(new LoadingView());
             //edit an evet
             if (id) {
                 //look up the event and fetch if it is not in the collection
-                var event = fevent ? fevent : self.eventList.get(id);
+                event = fevent ? fevent : self.eventList.get(id);
                 if (!event) {
                     self.fetchEvent(id,self.addevent);
                     return;
-                } 
+                }
             }else{
                 //creating a new event
-                var event = new EventModel.Event();
+                event = new EventModel.Event();
             }
             require(['views/event_add'],function(event_add){
                 //create a new event
-                newEventView = new event_add.EventAddView({
+                var newEventView = new event_add.EventAddView({
                     model:event
                 });
                 self.showView(newEventView);
             });
         },
- 
         about: function(){
             //about view goes here
         },
@@ -226,7 +221,7 @@ define([
             if(this.currentView){
                 this.currentView.forEach(function(view){
                     if(view){
-                        view.close();  
+                        view.close();
                     }
                 });
             }
@@ -239,17 +234,16 @@ define([
             this.currentView = views;
             views.forEach(function(view){
                 if(view.onDOMadd)
-                    view.onDOMadd();   
+                    view.onDOMadd();
             });
 
         },
-        fetchEvent:function(id, context){
+        fetchEvent:function(id, callback){
             var self = this;
-            var callback = arguments.callee.caller;
             var event = new EventModel.Event({
                 slug: id
             });
-            request = event.fetch();
+            var request = event.fetch();
             request.error(function() {
                 throw ("event not found");
             });
