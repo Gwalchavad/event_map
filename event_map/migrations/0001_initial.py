@@ -11,7 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'emObject'
         db.create_table('event_map_emobject', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('uid', self.gf('django.db.models.fields.CharField')(default='b145a208-b412-4e27-ab26-bf9a3dba4439', unique=True, max_length=255)),
+            ('uid', self.gf('django.db.models.fields.CharField')(default='b30fc725-4fc9-4390-ba08-1c474b900fef', unique=True, max_length=255)),
         ))
         db.send_create_signal('event_map', ['emObject'])
 
@@ -42,10 +42,34 @@ class Migration(SchemaMigration):
 
         # Adding model 'FeedGroup'
         db.create_table('event_map_feedgroup', (
-            ('group_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['event_map.Group'], unique=True, primary_key=True)),
-            ('feed', self.gf('django.db.models.fields.related.ForeignKey')(related_name='feed_model', unique=True, to=orm['feed_import.Feed'])),
+            ('abstractgroup_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['event_map.AbstractGroup'], unique=True, primary_key=True)),
+            ('creator', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.UserGroup'])),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('feed', self.gf('django.db.models.fields.related.ForeignKey')(related_name='feed_model', to=orm['feed_import.Feed'])),
         ))
         db.send_create_signal('event_map', ['FeedGroup'])
+
+        # Adding model 'Event'
+        db.create_table('event_map_event', (
+            ('emobject_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['event_map.emObject'], unique=True, primary_key=True)),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='event_author', null=True, to=orm['event_map.UserGroup'])),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('content', self.gf('django.db.models.fields.TextField')(default='please add some content here')),
+            ('slug', self.gf('autoslug.fields.AutoSlugField')(unique=True, max_length=50, populate_from='title', unique_with=())),
+            ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
+            ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('start_date', self.gf('django.db.models.fields.DateTimeField')()),
+            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('address', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('city', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('venue', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('link', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('contact_info', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('complete', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('parent_event', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.Event'], null=True, blank=True)),
+            ('location_point', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
+        ))
+        db.send_create_signal('event_map', ['Event'])
 
         # Adding model 'Permission'
         db.create_table('event_map_permission', (
@@ -62,39 +86,10 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'Permission', fields ['subject', 'emobject']
         db.create_unique('event_map_permission', ['subject_id', 'emobject_id'])
 
-        # Adding model 'Event'
-        db.create_table('event_map_event', (
-            ('emobject_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['event_map.emObject'], unique=True, primary_key=True)),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='event_author', null=True, to=orm['event_map.UserGroup'])),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('content', self.gf('django.db.models.fields.TextField')()),
-            ('slug', self.gf('autoslug.fields.AutoSlugField')(unique=True, max_length=50, populate_from='title', unique_with=())),
-            ('date_modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('start_date', self.gf('django.db.models.fields.DateTimeField')()),
-            ('end_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('address', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('city', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('venue', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('link', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('contact_info', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('parent_event', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.Event'], null=True, blank=True)),
-            ('location_point', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('event_map', ['Event'])
-
-        # Adding M2M table for field groups on 'Event'
-        db.create_table('event_map_event_groups', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('event', models.ForeignKey(orm['event_map.event'], null=False)),
-            ('abstractgroup', models.ForeignKey(orm['event_map.abstractgroup'], null=False))
-        ))
-        db.create_unique('event_map_event_groups', ['event_id', 'abstractgroup_id'])
-
         # Adding model 'Subscription'
         db.create_table('event_map_subscription', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('subscriber', self.gf('django.db.models.fields.related.ForeignKey')(related_name='subcriber', to=orm['event_map.AbstractGroup'])),
+            ('subscriber', self.gf('django.db.models.fields.related.ForeignKey')(related_name='subscriber', to=orm['event_map.AbstractGroup'])),
             ('publisher', self.gf('django.db.models.fields.related.ForeignKey')(related_name='publisher', to=orm['event_map.AbstractGroup'])),
         ))
         db.send_create_signal('event_map', ['Subscription'])
@@ -102,13 +97,18 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'Subscription', fields ['subscriber', 'publisher']
         db.create_unique('event_map_subscription', ['subscriber_id', 'publisher_id'])
 
-        # Adding M2M table for field events on 'Subscription'
-        db.create_table('event_map_subscription_events', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('subscription', models.ForeignKey(orm['event_map.subscription'], null=False)),
-            ('event', models.ForeignKey(orm['event_map.event'], null=False))
+        # Adding model 'SubGroupEvent'
+        db.create_table('event_map_subgroupevent', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('subscription', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.Subscription'], null=True, blank=True)),
+            ('group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.AbstractGroup'])),
+            ('event', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.Event'])),
+            ('group_name', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
         ))
-        db.create_unique('event_map_subscription_events', ['subscription_id', 'event_id'])
+        db.send_create_signal('event_map', ['SubGroupEvent'])
+
+        # Adding unique constraint on 'SubGroupEvent', fields ['subscription', 'group', 'event']
+        db.create_unique('event_map_subgroupevent', ['subscription_id', 'group_id', 'event_id'])
 
         # Adding model 'Verbiage'
         db.create_table('event_map_verbiage', (
@@ -119,8 +119,22 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('event_map', ['Verbiage'])
 
+        # Adding model 'Notification'
+        db.create_table('event_map_notification', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('content', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('href', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('to', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['event_map.UserGroup'])),
+            ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('read', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal('event_map', ['Notification'])
+
 
     def backwards(self, orm):
+        # Removing unique constraint on 'SubGroupEvent', fields ['subscription', 'group', 'event']
+        db.delete_unique('event_map_subgroupevent', ['subscription_id', 'group_id', 'event_id'])
+
         # Removing unique constraint on 'Subscription', fields ['subscriber', 'publisher']
         db.delete_unique('event_map_subscription', ['subscriber_id', 'publisher_id'])
 
@@ -142,23 +156,23 @@ class Migration(SchemaMigration):
         # Deleting model 'FeedGroup'
         db.delete_table('event_map_feedgroup')
 
-        # Deleting model 'Permission'
-        db.delete_table('event_map_permission')
-
         # Deleting model 'Event'
         db.delete_table('event_map_event')
 
-        # Removing M2M table for field groups on 'Event'
-        db.delete_table('event_map_event_groups')
+        # Deleting model 'Permission'
+        db.delete_table('event_map_permission')
 
         # Deleting model 'Subscription'
         db.delete_table('event_map_subscription')
 
-        # Removing M2M table for field events on 'Subscription'
-        db.delete_table('event_map_subscription_events')
+        # Deleting model 'SubGroupEvent'
+        db.delete_table('event_map_subgroupevent')
 
         # Deleting model 'Verbiage'
         db.delete_table('event_map_verbiage')
+
+        # Deleting model 'Notification'
+        db.delete_table('event_map_notification')
 
 
     models = {
@@ -202,6 +216,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'AbstractGroup', '_ormbases': ['event_map.emObject']},
             'description': ('django.db.models.fields.TextField', [], {}),
             'emobject_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.emObject']", 'unique': 'True', 'primary_key': 'True'}),
+            'events': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.Event']", 'through': "orm['event_map.SubGroupEvent']", 'symmetrical': 'False'}),
             'posting_option': ('django.db.models.fields.CharField', [], {'default': "'restricted'", 'max_length': '32'}),
             'subscriptions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.AbstractGroup']", 'through': "orm['event_map.Subscription']", 'symmetrical': 'False'}),
             'visibility': ('django.db.models.fields.CharField', [], {'default': "'public'", 'max_length': '32'})
@@ -209,20 +224,20 @@ class Migration(SchemaMigration):
         'event_map.emobject': {
             'Meta': {'object_name': 'emObject'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'uid': ('django.db.models.fields.CharField', [], {'default': "'19771176-732c-468a-afbf-37516df18f02'", 'unique': 'True', 'max_length': '255'})
+            'uid': ('django.db.models.fields.CharField', [], {'default': "'9f37cd81-6a27-4c10-98c1-e394915f114b'", 'unique': 'True', 'max_length': '255'})
         },
         'event_map.event': {
             'Meta': {'object_name': 'Event', '_ormbases': ['event_map.emObject']},
-            'address': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'address': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'author': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'event_author'", 'null': 'True', 'to': "orm['event_map.UserGroup']"}),
-            'city': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'city': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
+            'complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'contact_info': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'content': ('django.db.models.fields.TextField', [], {}),
+            'content': ('django.db.models.fields.TextField', [], {'default': "'please add some content here'"}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'date_modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'emobject_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.emObject']", 'unique': 'True', 'primary_key': 'True'}),
             'end_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.AbstractGroup']", 'symmetrical': 'False', 'blank': 'True'}),
             'link': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'location_point': ('django.contrib.gis.db.models.fields.PointField', [], {'null': 'True', 'blank': 'True'}),
             'parent_event': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.Event']", 'null': 'True', 'blank': 'True'}),
@@ -232,15 +247,26 @@ class Migration(SchemaMigration):
             'venue': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
         },
         'event_map.feedgroup': {
-            'Meta': {'object_name': 'FeedGroup', '_ormbases': ['event_map.Group']},
-            'feed': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'feed_model'", 'unique': 'True', 'to': "orm['feed_import.Feed']"}),
-            'group_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.Group']", 'unique': 'True', 'primary_key': 'True'})
+            'Meta': {'object_name': 'FeedGroup', '_ormbases': ['event_map.AbstractGroup']},
+            'abstractgroup_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.AbstractGroup']", 'unique': 'True', 'primary_key': 'True'}),
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.UserGroup']"}),
+            'feed': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'feed_model'", 'to': "orm['feed_import.Feed']"}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'event_map.group': {
             'Meta': {'object_name': 'Group', '_ormbases': ['event_map.AbstractGroup']},
             'abstractgroup_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['event_map.AbstractGroup']", 'unique': 'True', 'primary_key': 'True'}),
             'creator': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.UserGroup']"}),
             'title': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'})
+        },
+        'event_map.notification': {
+            'Meta': {'object_name': 'Notification'},
+            'content': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'href': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'read': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'to': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.UserGroup']"})
         },
         'event_map.permission': {
             'Meta': {'unique_together': "(('subject', 'emobject'),)", 'object_name': 'Permission'},
@@ -252,12 +278,20 @@ class Migration(SchemaMigration):
             'subject': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'permissions'", 'to': "orm['event_map.AbstractGroup']"}),
             'write': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
         },
+        'event_map.subgroupevent': {
+            'Meta': {'unique_together': "(('subscription', 'group', 'event'),)", 'object_name': 'SubGroupEvent'},
+            'event': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.Event']"}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.AbstractGroup']"}),
+            'group_name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'subscription': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['event_map.Subscription']", 'null': 'True', 'blank': 'True'})
+        },
         'event_map.subscription': {
             'Meta': {'unique_together': "(('subscriber', 'publisher'),)", 'object_name': 'Subscription'},
-            'events': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.Event']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'publisher': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'publisher'", 'to': "orm['event_map.AbstractGroup']"}),
-            'subscriber': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'subcriber'", 'to': "orm['event_map.AbstractGroup']"})
+            'sub_events': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['event_map.Event']", 'through': "orm['event_map.SubGroupEvent']", 'symmetrical': 'False'}),
+            'subscriber': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'subscriber'", 'to': "orm['event_map.AbstractGroup']"})
         },
         'event_map.usergroup': {
             'Meta': {'object_name': 'UserGroup', '_ormbases': ['event_map.AbstractGroup']},
@@ -277,7 +311,8 @@ class Migration(SchemaMigration):
             'content': ('django.db.models.fields.TextField', [], {}),
             'feed_url': ('django.db.models.fields.URLField', [], {'unique': 'True', 'max_length': '200'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_import': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'})
+            'last_import': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         }
     }
 

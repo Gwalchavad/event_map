@@ -14,6 +14,7 @@ class EventAdmin(OSMGeoAdmin):
     map_height = 500
 
 admin.site.register(db.Event, EventAdmin)
+admin.site.register(db.AbstractGroup)
 admin.site.register(db.Group)
 admin.site.register(db.UserGroup,)
 admin.site.register(db.FeedGroup)

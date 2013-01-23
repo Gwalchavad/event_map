@@ -44,13 +44,24 @@ def add_feed(feed_url, user):
 
     ug = em_db.UserGroup.objects.get(user=user)
     feed, feed_created = db.Feed.objects.get_or_create(feed_url=feed_url)
-    feedGroup, created = em_db.FeedGroup.objects.get_or_create(title=feed_url, feed=feed, defaults={'creator': ug})
+    feed_group, fg_created = em_db.FeedGroup.objects.get_or_create(title=feed_url, feed=feed, creator=ug)
     #create a subscription to the feed
-    sub, sub_created = em_db.Subscription.objects.get_or_create(subscriber=ug, publisher=feedGroup)
     if feed_created:
         feed.content = r.content
         feed.save()
-        return import_feed(feed)
+        new_ug = em_db.UserGroup(user=feed.user, title=feed.user.username)
+        new_ug.save()
+        events = import_feed(feed)
+    if fg_created:
+        #create subscription from the feed group to the user
+        user_sub = em_db.Subscription(subscriber=ug, publisher=feed_group)
+        user_sub.save()
+        #create the subscription from the feed group to the feed
+        fg_sub = em_db.Subscription(subscriber=feed_group, publisher=feed.user.usergroup)
+        fg_sub.save()
+    if feed_created:
+        #propgation should happen on creation of subscriptions
+        feed.user.usergroup.bfs_propagation(events, created=True)
     return True
 
 
@@ -71,7 +82,7 @@ def import_feed(feed):
     cal = Calendar.from_ical(feed.content)
     return_events = []
     for vevent in cal.walk("VEVENT"):
-        event = {'author': feed.feed_model.creator}
+        event = {'author': feed.user.usergroup}
         #remap the event keys
         for key, val in vevent.iteritems():
             if key in name_map:
@@ -92,7 +103,17 @@ def import_feed(feed):
             event_obj, created = em_db.Event.objects.get_or_create(uid=vevent['UID'].to_ical(), defaults=event)
             if created:
                 return_events.append(event_obj)
-            elif event_obj.date_modified < (dateutil.parser.parse(event['date_modified'].replace("Z", ""))):
-                #update event
-                pass
+            else:
+                if event_obj.date_modified < (dateutil.parser.parse(event['date_modified'].replace("Z", ""))):
+                    #untested
+                    event_obj.title = event.title
+                    event_obj.start_date = event.start_date
+                    event_obj.end_date = event.end_date
+                    event_obj.content = event.content
+                    event_obj.address = event.address
+                    event_obj.link = event.link
+                    event_obj.location_point = event.location_point
+                    event_obj.save()
+                if event_obj.author != feed.user.usergroup:
+                    return_events.append(event_obj)
     return return_events

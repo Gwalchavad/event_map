@@ -1,9 +1,12 @@
+/*global define confirm app*/
 define([
+    'jquery',
     'underscore',
     'backbone',
     'utils',
     'hbs!../../templates/feed_add'
-], function(_,Backbone,Utils,temp_group_add){
+], function($,_,Backbone,Utils,temp_group_add){
+    "use strict";
     var groupAdd = Backbone.View.extend({
         tagname: "div",
         template:temp_group_add,
@@ -11,14 +14,14 @@ define([
         events: {
             "click #add_group": "add_group",
             "click .cancel": "cancel",
-            "click #delete_group": "delete_group",
+            "click #delete_group": "delete_group"
         },
         initialize : function(){
             this.model.on("error", function(model, errors) {
                 _.each(errors, function(error, key) {
                     $("#" + key + "_error").show().html(error);
                 });
-            }); 
+            });
         },
         render: function() {
             this.$el.append(this.template(this.model.toJSON()));
@@ -37,7 +40,7 @@ define([
             //hide error messages
             $(".label").hide();
             if(this.model.set(Utils.form2object("#group_add_form"))){
-                promise = this.model.save();
+                var promise = this.model.save();
                 if (promise) {
                     promise.error(function(response) {
                         var errors = JSON.parse(response.responseText);
@@ -51,11 +54,11 @@ define([
                         });
                     });
                 }
-            }            
+            }
         },
         delete_group: function(e) {
             e.preventDefault();
-            self = this;
+            var self = this;
             if (confirm("Do you want to Delete your Group?")) {
                 self.model.destroy({
                     success: function() {
@@ -66,9 +69,6 @@ define([
                 });
             }
         }
-        
     });
-    
     return groupAdd;
 });
-

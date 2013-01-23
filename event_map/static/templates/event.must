@@ -1,6 +1,6 @@
 <div>
 	<h1>{{title}}{{#if edit}}
-	<a href="#/editevent/{{ slug }}" class="btn btn-primary">EDIT</a>
+	<a href="#/event/{{ slug }}/edit" class="btn btn-primary">EDIT</a>
 	{{/if}}</h1>
 	<div class="row-fluid">
 		<div class="span5">
@@ -17,7 +17,7 @@
 			<h3>
 			WHERE:{{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}
 			<br>
-			<a href="#/user/{{author}}">BY:{{author}}</a>
+			<a href="#/author/{{author}}">BY:{{author}}</a>
           
 			</h3>
 		</div>
@@ -25,6 +25,6 @@
 </div>
 <div>
 {{#nl2br content}}
-   
+
 {{/nl2br}}
 </div>

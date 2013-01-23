@@ -94,7 +94,7 @@ class EventUser(View):
     """API for user manpulation"""
     @method_decorator(json_api_errors)
     def dispatch(self, *args, **kwargs):
-        return super(Event, self).dispatch(*args, **kwargs)
+        return super(EventUser, self).dispatch(*args, **kwargs)
 
     def post(self, request):
         """Create a new user"""
@@ -135,7 +135,9 @@ class EventTimeLine(View):
         GET[n] specifies the number of events
         GET[start] Where to start getting the events from
         GET[offset] How many events to skip
-        GET[User] specifies a user, or all events will be searched
+        GET[Author] selects events by the an authors username
+        GET[group] gets all the events in a particular group
+        GET[me] get all of the events in the usergroup of the current user
         """
         events = db.Event.objects.order_by('start_date')
 
@@ -160,9 +162,17 @@ class EventTimeLine(View):
                 raise ApiException("Invalid ISO date", 400, "start")
             events = events.filter(date_modified__gte=mod_date)
 
-        if request.GET.get('user'):
-            events = events.select_related("author").filter(
-                author__user__username=request.GET.get('user'))
+        if request.GET.get('author'):
+            #gets events by the author's username
+            events = events.filter(
+                author__user__username=request.GET.get('author'))
+
+        #need to implement visibilty settings
+        #if request.GET.get('group'):
+        #    events = db.Event.objects.filter(subgroupevent__group_id=request.GET.get('group'))
+
+        if request.GET.get('me'):
+            events = events.filter(subgroupevent__group_id=request.user.usergroup.id)
 
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
@@ -385,7 +395,7 @@ class FeedView(View):
         json_post = json.loads(request.raw_post_data)
         imported_feed = importers.add_feed(json_post['url'], request.user)
         if imported_feed:
-            return utils.json_response({'message': imported_feed})
+            return utils.json_response({'message': 'feed imported'})
 
     def delete(self, request):
         """delete a group"""

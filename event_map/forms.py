@@ -41,10 +41,7 @@ class EventForm(forms.ModelForm):
         model.end_date = self.cleaned_data['end_date']
         model.author = self.user.usergroup
         model.published = datetime.now()
-        model.save()
-        #add event to the user group
-        sge = db.SubGroupEvent(event=model, group=self.user.usergroup)
-        sge.save()
+        model.save(create_sge=True)
         return model
 
 
@@ -77,6 +74,6 @@ class SignUpForm(forms.Form):
         email = self.cleaned_data.get('email')
         user = User.objects.create_user(username, email, password)
         #create an user group
-        userGroup = db.UserGroup(user=user)
+        userGroup = db.UserGroup(user=user, title=username)
         userGroup.save()
         return user

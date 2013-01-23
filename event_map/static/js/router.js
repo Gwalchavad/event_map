@@ -23,7 +23,8 @@ define([
             "group/:group(/:status)":"viewGroup",
             "add/group":"addGroup",
             "feed/:feed(/:status)":"viewFeed",
-            "add/feed":"addFeed"
+            "add/feed":"addFeed",
+            "me(/:status)":"me"
         },
         initialize: function(options) {
             //remove trailing slashes
@@ -181,25 +182,24 @@ define([
             });
         },
         eventAdd: function(id,fevent,context){
-            if(!this.session.is_authenticated()){
-                this.appView.login();
-                return;
-            }
             var self = context ? context : this,
             event;
-            self.showView(new LoadingView());
-            //edit an evet
-            if (id) {
+            if(!self.session.is_authenticated()){
+                self.appView.login();
+                return;
+            }
+            if(id) {
                 //look up the event and fetch if it is not in the collection
                 event = fevent ? fevent : self.eventList.get(id);
                 if (!event) {
-                    self.fetchEvent(id,self.addevent);
+                    self.fetchEvent(id,self.eventAdd);
                     return;
                 }
             }else{
                 //creating a new event
                 event = new EventModel.Event();
             }
+            self.showView(new LoadingView());
             require(['views/event_add'],function(event_add){
                 //create a new event
                 var newEventView = new event_add.EventAddView({
@@ -210,6 +210,38 @@ define([
         },
         about: function(){
             //about view goes here
+        },
+        me: function(status){
+            if(!this.session.is_authenticated()){
+                this.appView.login();
+                return;
+            }
+            this.showView(new LoadingView());
+            var self = this,
+            data = {me:true},
+            complete;
+            if(status == "uncomplete"){
+                data.uncomplete = true;
+                complete = false;
+            }else{
+                complete = true;
+            }
+
+            require(['views/list','views/list_info'],function(list,ListInfoView){
+                var UserEventList = new EventModel.EventCollection(
+                    self.eventList.where({complete:complete}),
+                    {
+                        data:data
+                    }
+                );
+                var EventList = new list.EventsListView({
+                    model:UserEventList, uncomplete:data.uncomplete
+                });
+                var information = new ListInfoView({
+                });
+                self.showView([information,EventList]);
+            });
+
         },
         //
         //Helper Functions
@@ -254,4 +286,3 @@ define([
     });
     return AppRouter;
 });
-

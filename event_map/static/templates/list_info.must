@@ -4,13 +4,11 @@
     </div>
 </div>
 <div id="ListOptionView" style="margin: 20px;">
+    {{description}}
+    <br><br>
     {{#if allow_add}}
-    <a href="#addevent" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
-    {{/if}}
-    {{#if permissions.admin}}
-    <a href="#addevent" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
+    <a href="#add/event" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
     {{/if}}
     <div id="listOptionPanels">
-        
     </div>
 </div>

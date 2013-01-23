@@ -1,8 +1,10 @@
+/*global define app intro_text*/
 define([
     'backbone',
-    'hbs!../../templates/list_info',
+    'hbs!../../templates/list_info'
   // Load our app module and pass it to our definition function
-], function(Backbone,temp_list_info){ 
+], function(Backbone,temp_list_info){
+    "use strict";
     var ListInfoView = Backbone.View.extend({
         tagName: "div",
         className: "replace span3",
@@ -10,29 +12,30 @@ define([
         childrenEL: "#listOptionPanels",
         render: function() {
             var editable = null;
+            var title;
             //if any user, group or feed is being viewed
             if (this.model) {
                 if (this.model.getTitle() == app.session.get("username")) {
-                    var title = "MY EVENTS"
+                    title = "MY EVENTS";
                     editable = true;
                 } else {
-                    var title = this.model.getTitle();
+                    title = this.model.getTitle();
                 }
             } else {
                 //else all things are being viewed
-                var title = "ALL EVENT";
+                title = "ALL EVENT";
                 editable = true;
             }
 
             this.$el.append(
                 temp_list_info({
                     title: title,
-                    allow_add: editable
+                    allow_add: editable,
+                    description: intro_text
                 })
             );
             return this;
-        },
+        }
     });
-    
     return ListInfoView;
 });

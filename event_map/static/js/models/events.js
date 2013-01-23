@@ -117,14 +117,14 @@ define([
         defaults:{
             lock:false,
             futureEvents:{
-                numOfEventsToFetch:10,
+                numOfEventsToFetch:20,
                 more:true,
                 updateOffset:10
             },
             pastEvents:{
-                numOfEventsToFetch:-10,
+                numOfEventsToFetch:-20,
                 more:true,
-                updateOffset:-10
+                updateOffset:-20
             }
         },
         url: "/api/events",

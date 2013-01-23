@@ -1,9 +1,17 @@
-define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/session', 'hbs!../../templates/app_css', 'hbs!../../templates/nav', 'bootstrap',
+/*global define*/
+define([
+    'jquery',
+    'underscore',
+    'backbone',
+    'utils',
+    'models/users',
+    'models/session',
+    'hbs!../../templates/app_css',
+    'hbs!../../templates/nav',
+    'bootstrap'
 // Load our app module and pass it to our definition function
-], function($, _, Backbone, Utils, User, Session,
-    temp_app_css,
-    temp_nav
-) {
+], function($, _, Backbone, Utils, User, Session, temp_app_css, temp_nav) {
+    "use strict";
     var frameView = Backbone.View.extend({
         el: 'body',
         height: 0,
@@ -58,7 +66,7 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
             $("#site_title").width(site_title_lenght);
             $("#site_title").textfill();
             var font_height = parseInt($("#site_title span").css("font-size"),10);
-            $("#site_title").css("left",35 + font_height); 
+            $("#site_title").css("left",35 + font_height);
         },
         render: function() {
             //add login template
@@ -83,23 +91,23 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
                 }
             });
         },
-        login: function(){
-            this.loginCallback = arguments.callee.caller;
+        login: function(callback){
+            this.loginCallback = callback;
             this.logonmodel();
             var hide = function () {
                 delete this.loginCallback;
                 history.back();
-            }
+            };
             $('#loginhtml').one('hidden',hide);
         },
         onLogin: function(e) {
-            self = this;
+            var self = this;
             e.preventDefault();
-            promise = this.model.save(Utils.form2object("#loginForm"));
+            var promise = this.model.save(Utils.form2object("#loginForm"));
             if (promise) {
                 promise.error(function(response) {
                     //get the error message and display it
-                    json = JSON.parse(response.responseText);
+                    var json = JSON.parse(response.responseText);
                     $('#loginError').text(json.errors.message).show('fast');
                 });
                 promise.success(function(data) {
@@ -115,25 +123,22 @@ define(['jquery', 'underscore', 'backbone', 'utils', 'models/users','models/sess
             $(".label").hide();
         },
         signUp: function(e) {
-            self = this;
+            var self = this;
             e.preventDefault();
-
             var NewUser = new User();
-            
             NewUser.on("error", function(model, errors) {
                 _.each(errors, function(error, key) {
                     $("#" + key + "_error").show().html(error);
                 });
-            });    
-            
+            });
             if(NewUser.set(Utils.form2object("#SignUpForm"))){
-                promise = NewUser.save();
+                var promise = NewUser.save();
                 promise.error(function(response) {
                     //get the error message and display it
-                    json = JSON.parse(response.responseText);
+                    var json = JSON.parse(response.responseText);
                     var list = $("<ul />");
                     _.each(json, function(error, key) {
-                        list_item = $("<li  />", {
+                        var list_item = $("<li  />", {
                             text: error.message
                         });
                         list.append(list_item);

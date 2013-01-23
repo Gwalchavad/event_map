@@ -65,6 +65,8 @@ class AbstractGroup(emObject):
             return "group: "+self.group.__unicode__()
         elif hasattr(self, 'usergroup'):
             return "usergroup: "+self.usergroup.__unicode__()
+        elif hasattr(self, 'feedgroup'):
+            return "feedgroup: "+self.feedgroup.__unicode__()
         else:
             return self.description
 
@@ -81,8 +83,8 @@ class AbstractGroup(emObject):
         return SubGroupEvent.objects.filter(group=self)
 
     def add_events(self, events, created=False, subscription=None):
-        """takes a list of events and addes them to the group and also
-        propagates them. If the events were newly created use the created
+        """takes a list of events and addes them to the group
+        If the events were newly created use the created
         argument"""
         if events:
             if not created:
@@ -166,14 +168,16 @@ class Group(AbstractGroup):
 
 
 class FeedGroup(AbstractGroup):
+    class Meta:
+        unique_together = ("creator", "feed")
     creator = models.ForeignKey(
         UserGroup)
     title = models.CharField(
         max_length=255,
         help_text=""" the name of the group""")
-    feed = models.OneToOneField(
+    feed = models.ForeignKey(
         fi_db.Feed,
-        related_name='feed_model')
+        related_name='feed_group')
 
     def __unicode__(self):
         return self.title
@@ -232,12 +236,11 @@ class Event(emObject):
         default=False,
         help_text="""is are all the nessicary fields full on this event? used\
                 when importing events""")
-    parent_event = models.ForeignKey(
+    root = models.ForeignKey(
         'self',
         null=True,
         blank=True,
         help_text="""The Event that this was cloned from""")
-
     location_point = models.PointField(
         null=True,
         blank=True,
@@ -275,6 +278,9 @@ class Event(emObject):
             self.complete = True
         super(Event, self).save()
         #publish
+        if 'create_sge' in kwargs and kwargs['create_sge']:
+            sge = SubGroupEvent(event=self, group=self.author)
+            sge.save()
         django_push.hub.publish(
             ['http://%s%s' % (Site.objects.get_current().domain,
                               reverse("subhub-hub"))],
@@ -316,6 +322,9 @@ class Subscription(models.Model):
         AbstractGroup,
         related_name='publisher')
     sub_events = models.ManyToManyField(Event, through='SubGroupEvent')
+    uncomplete_events = models.BooleanField(
+        default=False,
+        help_text="""Does the subscriber want uncomplete events?""")
 
     def __unicode__(self):
         return str(self.publisher) + "-->" + str(self.subscriber)
@@ -350,9 +359,9 @@ class SubGroupEvent(models.Model):
 
     def __unicode__(self):
         if self.subscription:
-            return str(self.subscription) + " (" + str(self.event) + ")"
+            return str(self.subscription)  # + " (" + str(self.event) + ")"
         else:
-            return str(self.group) + " (" + str(self.event) + ")"
+            return str(self.group)  # + " (" + str(self.event) + ")"
 
 
 class Verbiage(models.Model):
