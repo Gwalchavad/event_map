@@ -1,9 +1,7 @@
 // Require.js allows us to configure shortcut alias
-// There usage will become more apparent further along in the tutorial.
+/*global require*/
 require.config({
-    
     deps: ["main"],
-    
     hbs : {
         templateExtension : 'must',
         // if disableI18n is `true` it won't load locales and the i18n helper
@@ -11,12 +9,13 @@ require.config({
         disableI18n : true,
         helperDirectory : "../templates/helpers/"
     },
-  
     paths: {
         jquery: 'lib/jquery',
         underscore: 'lib/underscore',
         leaflet: 'lib/leaflet/leaflet',
         backbone: 'lib/backbone',
+        routefilter: 'lib/backbone.routefilter',
+        collectionsubset: 'lib/backbone.collectionsubset',
         handlebars: 'lib/handlebars',
         hbs: 'lib/hbs',
         i18nprecompile : "lib/hbs/i18nprecompile",
@@ -38,6 +37,8 @@ require.config({
             //module value.
             exports: 'Backbone'
         },
+        'routefilter': ['backbone'],
+        'collectionsubset': ['backbone'],
         'handlebars': {
             exports: 'Handlebars'
         },
@@ -48,5 +49,5 @@ require.config({
         'leaflet':{
             exports:'L'
         }
-    },
+    }
 });

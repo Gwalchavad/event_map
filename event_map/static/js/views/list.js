@@ -54,8 +54,9 @@ define([
         initialize: function() {
             var self = this;
             map.group.clearLayers();
-            //bind
-            $(window).on('resize.' + this.cid, this, this.onResize);
+            //bind resive
+            var de_resize = _.debounce(this.onResize, 300);
+            $(window).on('resize.' + this.cid, this, de_resize);
             //process events that are added by fetching
             this.model.on('add', function(event) {
                 self.onAdd(event);
@@ -281,8 +282,8 @@ define([
             }
         },
         onClose: function() {
-            $(window).off('resize.' + this.cid, this.onResize);
-            $("#EventsListView").off("scroll." + this.cid, this, this.onScroll);
+            $(window).off('resize.' + this.cid);
+            $("#EventsListView").off("scroll." + this.cid);
         },
         onDOMadd: function() {
             this.onResize();

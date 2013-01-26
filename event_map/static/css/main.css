@@ -22,6 +22,9 @@ label.required:after { content: " (required)"; }
     position: absolute;
     bottom: 0;
 }
+#map{
+    float: right;
+}
 #site_title{
     height: 58px;
     font-size: 35px;

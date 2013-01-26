@@ -24,7 +24,7 @@ def index(request):
     and get the initail session status for the user
     """
     begin = datetime.now()
-    init_events = db.Event.objects.filter(start_date__gte=begin, complete=True).order_by('start_date')[:10]
+    init_events = db.Event.objects.filter(start_date__gte=begin, complete=True).order_by('start_date')[:20]
     response = [event.to_JSON() for event in init_events]
     jsonevents = json.dumps(response, default=utils.clean_data)
     init_events = {
@@ -149,7 +149,7 @@ class EventTimeLine(View):
         if request.GET.get('start'):
             #change to use actully date
             try:
-                begin = dateutil.parser.parse(request.GET.get('start'))
+                begin = dateutil.parser.parse(request.GET.get('start').replace("Z", ""))
             except (ValueError, OverflowError):
                 raise ApiException("Invalid ISO date", 400, "start")
         else:
@@ -157,7 +157,7 @@ class EventTimeLine(View):
 
         if request.GET.get('modified'):
             try:
-                mod_date = dateutil.parser.parse(request.GET.get('modified'))
+                mod_date = dateutil.parser.parse(request.GET.get('modified').replace("Z", ""))
             except (ValueError, OverflowError):
                 raise ApiException("Invalid ISO date", 400, "start")
             events = events.filter(date_modified__gte=mod_date)
@@ -166,10 +166,6 @@ class EventTimeLine(View):
             #gets events by the author's username
             events = events.filter(
                 author__user__username=request.GET.get('author'))
-
-        #need to implement visibilty settings
-        #if request.GET.get('group'):
-        #    events = db.Event.objects.filter(subgroupevent__group_id=request.GET.get('group'))
 
         if request.GET.get('me'):
             events = events.filter(subgroupevent__group_id=request.user.usergroup.id)

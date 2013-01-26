@@ -7,6 +7,5 @@
         <div>{{start_time }} - {{end_time }} <b>At</b>
          {{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}
         </div>
-        <div class="itemControlls">Going?/Spam</div>
     </div>
 </div>

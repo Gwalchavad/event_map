@@ -1,4 +1,4 @@
-/*global define*/
+/*global define app*/
 define([
     'jquery',
     'underscore',
@@ -31,11 +31,10 @@ define([
                 $('#signupError').hide();
             }
         },
-
         initialize: function() {
             var self = this;
             this.model.on('change',this.render,this);
-            
+
             $(window).on('resize', function() {
                 self.height = $(window).height();
                 // shuold be $(".top").height() instead of 60, but top is not there first
@@ -45,11 +44,8 @@ define([
                     topHeight: self.topHeight
                 }));
                 self.resizeTitleText();
-                
-
             });
 
-            //this.$el.append(temp_markdown(null));
             this.height = $(window).height();
             //60 height of header
             this.topHeight = $(window).height() - 60;
@@ -91,8 +87,7 @@ define([
                 }
             });
         },
-        login: function(callback){
-            this.loginCallback = callback;
+        login: function(){
             this.logonmodel();
             var hide = function () {
                 delete this.loginCallback;
@@ -111,8 +106,11 @@ define([
                     $('#loginError').text(json.errors.message).show('fast');
                 });
                 promise.success(function(data) {
-                    if(self.loginCallback)
-                        self.loginCallback();
+                    if(self.route !== 'undfined'){
+                        //http://stackoverflow.com/questions/8550841/trigger-same-location-route#10181053
+                        Backbone.history.loadUrl(Backbone.history.fragment);
+                    }
+                    $('#loginhtml').off('hidden');
                     $('#loginhtml').modal('hide');
                 });
             }

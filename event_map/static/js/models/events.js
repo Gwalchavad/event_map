@@ -119,7 +119,7 @@ define([
             futureEvents:{
                 numOfEventsToFetch:20,
                 more:true,
-                updateOffset:10
+                updateOffset:20
             },
             pastEvents:{
                 numOfEventsToFetch:-20,
@@ -129,9 +129,6 @@ define([
         },
         url: "/api/events",
         initialize: function (models,options) {
-            /*
-             * Backbone init for collection
-             */
             this._attributes = {};
             this.lock = false;
             this._attributes.modified = (new Date()).toISOString();
@@ -142,12 +139,15 @@ define([
                 var fe =  this.attr("futureEvents");
                 fe.updateOffset = models.length;
                 this.attr("futureEvents",fe);
+                var pe = this.attr("pastEvents");
+                pe.updateOffset -= 1;
+                this.attr("pastEvents",pe);
             }
             if(options)
                 $.extend(true,this._attributes,options);
+
             this.on("reset",function(models){
                 $.extend(true,this._attributes,this.defaults);
-                this._attributes.futureEvents.updateOffset = models.length;
             });
         },
         comparator: function(event) {
