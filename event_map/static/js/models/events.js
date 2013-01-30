@@ -35,16 +35,20 @@ define([
              * Turns the time into a javascipt object "_start_date"
              * And Creates an nice looking version of time to be displayed
              */
-            var _start_date = new Date(this.get("start_date"));
+            var start_datetime_tz = new Date(this.get("start_date")),
+            _start_date = new Date(this.get("start_date").substring(0,19));
             this.set("_start_date", _start_date);
+            this.set("start_datetime_tz", start_datetime_tz);
             this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));
         },
         computeEndTimes:function(){
             /*
              * does the same thing as `computeStartTimes` except for the end times
              */
-            var _end_date = new Date(this.get("end_date"));
+            var end_datetime_tz = new Date(this.get("end_date")),
+            _end_date = new Date(this.get("end_date").substring(0,19));
             this.set("_end_date", _end_date);
+            this.set("end_datetime_tz", end_datetime_tz);
             this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));
         },
         computeCloseValues:function(){

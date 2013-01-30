@@ -1,16 +1,16 @@
+/*global define jQuery*/
 define([
    'jquery',
    'underscore',
-   'handlebars' 
+   'handlebars'
   // Load our app module and pass it to our definition function
 ], function($,_,handlebars){
-    //other functions
-    //load templates 
+    "use strict";
     //send the CSRFToken in the header. from django docs
     $(document).ajaxSend(function(event, xhr, settings) {
         function getCookie(name) {
             var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
+            if (document.cookie && document.cookie !== '') {
                 var cookies = document.cookie.split(';');
                 for (var i = 0; i < cookies.length; i++) {
                     var cookie = jQuery.trim(cookies[i]);
@@ -61,15 +61,15 @@ define([
                 maxHeight = self.height(),
                 maxWidth = self.width(),
                 words = self.text().split(" ");
-            
+
             function calcSize(text) {
                 var ourText = $("<span>"+text+"</span>").appendTo(self),
                     multiplier = maxWidth/ourText.width(),
                     newSize = fontSize*(multiplier-0.1);
                 ourText.css(
-                    "fontSize", 
-                    (maxFontSize > 0 && newSize > maxFontSize) ? 
-                        maxFontSize : 
+                    "fontSize",
+                    (maxFontSize > 0 && newSize > maxFontSize) ?
+                        maxFontSize :
                         newSize
                 );
                 var scrollHeight = self[0].scrollHeight;
@@ -77,9 +77,9 @@ define([
                     multiplier = maxHeight/scrollHeight;
                     newSize = (newSize*multiplier);
                     ourText.css(
-                        "fontSize", 
-                        (maxFontSize > 0 && newSize > maxFontSize) ? 
-                            maxFontSize : 
+                        "fontSize",
+                        (maxFontSize > 0 && newSize > maxFontSize) ?
+                            maxFontSize :
                             newSize
                     );
                 }
@@ -88,7 +88,6 @@ define([
             if (words.length > maxWords) {
                 while (words.length > 0) {
                     var newText = words.splice(0, maxWords).join(" ");
-                    console.log
                     calcSize(newText);
                     self.append("<br>");
                 }
@@ -103,11 +102,11 @@ define([
          * Form 2 Object: takes a select of a form and returns the contents
          * of the form in an object
          */
-        result = {};
+        var result = {},
         formArray = $(selector).serializeArray();
-        _.each(formArray,function(element){ 
-                if(element.value != "csrfmiddlewaretoken") 
-                    result[element.name] = element.value; 
+        _.each(formArray,function(element){
+                if(element.value != "csrfmiddlewaretoken")
+                    result[element.name] = element.value;
             } );
         return result;
     };
@@ -123,7 +122,7 @@ define([
         var temp = "";
         if (additionalURL) {
             tempArray = additionalURL.split("&");
-            for (i=0; i<tempArray.length; i++){
+            for (var i=0; i<tempArray.length; i++){
                 if(tempArray[i].split('=')[0] != param){
                     newAdditionalURL += temp + tempArray[i];
                     temp = "&";
@@ -133,8 +132,8 @@ define([
 
         var rows_txt = temp + "" + param + "=" + paramVal;
         return baseURL + "?" + newAdditionalURL + rows_txt;
-    }
-    
+    };
+
     Date.prototype.getWeekdayName = function(){
         /*
          * give a weekday num return a weekday abervation
@@ -147,13 +146,13 @@ define([
         weekday[4]="Thu";
         weekday[5]="Fri";
         weekday[6]="Sat";
-        return weekday[this.getUTCDay()];    
+        return weekday[this.getUTCDay()];
     };
     Date.prototype.month2letter = function(num) {
         /*
          * Given a month letter (0-11) return the month letter
          */
-        var number = (typeof(num) != "undefined")?num:this.getMonth()
+        var number = (typeof(num) != "undefined")?num:this.getMonth();
         var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
         return m_names[number];
     };
@@ -171,17 +170,18 @@ define([
         /*
          * retruns time with AM or PM attched
          */
-        var hours = this.getUTCHours()
-        var minutes = this.getUTCMinutes()
+        var hours = this.getUTCHours(),
+        minutes = this.getUTCMinutes(),
+        orientation;
         if (minutes < 10){
-            minutes = "0" + minutes
+            minutes = "0" + minutes;
         }
         if(hours > 11){
-            var orientation = "PM";
+            orientation = "PM";
         } else {
-            var orientation = "AM";
+            orientation = "AM";
         }
-        hours = hours % 12; 
+        hours = hours % 12;
         var time = hours + ":" + minutes + " "+orientation;
         return time;
     };
@@ -190,5 +190,3 @@ define([
         updateURLParameter:updateURLParameter
     };
 });
-
-

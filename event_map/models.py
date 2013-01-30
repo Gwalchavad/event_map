@@ -187,8 +187,6 @@ class Event(emObject):
     """Events!"""
     author = models.ForeignKey(
         UserGroup,
-        null=True,
-        blank=True,
         related_name='event_author',
         help_text="""The user who wrote this article.""")
     title = models.CharField(
@@ -232,6 +230,8 @@ class Event(emObject):
         max_length=255,
         blank=True,
         help_text="""Get more info by contacting this email/phone number""")
+    sequence = models.IntegerField(default=0, help_text="""someday will be\
+            replaced be some awsesome revsion shit. but for now this is needed for icalender importing/exporting""")
     complete = models.BooleanField(
         default=False,
         help_text="""is are all the nessicary fields full on this event? used\

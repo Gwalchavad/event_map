@@ -20,6 +20,23 @@ class Feed(models.Model):
     content = models.TextField()
     last_import = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User)
+    cal_name = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="""The calenders name populated from X-WR-CALNAME""")
+    timezone = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="""The time zone of the calender""")
+    cal_scale = models.CharField(
+        max_length=255,
+        blank=True)
+    desciption = models.TextField(
+        blank=True)
+    prod_id = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="""icalenar product id (PRODID)""")
 
     def save(self, *args, **kwargs):
         if not self.pk:

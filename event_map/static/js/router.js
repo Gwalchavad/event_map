@@ -24,6 +24,7 @@ define([
             "add/group":"addGroup",
             "feed/:feed(/:status)":"viewFeed",
             "add/feed":"addFeed",
+            "upload": "upload",
             "me(/:status)":"me"
         },
         loginRequired: [
@@ -101,21 +102,6 @@ define([
             });
         },
         viewGroup:function(id){
-            var self = this;
-            require(['views/list','models/groups','views/groups'],function(ListView,Group,GroupView){
-                var group = new Group({id:id});
-                group.fetch({
-                    success:function(){
-                        var groupEventList = new EventModel.EventCollection(
-                        self.eventList.where({group:id}),
-                            {
-                                data:{group:id}
-                            }
-                        );
-                        self.showView([new GroupView({ model:group }),groupEventList]);
-                    }
-                });
-            });
         },
         addGroup:function(id,context){
             var self = context ? context : this;
@@ -128,21 +114,6 @@ define([
             });
         },
         viewFeed:function(id){
-            var self = this;
-            require(['views/list','models/feed','views/groups'],function(ListView,Group,GroupView){
-                var group = new Group({id:id});
-                group.fetch({
-                    success:function(){
-                        var groupEventList = new EventModel.EventCollection(
-                        self.eventList.where({group:id}),
-                            {
-                                data:{group:id}
-                            }
-                        );
-                        self.showView([new GroupView({ model:group }),groupEventList]);
-                    }
-                });
-            });
         },
         addFeed:function(id,context){
             var self = context ? context : this;
@@ -195,7 +166,14 @@ define([
         about: function(){
             //about view goes here
         },
+        upload:function(){
+            var self= this;
+            require(['views/ical_upload'],function(UploadView){
+                var feedView = new UploadView();
+                self.showView(feedView);
+            });
 
+        },
         //
         //Helper Functions
         //

@@ -3,7 +3,8 @@ from django import forms
 from event_map import models as db
 from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User
-import dateutil.parser
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 
 
 class EventForm(forms.ModelForm):
@@ -17,17 +18,19 @@ class EventForm(forms.ModelForm):
 
     def clean_start_date(self):
         try:
-            start_date = dateutil.parser.parse(self.data.get('start_date').replace("Z", ""))
+            start_date = parse_datetime(self.data.get('start_date').replace("Z", ""))
+            tz = timezone.get_current_timezone()
+            return tz.localize(start_date)
         except ValueError:
             raise forms.ValidationError("Invalid ISO date for start_date")
-        return start_date
 
     def clean_end_date(self):
         try:
-            end_date = dateutil.parser.parse(self.data.get('end_date').replace("Z", ""))
+            end_date = parse_datetime(self.data.get('end_date').replace("Z", ""))
+            tz = timezone.get_current_timezone()
+            return tz.localize(end_date)
         except ValueError:
             raise forms.ValidationError("Invalid ISO date for end_date")
-        return end_date
 
     def __init__(self, user, *args, **kwargs):
         self.user = user

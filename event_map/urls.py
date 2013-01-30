@@ -18,6 +18,8 @@ urlpatterns = patterns(
     url(r'^ical/group/(?P<group>[-_\d\w]+)$', feeds.atomAllFeed(), name='atom-group'),
     url(r'^ical/feed/(?P<feed>[-_\d\w]+)$', feeds.atomAllFeed(), name='atom-feed'),
     url(r'^ical/event/(?P<slug>[-_\d\w]+)$', feeds.iCalEvent(), name='atom-event'),
+    #ical uploader
+    url(r'^upload$', views.upload_file),
     #hub
     url(r'^hub/', include('django_push.hub.urls'), name="subhub-hub"),
     #callback

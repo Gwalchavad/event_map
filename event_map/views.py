@@ -39,6 +39,14 @@ def index(request):
         context_instance=RequestContext(request))
 
 
+def upload_file(request):
+    """
+    icalendar file uploader
+    """
+    import pdb
+    pdb.set_trace()
+
+
 class Session(View):
     """
     Log In, Log out and check the session
@@ -359,7 +367,7 @@ class Group(View):
 
 class FeedView(View):
     """API For groups"""
-    @method_decorator(json_api_errors)
+    #@method_decorator(json_api_errors)
     def dispatch(self, *args, **kwargs):
         return super(FeedView, self).dispatch(*args, **kwargs)
 

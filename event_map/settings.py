@@ -10,7 +10,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'
         'NAME': '',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
@@ -43,7 +43,7 @@ USE_I18N = True
 USE_L10N = False
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = False
+USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -76,7 +76,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -150,8 +150,8 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 #CELERY_TASK_SERIALIZER = 'json'
 #CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
-CELERY_TASK_RESULT_EXPIRES=3600
-CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
+CELERY_TASK_RESULT_EXPIRES = 3600
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 if ENABLE_CELERY:
     INSTALLED_APPS += ('djcelery',)
     import djcelery
@@ -208,4 +208,3 @@ except ImportError, e:
 #STATIC_ROOT = "/home/name/event_map/event_map/event_map/static"
 #
 #./manage.py collectstatic
-
