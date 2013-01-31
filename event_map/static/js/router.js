@@ -65,49 +65,57 @@ define([
         },
         viewAuthor:function(user,status){
             var data = {author:user};
+            if(typeof(status) != 'undefined' && status == "uncomplete"){
+                data.complete = false;
+            }else{
+                data.complete = true;
+            }
             this.viewList(data,status);
         },
         me: function(status){
             var data = {me:true};
+            if(typeof(status) != 'undefined' && status == "uncomplete"){
+                data.complete = false;
+            }else{
+                data.complete = true;
+            }
             this.viewList(data,status);
         },
         viewList:function(data,status){
-            data = data ? data : {};
-            var self = this,
-            filter = data;
-            if(status == "uncomplete"){
-                data.uncomplete = true;
-                filter.complete = false;
-            }else{
-                filter.complete = true;
-            }
+            var self = this;
             require(['views/list','views/list_info'],function(list,ListInfoView){
                 //TODO: test to see if eventlist is in a hash based on the filter, first
-                var newEventList = new EventModel.EventCollection(
-                    self.eventList.where(filter),
-                    {
-                        data:data
+                var newEventList,
+                options = {};
+                if(typeof(data) != 'undefined'){
+                    options = data;
+                    newEventList = new EventModel.EventCollection(
+                        self.eventList.where(data),
+                        {
+                            data:data
+                        }
+                    );
+                    //if the filter produces an subset of all, current only happens when filtering by author
+                    if(data.author){
+                        newEventList._attributes.futureEvents.more = self.eventList._attributes.futureEvents.more;
+                        newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
+                    }else{
+                        newEventList._attributes.futureEvents = {
+                            numOfEventsToFetch:20,
+                            more:true,
+                            updateOffset:0
+                       };
+                       newEventList._attributes.pastEvents.more = {
+                            numOfEventsToFetch:20,
+                            more:true,
+                            updateOffset:0
+                       };
                     }
-                );
-                //if the filter produces an subset of all, current only happens when filtering by author
-                if(filter.author){
-                    newEventList._attributes.futureEvents.more = self.eventList._attributes.futureEvents.more;
-                    newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
-                }else if(data.uncomplete){
-                    newEventList._attributes.futureEvents = {
-                        numOfEventsToFetch:20,
-                        more:true,
-                        updateOffset:0
-                   };
-                   newEventList._attributes.pastEvents.more = {
-                        numOfEventsToFetch:20,
-                        more:true,
-                        updateOffset:0
-                   };
+                }else{
+                    newEventList = self.eventList;
                 }
-                var eventListView = new list.EventsListView({
-                    model:newEventList, uncomplete:data.uncomplete
-                });
+                options.model = newEventList;
+                var eventListView = new list.EventsListView(options);
                 var information = new ListInfoView();
                 self.showView([information,eventListView]);
             });

@@ -466,7 +466,7 @@ define([
          */
         genarateColorsAndMonths: function(regenrate) {
             //if this is a list of uncomplete events then don't color them
-            if(this.options.uncomplete)
+            if(!this.options.complete && typeof(this.options.complete) != 'undefined' )
                 return 0;
 
             var self = this,

@@ -52,7 +52,7 @@ def add_feed(feed_url, user):
     if feed_created:
         new_ug = em_db.UserGroup(user=feed.user, title=feed.user.username)
         new_ug.save()
-        events = import_feed(r.content, new_ug, feed)
+        created_events, old_events = import_feed(r.content, new_ug, feed)
     if fg_created:
         #create subscription from the feed group to the user
         user_sub = em_db.Subscription(subscriber=ug, publisher=feed_group)
@@ -62,8 +62,10 @@ def add_feed(feed_url, user):
         fg_sub.save()
     if feed_created:
         #propgation should happen on creation of subscriptions
-        if events:
-            feed.user.usergroup.bfs_propagation(events, created=True)
+        if created_events:
+            feed.user.usergroup.bfs_propagation(created_events, created=True)
+        if old_events:
+            feed.user.usergroup.bfs_propagation(old_events)
     return True
 
 
@@ -95,7 +97,8 @@ def import_feed(content, author, feed=None):
         feed.desciption = unicode(cal['X-WR-CALDESC'])
         feed.prod_id = unicode(cal['PRODID'])
         feed.save()
-    return_events = []
+    created_events = []
+    old_events = []
     for vevent in cal.walk("VEVENT"):
         event = {'author': author}
         #remap the event keys
@@ -129,7 +132,7 @@ def import_feed(content, author, feed=None):
         if event['start_date'] > timezone.now():
             event_obj, created = em_db.Event.objects.get_or_create(uid=uid, defaults=event)
             if created:
-                return_events.append(event_obj)
+                created_events.append(event_obj)
             else:
                 if 'date_modified' in event and event_obj.date_modified < event['date_modified']:
                     #untested: update events
@@ -146,6 +149,8 @@ def import_feed(content, author, feed=None):
                     if not feed:
                         new_event = em_db.Event(**event)
                         new_event.save()
-                    return_events.append(event_obj)
+                        created_events.append(event_obj)
+                    else:
+                        old_events.append(event_obj)
 
-    return return_events
+    return created_events, old_events

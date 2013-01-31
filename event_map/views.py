@@ -47,11 +47,15 @@ def upload_file(request):
     #if request.FILES['our-file'].size < 1000:
     if request.FILES['our-file'].content_type == 'text/calendar':
         ical_file = request.FILES['our-file'].read()
-        added_events = importers.import_feed(ical_file, request.user.usergroup)
-        request.user.usergroup.bfs_propagation(added_events)
+        created_events, old_events = importers.import_feed(ical_file, request.user.usergroup)
+        if created_events:
+            request.user.usergroup.bfs_propagation(created_events, created=True)
+        if old_events:
+            request.user.usergroup.bfs_propagation(old_events)
     else:
         raise ApiException("invalid file type", 415)
-    return utils.json_response([event.to_JSON() for event in added_events])
+    all_events = created_events + old_events
+    return utils.json_response([event.to_JSON() for event in all_events])
 
 
 class Session(View):
@@ -156,7 +160,7 @@ class EventTimeLine(View):
         """
         events = db.Event.objects.order_by('start_date')
 
-        if request.GET.get('uncomplete'):
+        if request.GET.get('complete') and request.GET.get('complete').lower() == 'false':
             events = events.filter(complete=False)
         else:
             events = events.filter(complete=True)

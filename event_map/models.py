@@ -83,7 +83,7 @@ class AbstractGroup(emObject):
         return SubGroupEvent.objects.filter(group=self)
 
     def add_events(self, events, created=False, subscription=None):
-        """takes a list of events and addes them to the group
+        """takes a list of events and adds them to the group
         If the events were newly created use the created
         argument"""
         if events:
