@@ -1,7 +1,7 @@
 <p id="support-notice">Your browser does not support Ajax uploads :-(<br/>The form will be submitted as normal.</p>
 
 <!-- The form starts -->
-<form action="/" method="post" enctype="multipart/form-data" id="form-id">
+<form action="/upload" method="post" enctype="multipart/form-data" id="form-id">
 
   <!-- The file to upload -->
   <p><input id="file-id" type="file" name="our-file" />

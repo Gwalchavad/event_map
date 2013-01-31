@@ -89,14 +89,25 @@ define([
                         data:data
                     }
                 );
-                var eventListView = new list.EventsListView({
-                    model:newEventList, uncomplete:data.uncomplete
-                });
                 //if the filter produces an subset of all, current only happens when filtering by author
                 if(filter.author){
                     newEventList._attributes.futureEvents.more = self.eventList._attributes.futureEvents.more;
                     newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
+                }else if(data.uncomplete){
+                    newEventList._attributes.futureEvents = {
+                        numOfEventsToFetch:20,
+                        more:true,
+                        updateOffset:0
+                   };
+                   newEventList._attributes.pastEvents.more = {
+                        numOfEventsToFetch:20,
+                        more:true,
+                        updateOffset:0
+                   };
                 }
+                var eventListView = new list.EventsListView({
+                    model:newEventList, uncomplete:data.uncomplete
+                });
                 var information = new ListInfoView();
                 self.showView([information,eventListView]);
             });

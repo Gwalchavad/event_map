@@ -15,6 +15,7 @@ import itertools
 import json
 from event_map import utils, forms, models as db
 from event_map.utils import json_api_errors, ApiException
+from feed_import import importers
 
 
 @ensure_csrf_cookie
@@ -43,8 +44,14 @@ def upload_file(request):
     """
     icalendar file uploader
     """
-    import pdb
-    pdb.set_trace()
+    #if request.FILES['our-file'].size < 1000:
+    if request.FILES['our-file'].content_type == 'text/calendar':
+        ical_file = request.FILES['our-file'].read()
+        added_events = importers.import_feed(ical_file, request.user.usergroup)
+        request.user.usergroup.bfs_propagation(added_events)
+    else:
+        raise ApiException("invalid file type", 415)
+    return utils.json_response([event.to_JSON() for event in added_events])
 
 
 class Session(View):

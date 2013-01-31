@@ -2,9 +2,10 @@
 define([
    'jquery',
    'backbone',
+   'utils',
    'hbs!../../templates/ical_upload'
   // Load our app module and pass it to our definition function
-], function($,Backbone,temp){
+], function($,Backbone,utils,temp){
     "use strict";
     var UploadView = Backbone.View.extend({
         tagName: "div",
@@ -109,10 +110,9 @@ define([
       xhr.upload.addEventListener('progress', onprogressHandler, false);
       xhr.upload.addEventListener('load', onloadHandler, false);
       xhr.addEventListener('readystatechange', onreadystatechangeHandler, false);
-
       // Set up request
       xhr.open('POST', uri, true);
-
+      xhr.setRequestHeader("x-csrftoken", utils.getCookie('csrftoken'));
       // Fire!
       xhr.send(formData);
     }
