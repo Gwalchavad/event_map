@@ -1,24 +1,35 @@
-<p id="support-notice">Your browser does not support Ajax uploads :-(<br/>The form will be submitted as normal.</p>
-
+<h1>Import Events</h1>
 <!-- The form starts -->
-<form action="/upload" method="post" enctype="multipart/form-data" id="form-id">
-
-  <!-- The file to upload -->
-  <p><input id="file-id" type="file" name="our-file" />
-
-  <!--
-    Also by default, we disable the upload button.
-    If Ajax uploads are supported we'll enable it.
-  -->
-  <input type="button" value="Upload" id="upload-button-id" disabled="disabled" /></p>
-
-  <!-- A different field, just for the sake of the example -->
-  <p><label>Some other field: <input name="other-field" type="text" id="other-field-id" /></label></p>
-
-  <!-- And finally a submit button -->
-  <p><input type="submit" value="Submit" /></p>
-  <p id="upload-status"></p>
-  <p id="progress"></p>
-  <pre id="result"></pre>
-
+<form action="/upload" method="post" enctype="multipart/form-data" class="form-horizontal" id="form-id">
+  <fieldset>
+      <legend>Upload an ical file</legend>
+      <!-- The file to upload -->
+      <div class="control-group">
+          <div class="controls">
+            <input id="file-id" type="file" name="our-file" style="width: 100%;"/>
+          </div>
+      </div>
+      <!--
+        Also by default, we disable the upload button.
+        If Ajax uploads are supported we'll enable it.
+      -->
+       <div class="control-group">
+          <div class="controls">
+            <input type="submit" value="Upload" id="upload_event" class="btn btn-primary"/>
+         </div>
+      </div>
+      <p id="upload-status"></p>
+      <p id="progress"></p>
+  </fieldset>
+</form>
+<form class="form-horizontal">
+    <fieldset>
+        <legend>Or add by URL</legend>
+        <div class="control-group">
+          <div class="controls">
+            <input type="text" name="url" placeholder="calender URL" />
+            <input type="submit" id="import_url" value="Import" class="btn btn-primary">
+        </div>
+    </div>
+    </fieldset>
 </form>

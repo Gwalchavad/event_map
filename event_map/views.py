@@ -45,7 +45,7 @@ def upload_file(request):
     icalendar file uploader
     """
     #if request.FILES['our-file'].size < 1000:
-    if request.FILES['our-file'].content_type == 'text/calendar':
+    if 'our-file' in request.FILES and request.FILES['our-file'].content_type == 'text/calendar':
         ical_file = request.FILES['our-file'].read()
         created_events, old_events = importers.import_feed(ical_file, request.user.usergroup)
         if created_events:
