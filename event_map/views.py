@@ -44,18 +44,35 @@ def upload_file(request):
     """
     icalendar file uploader
     """
-    #if request.FILES['our-file'].size < 1000:
-    if 'our-file' in request.FILES and request.FILES['our-file'].content_type == 'text/calendar':
-        ical_file = request.FILES['our-file'].read()
-        created_events, old_events = importers.import_feed(ical_file, request.user.usergroup)
-        if created_events:
-            request.user.usergroup.bfs_propagation(created_events, created=True)
-        if old_events:
-            request.user.usergroup.bfs_propagation(old_events)
+    import_ical(request, 'file')
+
+
+def import_url(request):
+    """
+    import an ical file from an URL
+    """
+    import_ical(request, 'url')
+
+
+@json_api_errors
+def import_ical(request, source):
+    if request.method == 'POST':
+        if 'feed_url' in request.POST:
+            if source == 'url':
+                content = importers.fetch_feed(request.POST['feed_url'])
+            else:
+                content = request.FILES['our-file'].read()
+            created_events, old_events = importers.import_feed(content, request.user.usergroup)
+            if created_events:
+                request.user.usergroup.bfs_propagation(created_events, created=True)
+            if old_events:
+                request.user.usergroup.bfs_propagation(old_events)
+        else:
+            raise ApiException("invalid file type", 415)
+        all_events = created_events + old_events
+        return utils.json_response([event.to_JSON() for event in all_events])
     else:
-        raise ApiException("invalid file type", 415)
-    all_events = created_events + old_events
-    return utils.json_response([event.to_JSON() for event in all_events])
+        raise ApiException("invalid request type. only POST allowed", 405)
 
 
 class Session(View):

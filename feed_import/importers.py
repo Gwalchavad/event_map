@@ -17,34 +17,30 @@ import hashlib
 
 
 def fetch_feed(feed_url):
-    feed = db.Feed.objects.get(feed_url=feed_url)
-    r = requests.get(feed_url)
-    if r .status_code == 200:
-        feed.content = r.content
-        feed.save()
-        #return callback
-        return import_feed(feed)
-    return False
-
-
-def add_feed(feed_url, user):
     url = urlparse(feed_url)
     if url.netloc == Site.objects.get_current().domain:
-        raise ApiException({'message': 'Feed is from current domain'}, 406)
+        raise ApiException('feed is from current domain', 415)
     #add https of https
     if url.scheme == '':
         try:
-            result = add_feed('https://'+feed_url)
+            result = fetch_feed('https://'+feed_url)
         except:
-            result = add_feed('http://'+feed_url)
+            result = fetch_feed('http://'+feed_url)
         return result
 
     r = requests.get(feed_url)
     if r .status_code == 200:
         head_type = r.headers['content-type'].split(';')[0]
         if head_type != 'text/calendar':
-            raise ApiException({"message": "invalid content type"}, 406)
+            raise ApiException("invalid content type", 415)
+    else:
+        raise ApiException("No Response From URL", 415)
 
+    return r.content
+
+
+def add_feed(feed_url, user):
+    content = fetch_feed(feed_url)
     ug = em_db.UserGroup.objects.get(user=user)
     feed, feed_created = db.Feed.objects.get_or_create(feed_url=feed_url)
     feed_group, fg_created = em_db.FeedGroup.objects.get_or_create(title=feed_url, feed=feed, creator=ug)
@@ -52,7 +48,7 @@ def add_feed(feed_url, user):
     if feed_created:
         new_ug = em_db.UserGroup(user=feed.user, title=feed.user.username)
         new_ug.save()
-        created_events, old_events = import_feed(r.content, new_ug, feed)
+        created_events, old_events = import_feed(content, new_ug, feed)
     if fg_created:
         #create subscription from the feed group to the user
         user_sub = em_db.Subscription(subscriber=ug, publisher=feed_group)
@@ -149,7 +145,7 @@ def import_feed(content, author, feed=None):
                     if not feed:
                         new_event = em_db.Event(**event)
                         new_event.save()
-                        created_events.append(event_obj)
+                        created_events.append(new_event)
                     else:
                         old_events.append(event_obj)
 

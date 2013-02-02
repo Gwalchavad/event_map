@@ -57,7 +57,6 @@ define([
             $(window).trigger("resize");
         },
         resizeTitleText: function(){
-
             var site_title_lenght= $(window).height() - $("#mainNavList").height();
             $("#site_title").width(site_title_lenght);
             $("#site_title").textfill();

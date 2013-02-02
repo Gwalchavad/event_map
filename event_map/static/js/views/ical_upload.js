@@ -59,6 +59,7 @@ define([
     // Once the FormData instance is ready and we know
     // where to send the data, the code is the same
     // for both variants of this technique
+    //http://blog.new-bamboo.co.uk/2012/01/10/ridiculously-simple-ajax-uploads-with-formdata
     function sendXHRequest(formData, uri) {
       // Get an XMLHttpRequest instance
       var xhr = new XMLHttpRequest();
@@ -66,7 +67,6 @@ define([
       // Set up events
       xhr.upload.addEventListener('loadstart', onloadstartHandler, false);
       xhr.upload.addEventListener('progress', onprogressHandler, false);
-      xhr.upload.addEventListener('load', onloadHandler, false);
       xhr.addEventListener('readystatechange', onreadystatechangeHandler, false);
       // Set up request
       xhr.open('POST', uri, true);
@@ -79,12 +79,6 @@ define([
     function onloadstartHandler(evt) {
       var div = document.getElementById('upload-status');
       div.innerHTML = 'Upload started!';
-    }
-
-    // Handle the end of the transmission
-    function onloadHandler(evt) {
-      var div = document.getElementById('upload-status');
-      div.innerHTML = 'Upload successful!';
     }
 
     // Handle the progress
@@ -112,6 +106,10 @@ define([
            }else{
                 alert("no events added!");
            }
+      }else{
+        //state 4 is done
+        if(evt.currentTarget.readyState === 4)
+            $("#upload_event_error").displayError(evt.target.responseText);
       }
     }
 

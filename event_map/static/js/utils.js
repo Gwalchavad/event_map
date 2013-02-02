@@ -37,65 +37,6 @@ define([
     function safeMethod(method) {
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
-
-    $(document).ajaxSend(function(event, xhr, settings) {
-        if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
-            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-        }
-    });
-
-    $.fn.textfill = function(maxFontSize, maxWords) {
-        /*
-         * TEXT FILL
-         * Resizes the font of text in an inner element so that it fills as much space as possible in the outer element.
-         * By marcus ekwall http://stackoverflow.com/users/358556/marcus-ekwall
-         * Fount At http://jsfiddle.net/mekwall/fNyHs/
-         */
-        maxFontSize = parseInt(maxFontSize, 10);
-        maxWords = parseInt(maxWords, 10) || 3;
-        return this.each(function(){
-            var self = $(this),
-                orgText = self.text(),
-                fontSize = parseInt(self.css("fontSize"), 10),
-                lineHeight = parseInt(self.css("lineHeight"), 10),
-                maxHeight = self.height(),
-                maxWidth = self.width(),
-                words = self.text().split(" ");
-
-            function calcSize(text) {
-                var ourText = $("<span>"+text+"</span>").appendTo(self),
-                    multiplier = maxWidth/ourText.width(),
-                    newSize = fontSize*(multiplier-0.1);
-                ourText.css(
-                    "fontSize",
-                    (maxFontSize > 0 && newSize > maxFontSize) ?
-                        maxFontSize :
-                        newSize
-                );
-                var scrollHeight = self[0].scrollHeight;
-                if (scrollHeight  > maxHeight) {
-                    multiplier = maxHeight/scrollHeight;
-                    newSize = (newSize*multiplier);
-                    ourText.css(
-                        "fontSize",
-                        (maxFontSize > 0 && newSize > maxFontSize) ?
-                            maxFontSize :
-                            newSize
-                    );
-                }
-            }
-            self.empty();
-            if (words.length > maxWords) {
-                while (words.length > 0) {
-                    var newText = words.splice(0, maxWords).join(" ");
-                    calcSize(newText);
-                    self.append("<br>");
-                }
-            } else {
-                calcSize(orgText);
-            }
-        });
-    };
     var form2object = function(selector){
         /*
          * Form 2 Object: takes a select of a form and returns the contents
@@ -154,9 +95,11 @@ define([
     };
 
     return {
-        getCookie:getCookie,
-        form2object:form2object,
-        updateURLParameter:updateURLParameter,
-        supportAjaxUploadWithProgress:supportAjaxUploadWithProgress
+        getCookie: getCookie,
+        form2object: form2object,
+        updateURLParameter: updateURLParameter,
+        safeMethod: safeMethod,
+        sameOrigin: sameOrigin,
+        supportAjaxUploadWithProgress: supportAjaxUploadWithProgress
     };
 });

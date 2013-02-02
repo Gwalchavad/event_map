@@ -4,6 +4,8 @@
   <fieldset>
       <legend>Upload an ical file</legend>
       <!-- The file to upload -->
+      <div id="upload_event_error"  class="row hide">
+      </div>
       <div class="control-group">
           <div class="controls">
             <input id="file-id" type="file" name="our-file" style="width: 100%;"/>
