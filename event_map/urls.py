@@ -2,7 +2,6 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from event_map import views, feeds
 admin.autodiscover()
-
 urlpatterns = patterns(
     '',
     url(r'^$', 'event_map.views.index',  name='event'),
@@ -20,6 +19,7 @@ urlpatterns = patterns(
     url(r'^ical/event/(?P<slug>[-_\d\w]+)$', feeds.iCalEvent(), name='atom-event'),
     #ical uploader
     url(r'^upload$', views.upload_file),
+    url(r'^import$', views.import_url),
     #hub
     url(r'^hub/', include('django_push.hub.urls'), name="subhub-hub"),
     #callback

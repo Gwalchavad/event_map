@@ -29,7 +29,7 @@ def fetch_feed(feed_url):
         return result
 
     r = requests.get(feed_url)
-    if r .status_code == 200:
+    if r.status_code == 200:
         head_type = r.headers['content-type'].split(';')[0]
         if head_type != 'text/calendar':
             raise ApiException("invalid content type", 415)

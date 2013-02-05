@@ -44,31 +44,28 @@ def upload_file(request):
     """
     icalendar file uploader
     """
-    import_ical(request, 'file')
+    return import_ical(request, 'file')
 
 
 def import_url(request):
     """
     import an ical file from an URL
     """
-    import_ical(request, 'url')
+    return import_ical(request, 'url')
 
 
-@json_api_errors
 def import_ical(request, source):
     if request.method == 'POST':
-        if 'feed_url' in request.POST:
-            if source == 'url':
-                content = importers.fetch_feed(request.POST['feed_url'])
-            else:
-                content = request.FILES['our-file'].read()
-            created_events, old_events = importers.import_feed(content, request.user.usergroup)
-            if created_events:
-                request.user.usergroup.bfs_propagation(created_events, created=True)
-            if old_events:
-                request.user.usergroup.bfs_propagation(old_events)
+        if source == 'url':
+            content = importers.fetch_feed(request.POST['feed_url'])
         else:
-            raise ApiException("invalid file type", 415)
+            content = request.FILES['ical_file'].read()
+        created_events, old_events = importers.import_feed(content, request.user.usergroup)
+        if created_events:
+            request.user.usergroup.bfs_propagation(created_events, created=True)
+        if old_events:
+            request.user.usergroup.bfs_propagation(old_events)
+        #raise ApiException("invalid file type", 415)
         all_events = created_events + old_events
         return utils.json_response([event.to_JSON() for event in all_events])
     else:

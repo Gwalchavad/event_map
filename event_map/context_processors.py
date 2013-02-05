@@ -6,8 +6,6 @@ r"""
     Tell Django to define certain template variables by default.
 
 """
-
-from django.conf import settings
 from event_map import models as db
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist
@@ -22,6 +20,7 @@ class VerbiageGetter(object):
             return mark_safe(db.Verbiage.get(key))
         except ObjectDoesNotExist:
             return ''
+
 
 def verbiage(request):
     return {'verbiage': VerbiageGetter(request)}

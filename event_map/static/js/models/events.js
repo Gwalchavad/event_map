@@ -119,40 +119,38 @@ define([
          */
         model: Event,
         defaults:{
-            lock:false,
             futureEvents:{
                 numOfEventsToFetch:20,
                 more:true,
-                updateOffset:20
+                updateOffset:0
             },
             pastEvents:{
-                numOfEventsToFetch:-20,
+                numOfEventsToFetch: -20,
                 more:true,
-                updateOffset:-20
+                updateOffset: -20
             }
         },
         url: "/api/events",
         initialize: function (models,options) {
             this._attributes = {};
-            this.lock = false;
             this._attributes.modified = (new Date()).toISOString();
             $.extend(true,this._attributes,this.defaults);
-            if(models && models.length){
-                //this assumes that incoming initail models are in order
-                this.attr("data",{start:models[0].attributes._start_date.toJSON()});
-                var fe =  this.attr("futureEvents");
-                fe.updateOffset = models.length;
-                this.attr("futureEvents",fe);
-                var pe = this.attr("pastEvents");
-                pe.updateOffset -= 1;
-                this.attr("pastEvents",pe);
-            }
             if(options)
                 $.extend(true,this._attributes,options);
 
-            this.on("reset",function(models){
-                $.extend(true,this._attributes,this.defaults);
+            this.on("reset",function(){
+                if(this.models && this.models.length){
+                    //this assumes that incoming initail models are in order
+                    this.attr("data",{start:this.models[0].attributes._start_date.toJSON()});
+                    var fe =  this.attr("futureEvents");
+                    fe.updateOffset = this.models.length;
+                    this.attr("futureEvents",fe);
+                    var pe = this.attr("pastEvents");
+                    pe.updateOffset -= 1;
+                    this.attr("pastEvents",pe);
+                }
             });
+            this.trigger("reset");
         },
         comparator: function(event) {
             /*
@@ -227,7 +225,6 @@ define([
                 direction  = "pastEvents";
             }
             var successCallback = function(evt, request) {
-                self.attr("lock",false);
                 var eventSettings = self.attr(direction);
                 if (request.length < Math.abs(eventSettings.numOfEventsToFetch)){
                     eventSettings.more = false;
@@ -243,7 +240,7 @@ define([
                         options.successCallback(events);
                 }
             };
-            if(this.attr(direction).more && !this.attr(direction).lock){
+            if(this.attr(direction).more){
                 var eventSettings = this.attr(direction);
                 var data = {
                     n: Math.abs(eventSettings.numOfEventsToFetch),
@@ -255,9 +252,6 @@ define([
                 if(this.attr("data"))
                     _.extend(data, this.attr("data"));
 
-                if(options.data)
-                    _.extend(data, options.data);
-                this.attr("lock",true);
                 this.fetch({
                     update: true,
                     remove: false,

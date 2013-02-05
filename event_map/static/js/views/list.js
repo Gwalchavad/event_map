@@ -58,8 +58,8 @@ define([
             var de_resize = _.debounce(this.onResize, 300);
             $(window).on('resize.' + this.cid, this, de_resize);
             //process events that are added by fetching
-            this.model.on('add', function(event) {
-                self.onAdd(event);
+            this.model.on('add', function(event,collection, options) {
+                self.onAdd(event,collection, options);
             });
             //process events that already exist
             this.model.forEach(function(model, key) {
@@ -134,7 +134,7 @@ define([
                 });
             }
         },
-        onAdd: function(model) {
+        onAdd: function(model, collect, options) {
             //compute the vaules for open and close
             //this is also compute on render becuase model appended are not
             //a refence to models in the collection
@@ -465,10 +465,6 @@ define([
          * And Generate the the Date Display at the top of the list
          */
         genarateColorsAndMonths: function(regenrate) {
-            //if this is a list of uncomplete events then don't color them
-            if(!this.options.complete && typeof(this.options.complete) != 'undefined' )
-                return 0;
-
             var self = this,
             //the range of colors (Hue) to use
             colorRange = 240,
@@ -497,7 +493,7 @@ define([
                 var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
 
                 //set the color to white for all over elements
-                $(".event_item").css("background-color", "white");
+                //$(".event_item").css("background-color", "white");
                 //set up event icons. Clears the prevouse colour
                 $(".viewed").removeClass("viewing");
                 $(".viewed").each(function(index, el) {
@@ -518,9 +514,9 @@ define([
                 var numberOfEl = bottomIndex - topIndex;
                 for (var i = 0; i <= numberOfEl; ++i) {
                     var id = $(".event_item")[i + topIndex].id.replace(/event_/, "");
-                    var H = (i / numberOfEl) * colorRange;
-                    $("#event_" + id).css("background-color", "hsl(" + H + ",100%, 50%)");
                     if(this.markers[id]){
+                        var H = (i / numberOfEl) * colorRange;
+                        $("#event_" + id).css("background-color", "hsl(" + H + ",100%, 50%)");
                         //add colors to icons
                         $("#icon-" + id)
                             .addClass("viewed")
