@@ -32,24 +32,24 @@ define([
         },
         computeStartTimes:function(){
             /*
-             * Turns the time into a javascipt object "_start_date"
+             * Turns the time into a javascipt object "start_datetime" in the original time
              * And Creates an nice looking version of time to be displayed
              */
             var start_datetime_tz = new Date(this.get("start_date")),
-            _start_date = new Date(this.get("start_date").substring(0,19));
-            this.set("_start_date", _start_date);
+            start_datetime = new Date(this.get("start_date").substring(0,19));
+            this.set("start_datetime", start_datetime);
             this.set("start_datetime_tz", start_datetime_tz);
-            this.set("start_time", _start_date.getTimeCom().replace(/\s+/g, ""));
+            this.set("start_time", start_datetime.getTimeCom().replace(/\s+/g, ""));
         },
         computeEndTimes:function(){
             /*
              * does the same thing as `computeStartTimes` except for the end times
              */
             var end_datetime_tz = new Date(this.get("end_date")),
-            _end_date = new Date(this.get("end_date").substring(0,19));
-            this.set("_end_date", _end_date);
+            end_datetime = new Date(this.get("end_date").substring(0,19));
+            this.set("end_datetime", end_datetime);
             this.set("end_datetime_tz", end_datetime_tz);
-            this.set("end_time", _end_date.getTimeCom().replace(/\s+/g, ""));
+            this.set("end_time", end_datetime.getTimeCom().replace(/\s+/g, ""));
         },
         computeCloseValues:function(){
             /*
@@ -141,7 +141,7 @@ define([
             this.on("reset",function(){
                 if(this.models && this.models.length){
                     //this assumes that incoming initail models are in order
-                    this.attr("data",{start:this.models[0].attributes._start_date.toJSON()});
+                    this.attr("data",{start:this.models[0].attributes.start_datetime.toJSON()});
                     var fe =  this.attr("futureEvents");
                     fe.updateOffset = this.models.length;
                     this.attr("futureEvents",fe);
@@ -157,7 +157,7 @@ define([
              *  backbone comparator. Sorts events by date and by 1/id to
              * garentee that events with the same date will be in the same order
              */
-            return event.get("_start_date").getTime() + 1/event.get("id");
+            return event.get("start_datetime").getTime() + 1/event.get("id");
         },
 
         attr: function(prop, value) {

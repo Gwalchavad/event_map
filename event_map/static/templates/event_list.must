@@ -29,18 +29,12 @@
             <div class="row-fluid">
                 <div class="span5">
                     <ul  id="event_list_month">
-                        {{#each months}}
-                            <li  id="month_{{month}}_{{year}}" style="height:{{height}}px">
-                                <div class="rot-90 verticalMonth">{{letter}}</div>
-                            </li>
-                        {{/each}}
+                        {{> _static_templates_liMonths}}
                     </ul>
                 </div>
                 <div class="span5">
                     <ul  id="event_list_day">
-                        {{#each days}}
-                            <li id="day_{{day}}_{{month}}_{{year}}" style="height:{{height}}px">{{day}}</li>
-                        {{/each}}
+                        {{> _static_templates_liDays}}
                     </ul>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 {{#each events}}
-    <li id="event_{{slug}}" class="event_item">
+<li id="event_{{slug}}" data-id="{{slug}}" data-date="{{start_date}}" class="event_item">
         <div class="list_item_container">
             <div class="openIndt" style="">[+]</div>
             <div class="list_item_width">
@@ -7,7 +7,7 @@
                     {{#if complete}}
                         {{start_time }} - {{end_time }} <a href="#/event/{{ slug }}">{{ this.titleClose }}</a>
                     {{else}}
-                        {{start_time }} - {{end_time }} <a href="#/event/{{ slug }}">{{ this.titleClose }}</a>                              
+                        {{start_time }} - {{end_time }} <a href="#/event/{{ slug }}">{{ this.titleClose }}</a>
                     {{/if}}
                 </div>
             </div>
