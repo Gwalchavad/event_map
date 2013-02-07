@@ -120,6 +120,10 @@ h2{
     overflow: hidden;
 }
 
-.event_item .open{
+.open .list_item_content{
+    white-space: normal;
+}
 
+.popupAddress{
+    color: #ffffff;
 }

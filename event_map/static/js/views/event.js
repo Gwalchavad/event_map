@@ -31,13 +31,13 @@ define([
             });
             var json = this.model.toJSON();
             //format the date
-            json.start_date = this.model.get("_start_date").getWeekdayName();
-            json.start_date += " "+this.model.get("_start_date").getDateWithSlash();
-            json.start = this.model.get("_start_date").getTimeCom();
-            json.end = this.model.get("_end_date").getTimeCom();
-            if(this.model.get("_end_date").toDateString() != this.model.get("_start_date").toDateString()){
-                json.end_date = this.model.get("_end_date").getWeekdayName() +
-                " " + this.model.get("_start_date").getDateWithSlash();
+            json.start_date = this.model.get("start_datetime").getWeekdayName();
+            json.start_date += " "+this.model.get("start_datetime").getDateWithSlash();
+            json.start = this.model.get("start_datetime").getTimeCom();
+            json.end = this.model.get("end_datetime").getTimeCom();
+            if(this.model.get("end_datetime").toDateString() != this.model.get("start_datetime").toDateString()){
+                json.end_date = this.model.get("end_datetime").getWeekdayName() +
+                " " + this.model.get("start_datetime").getDateWithSlash();
             }else{
                 delete json.end_date;
             }

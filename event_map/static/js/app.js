@@ -84,6 +84,8 @@ define([
             }
         });
     };
+    //redefine the almost useless toSting method
+    Date.prototype.toString = Date.prototype.toJSON;
 
     Date.prototype.getWeekdayName = function(){
         /*

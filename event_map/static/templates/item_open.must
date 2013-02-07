@@ -1,11 +1,7 @@
 <div class="openIndt">[-]</div>
 <div class="list_item_width">
     <div class="list_item_content">
-        <div><a href="#/event/{{slug}}">{{titleOpen}}</a>
-        {{#if contentOpen}} | <a href="#/event/{{slug}}">{{contentOpen}}</a>{{/if}}
-        </div>
-        <div>{{start_time }} - {{end_time }} <b>At</b>
-         {{#if venue}}{{venue}} ({{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}){{/if}}
-        </div>
+        {{start_time }} - {{end_time }} <a href="#/event/{{ slug }}">{{ title }}</a>
+        <a class="popupAddress btn btn-info btn-small" href="https://www.google.com/maps?daddr={{coordy}},{{coordx}}&saddr={{#if scoordy}}{{scoordy}},{{scoordx}}{{/if}}" target="_blank">Directions</a>
     </div>
 </div>

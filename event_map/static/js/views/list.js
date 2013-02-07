@@ -97,6 +97,11 @@ define([
             e.data.genarateColorsAndMonths();
             e.data.setMonthSideBarPosition();
         },
+        //debounced proxy for onScroll
+        deScroll: _.debounce(function(e){
+            var self = e.data;
+            self.onScroll(e);
+        },5),
         backFetch: function(context) {
             var self = context ? context : this;
             if(!self.backward_lock){
@@ -133,8 +138,6 @@ define([
             index = this.model.indexOf(model);
 
             if(location_point){
-                model.computeCloseValues();
-                model.computeOpenValues();
                 //for the handlebars temp
                 //set coordinates for google maps directions
                 model.set("coordx",location_point.coordinates[0]);
@@ -165,7 +168,6 @@ define([
                 $("#icon-" + model.get("slug")).html($('#svg svg').clone());
             }
             this.renderEvent(index,model);
-
         },
 
         onLocationFound: function(e){
@@ -282,8 +284,6 @@ define([
         },
         onDOMadd: function() {
             this.onResize();
-            //bind the scroll event
-            //then trigger a scroll to load more events
             this.backFetch();
             this.forwardFetch();
 
@@ -323,7 +323,7 @@ define([
                     height: this.height
                 });
                 this.$el.html(html);
-                $EventsListEL.on("scroll." + this.cid, this, this.onScroll);
+                this.$el.find("#EventsListView").on("scroll." + this.cid, this, this.onScroll);
                 return this;
             }else{
                 if(position < currentNumOfEl){
@@ -353,6 +353,9 @@ define([
                     },this);
                     //expand month
                     this.$el.find("#month_"+month+"_"+year).height(calcHeight);
+                    //calculate the text size for the month sidebar
+                    var text = this.month2FullNameOrLetter(month, this.$el.find("#month_"+month+"_"+year).height());
+                    this.$el.find("#month_"+month+"_"+year).children().text(text);
                     //test if the day exists
                     if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
                         this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear)[insertMethod](html_days);
@@ -445,11 +448,10 @@ define([
             }
         },
         setDay: function(date) {
-            var day = date.getDay();
+            var day = date.getUTCDay();
             $(".selected_day").removeClass("selected_day");
             $("#day_" + day).addClass("selected_day");
         },
-
         /*
          *Set the Month Letter, Day Number and Year at the top of the list
          */
@@ -457,7 +459,7 @@ define([
             var self = this;
             //set month on side bar
             var month = date.month2letter();
-            var day = date.getDate();
+            var day = date.getUTCDate();
             $("#topMonthLetter").text(month + day);
             //set day on side bar
             $("#topYear").text(date.getFullYear());
@@ -472,7 +474,7 @@ define([
             var topVisbleEl = document.elementFromPoint(
                     $("#event_list").position().left + 0.5,
                     $("#event_list_top_date").height());
-            var topModelId = topVisbleEl.id.replace(/event_/, "");
+            var topModelId = $(topVisbleEl).data("id");
             var top_start_date = this.model.get(topModelId).get("start_datetime");
             var topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear();
 

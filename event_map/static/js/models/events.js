@@ -27,8 +27,12 @@ define([
              */
             this.on("change:start_date",this.computeStartTimes);
             this.on("change:end_date",this.computeEndTimes);
-            this.computeStartTimes();
-            this.computeEndTimes();
+            if(this.get("start_date")){
+                this.computeStartTimes();
+                this.computeEndTimes();
+                this.computeCloseValues();
+                this.computeOpenValues();
+            }
         },
         computeStartTimes:function(){
             /*
