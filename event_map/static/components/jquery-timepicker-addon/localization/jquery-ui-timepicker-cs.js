@@ -11,7 +11,7 @@
 		timezoneText: 'Časové pásmo',
 		currentText: 'Nyní',
 		closeText: 'Zavřít',
-		timeFormat: 'HH:mm',
+		timeFormat: 'H:m',
 		amNames: ['dop.', 'AM', 'A'],
 		pmNames: ['odp.', 'PM', 'P'],
 		isRTL: false

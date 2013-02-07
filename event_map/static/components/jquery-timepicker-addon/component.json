@@ -1,0 +1,8 @@
+{
+  "name": "jquery-timepicker-addon",
+  "version": "1.1.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jpennell/jQuery-Timepicker-Addon.git"
+  }
+}

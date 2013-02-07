@@ -1,0 +1,9 @@
+{
+  "name": "backbone.routefilter",
+  "version": "0.0.0",
+  "commit": "10ad8ed621a2cad81b1c3bbfa29dc8f5665712cb",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wanderer/backbone.routefilter.git"
+  }
+}

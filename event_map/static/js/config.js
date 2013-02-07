@@ -10,20 +10,19 @@ require.config({
         helperDirectory : "../templates/helpers/"
     },
     paths: {
-        jquery: '../components/jquery/jquery',
-        underscore: 'lib/underscore',
-        leaflet: 'lib/leaflet/leaflet',
-        backbone: 'lib/backbone',
-        routefilter: 'lib/backbone.routefilter',
-        collectionsubset: 'lib/backbone.collectionsubset',
-        handlebars: 'lib/handlebars',
-        hbs: 'lib/hbs',
-        i18nprecompile : "lib/hbs/i18nprecompile",
-        json2 : "lib/hbs/json2",
-        timeDatePicker: 'lib/jquery-ui-sliderAccess',
-        jqueryui:'lib/jquery-ui-1.8.21.custom.min',
-        timepicker:'lib/jquery-ui-timepicker-addon',
-        bootstrap:'../components/bootstrap/js/bootstrap'
+        "backbone": "../components/backbone/backbone",
+        "routefilter": "../components/backbone.routefilter/dist/backbone.routefilter",
+        "bootstrap": "../components/bootstrap/js/bootstrap",
+        "handlebars":"../components/handlebars/handlebars",
+        "hbs": "../components/require-handlebars-plugin/hbs",
+        "i18nprecompile": "../components/require-handlebars-plugin/hbs/i18nprecompile",
+        "json2": "../components/require-handlebars-plugin/hbs/json2",
+        "jquery": "../components/jquery/jquery",
+        "jquery-timepicker-addon": "../components/jquery-timepicker-addon",
+        "jqueryUI": "../components/jqueryUI",
+        "leaflet": "../components/leaflet/dist/leaflet",
+        "require": "../components/require",
+        "underscore": "../components/underscore/underscore"
     },
     shim: {
         'underscore':{
@@ -38,7 +37,6 @@ require.config({
             exports: 'Backbone'
         },
         'routefilter': ['backbone'],
-        'collectionsubset': ['backbone'],
         'handlebars': {
             exports: 'Handlebars'
         },
