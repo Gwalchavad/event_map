@@ -8,11 +8,11 @@
 					<label for="id_start_date" class="required">Start date &nbsp;
                         <span id="start_date_error" class="label label-important hide"></span>
                     </label>
-					<input type="text" name="start_date" id="id_start_date" value="{{start_date}}">
+					<input type="datetime" name="start_date" id="id_start_date" value="{{start_date}}">
 				</div>
 				<div class="span5">
 					<label for="id_end_date">End date &nbsp;<span id="end_date_error" class="label label-important hide" ></span></label>
-					<input type="text" name="end_date" id="id_end_date" value="{{end_date}}">
+					<input type="datetime" name="end_date" id="id_end_date" value="{{end_date}}">
 				</div>
 			</div>
 			<div class="row-fluid">

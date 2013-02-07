@@ -10,7 +10,7 @@ require.config({
         helperDirectory : "../templates/helpers/"
     },
     paths: {
-        jquery: 'lib/jquery',
+        jquery: '../components/jquery/jquery',
         underscore: 'lib/underscore',
         leaflet: 'lib/leaflet/leaflet',
         backbone: 'lib/backbone',
@@ -23,7 +23,7 @@ require.config({
         timeDatePicker: 'lib/jquery-ui-sliderAccess',
         jqueryui:'lib/jquery-ui-1.8.21.custom.min',
         timepicker:'lib/jquery-ui-timepicker-addon',
-        bootstrap:'../vendors/bootstrap/js/bootstrap'
+        bootstrap:'../components/bootstrap/js/bootstrap'
     },
     shim: {
         'underscore':{
