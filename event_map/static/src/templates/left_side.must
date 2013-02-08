@@ -1,0 +1,31 @@
+<div class="span4 left-swappable">
+  <form method="post" action=".">
+    <table>
+      <tr>
+        <th colspan="2">Filter Events</th>
+      </tr>
+
+      <tr>
+        <td style="white-space:nowrap">Start Date:</td>
+
+        <td><input type="text" id="id_begin" name="begin"></td>
+      </tr>
+
+      <tr>
+        <td style="white-space:nowrap">End Date:</td>
+
+        <td><input type="text" id="id_end" name="end"></td>
+      </tr>
+
+      <tr>
+        <td><input type="submit" value="Submit"></td>
+
+        <td></td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<div class="span4 left-swappable" >
+  <ul id="agenda"></ul>
+</div>

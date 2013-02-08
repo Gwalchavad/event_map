@@ -311,6 +311,9 @@ define([
             html_days = temp_li_days({
                 days: [day_data]
             }),
+            html_events = temp_item_closed({
+                events: [events.toJSON()]
+            }),
             insertMethod,
             $EventsListEL = this.$el.find("#event_list"),
             currentNumOfEl = $EventsListEL.children().length;
@@ -318,10 +321,12 @@ define([
             if(currentNumOfEl === 0){
                 html = temp_event_list({
                     days: [day_data],
-                    months: [month_data],
-                    events: [events.toJSON()],
                     height: this.height
                 });
+                html = $(html);
+                html.find("#event_list_month").html(html_months);
+                html.find("#event_list_day").html(html_days);
+                html.find("#event_list").html(html_events);
                 this.$el.html(html);
                 this.$el.find("#EventsListView").on("scroll." + this.cid, this, this.onScroll);
                 return this;
@@ -337,11 +342,9 @@ define([
                 nDay = ndatetime.getUTCDate(),
                 nMonth = ndatetime.getUTCMonth(),
                 nYear = ndatetime.getUTCFullYear();
-                html = temp_item_closed({
-                    events: [events.toJSON()]
-                });
+
                 //insert new event li
-                nextEvent[insertMethod](html);
+                nextEvent[insertMethod](html_events);
                 //create and expand DOM for month and day li
                 //if the month doesn't exist
                 if(this.$el.find("#month_"+month+"_"+year).length === 0){

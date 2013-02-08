@@ -1,13 +1,64 @@
-/*global define*/
+// Require.js allows us to configure shortcut alias
+/*global require*/
+require.config({
+    hbs : {
+        templateExtension : 'must',
+        // if disableI18n is `true` it won't load locales and the i18n helper
+        // won't work as well.
+        disableI18n : true,
+        helperDirectory : "../templates/helpers/"
+    },
+    paths: {
+        "backbone": "../../components/backbone/backbone",
+        "routefilter": "../../components/backbone.routefilter/dist/backbone.routefilter",
+        "bootstrap": "../../components/bootstrap/js/bootstrap",
+        "handlebars":"../../components/handlebars/handlebars",
+        "hbs": "../../components/require-handlebars-plugin/hbs",
+        "i18nprecompile": "../../components/require-handlebars-plugin/hbs/i18nprecompile",
+        "json2": "../../components/require-handlebars-plugin/hbs/json2",
+        "jquery": "../../components/jquery/jquery",
+        "timeDatePicker": "../../components/jquery-timepicker-addon/jquery-ui-timepicker-addon",
+        "jqueryui": "../../components/jqueryUI/js/jquery-ui-1.10.0.custom",
+        "leaflet": "../../components/leaflet/dist/leaflet",
+        "require": "../../components/require",
+        "underscore": "../../components/underscore/underscore"
+    },
+    shim: {
+        'underscore':{
+             exports: '_'
+        },
+        'backbone': {
+            //These script dependencies should be loaded before loading
+            //backbone.js
+            deps: ['underscore', 'jquery'],
+            //Once loaded, use the global 'Backbone' as the
+            //module value.
+            exports: 'Backbone'
+        },
+        'routefilter': ['backbone'],
+        'handlebars': {
+            exports: 'Handlebars'
+        },
+        'bootstrap':['jquery'],
+        'jqueryui': ['jquery'],
+        'timeDatePicker':['jqueryui'],
+        'leaflet':{
+            exports:'L'
+        }
+    }
+});
+
 var app;
-define([
+require([
   'underscore',
   'jquery',
   'backbone',
   'router', // Request router.js
   'utils',
   'routefilter',
+  //>>includeStart("debug", pragmas.debug);
   'debug'
+  //>>includeEnd("debug");
 ], function(_,$,Backbone, Router,Utils){
     "use strict";
     // add jquery plugins
@@ -146,13 +197,7 @@ define([
         this.remove();
         this.unbind();
     };
-    var initialize = function(options){
-        app = new Router({
-            map: options
-        });
-        Backbone.history.start();
-    };
-    return {
-       initialize: initialize
-    };
+
+    app = new Router({});
+    Backbone.history.start();
 });

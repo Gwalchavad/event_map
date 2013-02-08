@@ -176,3 +176,6 @@ chmod -R o+r ./$PROJ/event_map/templates/
 chmod -R o+r ./$PROJ/event_map/static/
 cd ..
 chown -R $SUDO_USER:$SUDO_USER ./$PROJ
+
+#todo: install npm
+#npm install -g requirejs
