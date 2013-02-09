@@ -8,6 +8,7 @@ require.config({
         disableI18n : true,
         helperDirectory : "../templates/helpers/"
     },
+
     paths: {
         "backbone": "../../components/backbone/backbone",
         "routefilter": "../../components/backbone.routefilter/dist/backbone.routefilter",
@@ -47,7 +48,6 @@ require.config({
         }
     }
 });
-
 var app;
 require([
   'underscore',
