@@ -18,7 +18,7 @@
         },
         {
             name: "views/list",
-                include: ["views/list_info"]
+            include: ["views/list_info"]
         }
     ]
 })
