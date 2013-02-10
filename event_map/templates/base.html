@@ -11,8 +11,11 @@
 		<link href="/static/components/bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link href="/static/components/jqueryUI/css/custom-theme/jquery-ui-1.10.0.custom.css" rel="stylesheet">    
         <link href="/static/components/leaflet/dist/leaflet.css"  rel="stylesheet"/>
-        <!--<script data-main="/static/src/js/main" src="/static/components/require/require.js"></script>-->
-        <script src="/static/build/js/main.js"></script>
+        {% if DEBUG %}
+        <script data-main="{{STATIC_URL}}src/js/main" src="{{STATIC_URL}}components/require/require.js"></script>
+        {% else %}
+        <script src="{{BUILT_JS}}main.js"></script>
+        {% endif %}
 	</head>
 	<body>
 		<div class="row-fluid">
@@ -112,7 +115,6 @@
                                 </div>
                             </div>
                         </form>
-               
                 </div>
             </div>
         </section>
@@ -127,9 +129,7 @@
                 <div  id="signupError" class="alert alert-error hide"> </div>
 
                 <form id="SignUpForm" class="form-horizontal" method="post">
-                    
                     <br>
-                    
                     <div class="control-group">
                         <label class="control-label" for="id_username">Username</label>
                         <div class="controls">
@@ -137,21 +137,21 @@
                             <span id="signup_username_error" class="label label-important hide"></span>
                         </div>
                     </div>
-                    <div class="control-group">    
+                    <div class="control-group">
                         <label class="control-label"  for="id_email">Email</label>
                         <div class="controls">
-                            <input id="id_email" type="text" name="email" maxlength="30">  
-                            <span id="signup_email_error" class="label label-important hide"></span>         
-                        </div>  
+                            <input id="id_email" type="text" name="email" maxlength="30">
+                            <span id="signup_email_error" class="label label-important hide"></span>
+                        </div>
                     </div>
-                    <div class="control-group">                                   
+                    <div class="control-group">
                         <label class="control-label"  for="id_password">Password</label>
                         <div class="controls">
                             <input type="password" name="password" id="id_password">
                             <span id="signup_password_error" class="label label-important hide"></span>
                         </div>
                     </div>
-                    <div class="control-group">                                   
+                    <div class="control-group">
                         <label class="control-label"  for="id_password_again">Retype Password</label>
                         <div class="controls">
                             <input type="password" name="password_again" id="id_password_again">
@@ -161,7 +161,7 @@
                     <div id="loginStatus"  class="form-actions">
                         <input class="btn btn-primary" id="signUpButton" type="submit" value="Sign Up" />
                     </div>
-                </form>        
+                </form>
             </div>
         </div>
     </section

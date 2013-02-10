@@ -64,6 +64,8 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
+EM_BUILT_JS = STATIC_URL + "dist/js/"
+
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -121,7 +123,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
-    "event_map.context_processors.verbiage"
+    "event_map.context_processors.verbiage",
+    "event_map.context_processors.goodies"
 )
 
 INSTALLED_APPS = (

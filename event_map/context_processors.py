@@ -9,6 +9,7 @@ r"""
 from event_map import models as db
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
 
 class VerbiageGetter(object):
@@ -25,10 +26,9 @@ class VerbiageGetter(object):
 def verbiage(request):
     return {'verbiage': VerbiageGetter(request)}
 
-#def goodies(request):
-#    return {'OWS_CANONICAL_URL': settings.OWS_CANONICAL_URL,
-#            'OWS_SCRIPTS': settings.OWS_SCRIPTS,
-#            'OWS_SCRIPTS_MINIFIED': settings.OWS_SCRIPTS_MINIFIED,
-#            'OWS_SITE_NAME': settings.OWS_SITE_NAME,
-#            'DEBUG': settings.DEBUG,
- #           'base': 'occupywallst/base.html'}
+
+def goodies(request):
+    return {
+        'STATIC_URL': settings.STATIC_URL,
+        'BUILT_JS': settings.EM_BUILT_JS,
+        'DEBUG': settings.DEBUG}

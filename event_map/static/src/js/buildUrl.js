@@ -1,2 +1,2 @@
 /*global require*/
-require.config({baseUrl:"/static/build/js"});
+require.config({baseUrl:"/static/dist/js"});

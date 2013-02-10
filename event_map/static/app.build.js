@@ -3,7 +3,7 @@
     //name: "main",
     baseUrl: "./js",
     appDir: "./src",
-    dir: "./build",
+    dir: "./dist",
     optimize: "uglify2",
     preserveLicenseComments: false,
     //removeCombined: true,

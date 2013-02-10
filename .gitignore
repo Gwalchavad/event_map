@@ -1,2 +1,4 @@
 *.pyc
 settings_local.py
+*.swp
+event_map/static/dist/*

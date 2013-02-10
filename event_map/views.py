@@ -36,7 +36,10 @@ def index(request):
     jsonsession = json.dumps(init_events, default=utils.clean_data)
     return render_to_response(
         'base.html',
-        {'events': jsonevents, 'session': jsonsession},
+        {
+            'events': jsonevents,
+            'session': jsonsession,
+        },
         context_instance=RequestContext(request))
 
 
