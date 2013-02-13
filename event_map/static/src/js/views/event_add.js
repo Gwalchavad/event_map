@@ -34,7 +34,6 @@ define([
             });
         },
         render: function() {
-            map.group.clearLayers();
             var context = _.extend({
                 "settings": settings
             }, this.model.toJSON()),
@@ -62,38 +61,43 @@ define([
             marker.bindPopup("Move the maker to where the events will be").openPopup();
             //trigger resive event
             //set up datetime picker. destroy?
-            this.$el.find("#id_start_date").datetimepicker({
-                dateFormat: 'yy-mm-dd',
+            var startDateTextBox = this.$el.find("#id_start_date"),
+            endDateTextBox = this.$el.find("#id_end_date");
+
+            startDateTextBox.datetimepicker({
+                timeFormat: "hh:mm tt",
+                minDate: new Date(),
                 onClose: function(dateText, inst) {
-                    var endDateTextBox = $('#id_end_date');
-                    if (!endDateTextBox.val()) {
-                        var testStartDate = new Date(dateText);
-                        var testEndDate = new Date(endDateTextBox.val());
-                        if (testStartDate > testEndDate) endDateTextBox.val(dateText);
-                    } else {
+                    if (endDateTextBox.val() !== '') {
+                        var testStartDate = startDateTextBox.datetimepicker('getDate');
+                        var testEndDate = endDateTextBox.datetimepicker('getDate');
+                        if (testStartDate > testEndDate)
+                            endDateTextBox.datetimepicker('setDate', testStartDate);
+                    }
+                    else {
                         endDateTextBox.val(dateText);
                     }
                 },
-                onSelect: function(selectedDateTime) {
-                    var start = $(this).datetimepicker('getDate');
-                    $('#id_end_date').datetimepicker('option', 'minDate', new Date(start.getTime()));
+                onSelect: function (selectedDateTime){
+                    endDateTextBox.datetimepicker('option', 'minDate', startDateTextBox.datetimepicker('getDate') );
                 }
             });
-            this.$el.find("#id_end_date").datetimepicker({
-                dateFormat: 'yy-mm-dd',
+            endDateTextBox.datetimepicker({
+                timeFormat: "hh:mm tt",
+                minDate: new Date(),
                 onClose: function(dateText, inst) {
-                    var startDateTextBox = $('#id_start_date');
-                    if (!startDateTextBox.val()) {
-                        var testStartDate = new Date(startDateTextBox.val());
-                        var testEndDate = new Date(dateText);
-                        if (testStartDate > testEndDate) startDateTextBox.val(dateText);
-                    } else {
+                    if (startDateTextBox.val() !== '') {
+                        var testStartDate = startDateTextBox.datetimepicker('getDate');
+                        var testEndDate = endDateTextBox.datetimepicker('getDate');
+                        if (testStartDate > testEndDate)
+                            startDateTextBox.datetimepicker('setDate', testEndDate);
+                    }
+                    else {
                         startDateTextBox.val(dateText);
                     }
                 },
-                onSelect: function(selectedDateTime) {
-                    var end = $(this).datetimepicker('getDate');
-                    $('#id_start_date').datetimepicker('option', 'maxDate', new Date(end.getTime()));
+                onSelect: function (selectedDateTime){
+                    startDateTextBox.datetimepicker('option', 'maxDate', endDateTextBox.datetimepicker('getDate') );
                 }
             });
             return this;

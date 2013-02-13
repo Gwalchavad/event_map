@@ -7,14 +7,16 @@
 		<meta name="description" content="Event Map">
         <link href="/atom/all/" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
         <link href="/rss/all/" type="application/rss+xml" rel="alternate" title="Sitewide rss Feed">
-		<link href="/static/css/main.css" rel="stylesheet">
+		
 		<link href="/static/components/bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link href="/static/components/jqueryUI/css/custom-theme/jquery-ui-1.10.0.custom.css" rel="stylesheet">    
         <link href="/static/components/leaflet/dist/leaflet.css"  rel="stylesheet"/>
         {% if DEBUG %}
+        <link href="{{STATIC_URL}}src/css/main.css" rel="stylesheet">
         <script data-main="{{STATIC_URL}}src/js/main" src="{{STATIC_URL}}components/require/require.js"></script>
         {% else %}
-        <script src="{{BUILT_JS}}main.js"></script>
+        <link href="{{BUILT_URL}}css/main.css" rel="stylesheet">
+        <script src="{{BUILT_URL}}js/main.js"></script>
         {% endif %}
 	</head>
 	<body>

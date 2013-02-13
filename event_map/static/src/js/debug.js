@@ -27,9 +27,10 @@ define([
                 s.push('\n\n');
             });
             return s.join('');
-        }
+        };
         $.fn.eventReport = function(selector) {
             return $.eventReport(selector, this);
-        }
+        };
     })(jQuery);
+
 });

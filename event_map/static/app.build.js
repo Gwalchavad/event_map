@@ -6,6 +6,7 @@
     dir: "./dist",
     optimize: "uglify2",
     preserveLicenseComments: false,
+    optimizeCss: "standard",
     //removeCombined: true,
     //findNestedDependencies: true,
     pragmas: {
@@ -18,7 +19,16 @@
         },
         {
             name: "views/list",
-            include: ["views/list_info"]
+            include: ["views/list_info"],
+            exclude: ["main"]
+        },
+        {
+            name: "views/event_add",
+            exclude: ["main"]
+        },
+        {
+            name: "views/event",
+            exclude: ["main"]
         }
     ]
 })

@@ -30,5 +30,5 @@ def verbiage(request):
 def goodies(request):
     return {
         'STATIC_URL': settings.STATIC_URL,
-        'BUILT_JS': settings.EM_BUILT_JS,
+        'BUILT_URL': settings.EM_BUILT_URL,
         'DEBUG': settings.DEBUG}

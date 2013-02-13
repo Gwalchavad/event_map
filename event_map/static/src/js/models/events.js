@@ -161,7 +161,7 @@ define([
              *  backbone comparator. Sorts events by date and by 1/id to
              * garentee that events with the same date will be in the same order
              */
-            return event.get("start_datetime").getTime() + 1/event.get("id");
+            return event.get("start_datetime").getTime();
         },
 
         attr: function(prop, value) {

@@ -53,7 +53,6 @@ define([
         },
         initialize: function() {
             var self = this;
-            map.group.clearLayers();
             //bind resive
             var de_resize = _.debounce(this.onResize, 300);
             $(window).on('resize.' + this.cid, this, de_resize);
@@ -318,6 +317,7 @@ define([
             $EventsListEL = this.$el.find("#event_list"),
             currentNumOfEl = $EventsListEL.children().length;
             //create and insert the DOM for the event li
+            console.log(datetime,events.get("title"), position);
             if(currentNumOfEl === 0){
                 html = temp_event_list({
                     days: [day_data],
@@ -342,7 +342,6 @@ define([
                 nDay = ndatetime.getUTCDate(),
                 nMonth = ndatetime.getUTCMonth(),
                 nYear = ndatetime.getUTCFullYear();
-
                 //insert new event li
                 nextEvent[insertMethod](html_events);
                 //create and expand DOM for month and day li
@@ -473,20 +472,18 @@ define([
          * user scolls
          */
         setMonthSideBarPosition: function() {
-            var tolarance = 20;
-            var topVisbleEl = document.elementFromPoint(
+            var tolarance = 20,
+            topVisbleEl = document.elementFromPoint(
                     $("#event_list").position().left + 0.5,
-                    $("#event_list_top_date").height());
-            var topModelId = $(topVisbleEl).data("id");
-            var top_start_date = this.model.get(topModelId).get("start_datetime");
-            var topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear();
-
-            var topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height();
-            var topElwidth = $("#month_" + topMonthId).children().width();
-            var bottomElwidth = $("#month_" + topMonthId).next().children().width();
-
-            var current_top_month = $("#month_" + topMonthId).children();
-            if(!this.current_top_month || (this.current_top_month.selector != current_top_month.selector)){
+                    $("#event_list_top_date").height()),
+            topModelId = $(topVisbleEl).data("id"),
+            top_start_date = this.model.get(topModelId).get("start_datetime"),
+            topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear(),
+            topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height(),
+            topElwidth = $("#month_" + topMonthId).children().width(),
+            bottomElwidth = $("#month_" + topMonthId).next().children().width(),
+            current_top_month = $("#month_" + topMonthId).children();
+            if(!this.current_top_month || (this.current_top_month[0] !== current_top_month[0])){
                 $(".monthFixed").removeClass("monthFixed");
                 //this fixes an edge condition of collapsing the top event
                 if(this.current_top_month)
