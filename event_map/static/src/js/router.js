@@ -174,7 +174,6 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             });
 
         },
-
         //
         //Helper Functions
         //
@@ -187,9 +186,7 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             }
             if (this.currentView) {
                 this.currentView.forEach(function(view) {
-                    if (view) {
-                        view.close();
-                    }
+                    if (view.close) view.close();
                 });
             }
             //open new view
@@ -201,6 +198,10 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             this.currentView = views;
             views.forEach(function(view) {
                 if (view.onDOMadd) view.onDOMadd();
+                if (view.onResize){
+                    var de_resize = _.debounce(view.onResize, 300);
+                    $(window).on('resize.'+view.cid, view, de_resize);
+                }
             });
 
         },

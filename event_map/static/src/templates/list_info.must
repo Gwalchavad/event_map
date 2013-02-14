@@ -1,7 +1,5 @@
-<div class="row-fluid top top_text">
-    <div class="span10">
-        {{title}}
-    </div>
+<div class="row-fluid top">
+    <h1>{{title}}</h1>
 </div>
 <div id="ListOptionView" style="margin: 20px;">
     {{description}}

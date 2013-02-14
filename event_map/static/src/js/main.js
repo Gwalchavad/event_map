@@ -196,6 +196,7 @@ require([
         }
         this.remove();
         this.unbind();
+        $(window).off('resize.'+this.cid);
     };
 
     app = new Router({});

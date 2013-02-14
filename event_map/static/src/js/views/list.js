@@ -53,9 +53,6 @@ define([
         },
         initialize: function() {
             var self = this;
-            //bind resive
-            var de_resize = _.debounce(this.onResize, 300);
-            $(window).on('resize.' + this.cid, this, de_resize);
             //process events that are added by fetching
             this.model.on('add',self.onAdd, this);
             /*
@@ -278,7 +275,6 @@ define([
             }
         },
         onClose: function() {
-            $(window).off('resize.' + this.cid);
             $("#EventsListView").off("scroll." + this.cid);
         },
         onDOMadd: function() {

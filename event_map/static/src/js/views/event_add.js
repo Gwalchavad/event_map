@@ -13,6 +13,7 @@ define([
     "use strict";
     var EventAddView = Backbone.View.extend({
         tagname: "div",
+        //$(".form-actions").height()
         className: "span7 overflow setheight replace",
         events: {
             "click #geocode_button": "geocode",
@@ -101,6 +102,18 @@ define([
                 }
             });
             return this;
+        },
+        onResize: function(e){
+            var self = e ? e.data : this;
+            if(self.originalHeight <  $(window).height()){
+                $(".form-actions").height($(window).height() - self.originalHeight);
+            }else{
+                $(".form-actions").height(self.formActionHeight);
+            }
+        },
+        onDOMadd: function(e){
+            this.formActionHeight = $(".form-actions").height();
+            this.originalHeight = $(".top").height() + $("#event_add_form").height() - this.formActionHeight;
         },
         geocode: function() {
             map.geocode($("#id_street").val() + " " + $("#id_city").val(), {

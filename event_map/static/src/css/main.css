@@ -7,7 +7,11 @@ body{
 .h100{
     height: 100%;   
 }
-label.required:after { content: " (required)"; }
+label.required:after { 
+    content: " *";
+    font-weight: bold;
+    color: #f66;   
+}
 .top{
     height:60px
 }
@@ -127,3 +131,11 @@ h2{
 .popupAddress{
     color: #ffffff;
 }
+/*twitter bootstrap stuff*/
+form{
+    margin: 0;
+}
+.form-actions {
+    margin-bottom: 0;
+}
+
