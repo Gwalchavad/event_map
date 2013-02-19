@@ -39,6 +39,7 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             this.eventList.reset(init_events);
         },
         before: function(prama, route) {
+            this.map.group.clearLayers();
             if (_.contains(this.loginRequired, route)) {
                 if (!this.session.is_authenticated()) {
                     this.appView.login(route);

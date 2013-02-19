@@ -137,6 +137,12 @@ require([
     };
     //redefine the almost useless toSting method
     Date.prototype.toString = Date.prototype.toJSON;
+    //an ISO string without timezone
+    Date.prototype.toLocalISOString = function () {
+        var month = this.getMonth() + 1,
+        day = this.getDate(),
+        year = this.getFullYear();
+    }
 
     Date.prototype.getWeekdayName = function(){
         /*
@@ -169,7 +175,17 @@ require([
     Date.prototype.getDateShort = function(){
         return  this.getUTCMonth()+"/"+this.getUTCDate();
     };
+    //returns an ISO time string without the timezone info
+    Date.prototype.getLocalISOString = function(){
+        var year = this.getFullYear(),
+        month = this.getMonth() + 1 < 10 ? "0" + (this.getMonth() + 1) : this.getMonth() + 1,
+        day = this.getDate() < 10 ? "0" + this.getDate() : this.getDate(),
+        hour = this.getHours() < 10 ? "0" + this.getHours() : this.getHours(),
+        minutes = this.getMinutes() < 10 ? "0" + this.getMinutes() : this.getMinutes(),
+        seconds = this.getSeconds() < 10 ? "0" + this.getSeconds() : this.getSeconds();
 
+        return year + "-" + month + "-" + day + "T" + hour + ":" + minutes + ":" + seconds;
+    };
     Date.prototype.getTimeCom = function(){
         /*
          * retruns time with AM or PM attched
@@ -196,7 +212,6 @@ require([
         }
         this.remove();
         this.unbind();
-        $(window).off('resize.'+this.cid);
     };
 
     app = new Router({});
