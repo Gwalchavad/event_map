@@ -64,7 +64,7 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
-EM_BUILT_URL = STATIC_URL + "dist/"
+EM_BUILT_URL = STATIC_URL + "dist/js/"
 
 # Additional locations of static files
 STATICFILES_DIRS = (

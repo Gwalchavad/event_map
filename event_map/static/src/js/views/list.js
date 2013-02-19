@@ -313,7 +313,6 @@ define([
             $EventsListEL = this.$el.find("#event_list"),
             currentNumOfEl = $EventsListEL.children().length;
             //create and insert the DOM for the event li
-            console.log(datetime,events.get("title"), position);
             if(currentNumOfEl === 0){
                 html = temp_event_list({
                     days: [day_data],

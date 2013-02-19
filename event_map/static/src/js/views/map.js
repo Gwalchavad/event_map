@@ -9,12 +9,9 @@ define(['jquery','underscore', 'backbone', 'leaflet', 'settings'], function($, _
         marker: null,
         initialize: function() {
             this.props.center = new L.LatLng(settings.center[0], settings.center[1]);
-            this.props.topLeft = new L.LatLng(settings.bounds.tl[0], settings.bounds.tl[1]);
-            this.props.lowerRight = new L.LatLng(settings.bounds.lr[0], settings.bounds.lr[1]);
-            this.props.bounds = new L.LatLngBounds(this.props.topLeft, this.props.lowerRight);
+            this.props.bounds = new L.LatLngBounds(settings.bounds.ul, settings.bounds.lr);
             this.props.tilesetUrl = settings.tilesetUrl;
             this.props.tilesetAttrib = settings.tilesetAttrib;
-            this.props.api_key = settings.api_key;
 
             // create the tile layer with correct attribution
             var osm = new L.TileLayer(this.props.tilesetUrl, {

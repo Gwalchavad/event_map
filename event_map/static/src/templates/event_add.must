@@ -3,56 +3,56 @@
 </div>
 <form class="form-horizontal" id="event_add_form" action="/#" method="post" name="event_add_form" >
     <fieldset>
-        <div class="control-group">
-            <label for="id_title" class="required control-label">Title</label>
+        <div id="title" class="control-group">
+            <label for="title_input" class="required control-label">Title</label>
             <div class="controls">
-                <input id="id_title" class="span9" type="text" name="title" maxlength="255" value="{{title}}" required>
-                <span id="title_error" class="help-inline hide"></span>
+                <input id="title_input" class="span9" type="text" name="title" maxlength="255" value="{{title}}" required>
+                <br/><span id="title_error" class="help-inline hide"></span>
             </div>
         </div>
-        <div class="control-group">
-            <label for="id_start_date" class="required control-label">Start date</label>
+        <div id="start_date" class="control-group">
+            <label for="start_date_input" class="required control-label">Time & Date</label>
             <div class="controls">
-                <input type="datetime" name="start_date" id="id_start_date" value="{{start_date}}" required> - <input type="datetime" name="end_date" id="id_end_date" value="{{end_date}}">
-                <span id="start_date_error" class="help-inline hide"></span>
+                <input type="datetime" name="start_date" id="start_date_input" value="{{start_date}}" required> - <input type="datetime" name="end_date" id="end_date_input" value="{{end_date}}">
+                <br/><span id="start_date_error" class="help-inline hide"></span>
             </div>
         </div>
-        <div class="control-group">
-            <label for="id_address" class="required control-label">Street Address</label>
+        <div id="address" class="control-group">
+            <label for="street_input" class="required control-label">Street Address</label>
             <div class="controls">
-                <input id="id_street" class="span7" type="text" placeholder="Steet" name="address" maxlength="255" value="{{address}}">
+                <input id="street_input" class="span7" type="text" placeholder="Steet" name="address" maxlength="255" value="{{address}}">
                 <div class="input-append">
-                    <input class="input-mini" id="id_city" type="text" value="{{settings.city}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
+                    <input class="input-small" id="city_state_input" type="text" value="{{settings.city}}, {{settings.state}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
                 </div>
-                <span id="location_error" class="help-inline hide"></span>
+                <br/><span id="address_error" class="help-inline hide"></span>
             </div>
         </div>
-        <div class="control-group">
-            <label for="id_venue" class="control-label">Venue</label>
+        <div id="venue" class="control-group">
+            <label for="venue_input" class="control-label">Venue</label>
             <div class="controls">
-                <input id="id_venue" placeholder="" class="span8" type="text" name="venue" maxlength="255" value="{{venue}}">
-                <span id="location_error" class="help-inline hide"></span>
-            </div>
-        </div>
-
-        <div class="control-group">
-            <label for="id_link" class="control-label">Link</label>
-            <div class="controls">
-                <input id="id_link" type="url" placeholder="A link to more infromation" class="span8" name="link" maxlength="255" value="{{link}}">
-                <span id="link_error" class="help-inline hide"></span>
+                <input id="venue_input" placeholder="" class="span8" type="text" name="venue" maxlength="255" value="{{venue}}">
+                <br/><span id="venue_error" class="help-inline hide"></span>
             </div>
         </div>
 
-        <div class="control-group">
-            <label for="id_content" class="control-label required">Event Description</label>
+        <div id="link" class="control-group">
+            <label for="link_input" class="control-label">Link</label>
             <div class="controls">
-                <textarea id="id_content" class="span9" rows="10" wrap="hard" name="content" required>{{content}}</textarea>
-                <span id="content_error" class="help-inline hide"></span>
+                <input id="link_input" type="url" placeholder="A link to more infromation" class="span8" name="link" maxlength="255" value="{{link}}">
+                <br/><span id="link_error" class="help-inline hide"></span>
+            </div>
+        </div>
+
+        <div id="content" class="control-group">
+            <label for="content_input" class="control-label required">Event Description</label>
+            <div class="controls">
+                <textarea id="content_input" class="span9" rows="10" wrap="hard" name="content" required>{{content}}</textarea>
+                <br/><span id="content_error" class="help-inline hide"></span>
             </div>
         </div>
 
         <div class="form-actions">
             {{#if id}} <button type="submit" id="add_event" class="btn btn-primary">Update Event</button> <button id="delete_event" class="btn btn-danger">Delete</button> {{else}} <button type="submit" id="add_event" class="btn btn-primary">Create Event</button> {{/if}} <button class="btn cancel">Cancel</button>
-        </div><input type="hidden" name="lat" id="id_lat" value="{{ location_point.lat }}"> <input type="hidden" name="lng" id="id_lng" value="{{location_point.lng }}">
+        </div><input type="hidden" name="lat" id="lat" value="{{ location_point.lat }}"> <input type="hidden" name="lng" id="lng" value="{{location_point.lng }}">
     </fieldset>
 </form>

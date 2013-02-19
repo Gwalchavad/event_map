@@ -75,6 +75,7 @@ def import_ical(request, source):
         raise ApiException("invalid request type. only POST allowed", 405)
 
 
+
 class Session(View):
     """
     Log In, Log out and check the session
