@@ -1,0 +1,1 @@
+<span id="popup_{{id}}"><h3><a href="/#event/{{id}}">{{title}}</a></h3>{{start_time}}-{{end_time}} <a class="popupAddress btn btn-info btn-small" href="https://www.google.com/maps?daddr={{coordy}},{{coordx}}&saddr={{#if scoordy}}{{scoordy}},{{scoordx}}{{/if}}" target="_blank">Directions</a></span>

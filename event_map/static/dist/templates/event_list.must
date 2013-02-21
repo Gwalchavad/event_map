@@ -1,0 +1,45 @@
+<style>
+    #event_list li{
+        height:{{height}}px
+    }    
+</style>
+
+<div class="row-fluid top" id="event_list_top_date">
+    <div class="span2 top_text" id="topMonthLetter"></div>
+    <div class="span8">
+        <div class="row-fluid" style="height:60px">
+            <div class="span6" id="topWeekLetter" style="text-align: center">
+                <div style="display: inline-block">
+                    <span id="day_0">S</span>
+                    <span id="day_1">M</span>
+                    <span id="day_2">T</span>
+                    <span id="day_3">W</span>
+                    <span id="day_4">T</span>
+                    <span id="day_5">F</span>
+                    <span id="day_6">S</span>
+                </div>
+            </div>
+            <div style="text-align: center;" class="span4 top_text" id="topYear"></div>
+        </div>
+    </div>
+</div>
+<div id="EventsListView" class="replace overflow setheightWithTop">
+    <div class="row-fluid">
+        <div class="span1">
+            <div class="row-fluid">
+                <div class="span5">
+                    <ul  id="event_list_month">
+                    </ul>
+                </div>
+                <div class="span5">
+                    <ul  id="event_list_day">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="span9">
+            <ul id="event_list">
+            </ul>
+        </div>
+    </div>
+</div>

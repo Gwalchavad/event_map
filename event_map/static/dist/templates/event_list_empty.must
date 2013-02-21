@@ -1,0 +1,10 @@
+<div id="NoEvent" class="row-fluid top">
+    <div class="span10 top_text" style="text-align: center;">NO EVENTS</div>
+</div>
+<div>
+    <div id="EventsListView" class="replace overflow setheightWithTop">
+        <ul id="event_list">
+        </ul>
+    </div>
+</div>
+

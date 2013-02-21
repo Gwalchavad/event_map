@@ -1,0 +1,1 @@
+handlebars.registerHelper("slice",function(t,e){for(var i in this)"string"==typeof this[i]&&this[i].length>t&&(this[i]=this[i].slice(0,t)+"...");return e.fn(this)});

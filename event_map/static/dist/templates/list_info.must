@@ -1,0 +1,12 @@
+<div class="row-fluid top">
+    <h1>{{title}}</h1>
+</div>
+<div id="ListOptionView" style="margin: 20px;">
+    {{description}}
+    <br><br>
+    {{#if allow_add}}
+    <a href="#add/event" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
+    {{/if}}
+    <div id="listOptionPanels">
+    </div>
+</div>

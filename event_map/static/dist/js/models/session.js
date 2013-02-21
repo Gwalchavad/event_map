@@ -1,0 +1,1 @@
+define(["underscore","backbone"],function(e,t){var i=t.Model.extend({url:"/api/session",defaults:{authenticated:!1,username:"",password:"",email:""},logout:function(){loggedin=!1,username="",this.save({silent:!0})},is_authenticated:function(){return this.attributes.authenticated}});return i});

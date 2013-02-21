@@ -1,0 +1,1 @@
+define(["underscore","backbone","hbs!../../templates/list_option"],function(e,t,n){var i=t.View.extend({tagName:"div",className:"span3",id:"listDescription",childrenEL:"#listOptionPanels",initialize:function(){},render:function(){return this.$el.append(n(this.model.toJSON())),this}});return i});
