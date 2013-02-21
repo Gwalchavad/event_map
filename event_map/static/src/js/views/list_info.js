@@ -23,7 +23,7 @@ define([
                 }
             } else {
                 //else all things are being viewed
-                title = "ALL EVENT";
+                title = "ALL EVENTS";
                 editable = true;
             }
 

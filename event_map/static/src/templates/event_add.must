@@ -20,7 +20,7 @@
         <div id="address" class="control-group">
             <label for="street_input" class="required control-label">Street Address</label>
             <div class="controls">
-                <input id="street_input" class="span7" type="text" placeholder="Steet" name="address" maxlength="255" value="{{address}}">
+                <input id="street_input" class="span7" type="text" placeholder="" name="address" maxlength="255" value="{{address}}">
                 <div class="input-append">
                     <input class="input-small" id="city_state_input" type="text" value="{{settings.city}}, {{settings.state}}" name="city"><button id="geocode_button" class="btn" type="button">Find!</button>
                 </div>
@@ -30,7 +30,7 @@
         <div id="venue" class="control-group">
             <label for="venue_input" class="control-label">Venue</label>
             <div class="controls">
-                <input id="venue_input" placeholder="" class="span8" type="text" name="venue" maxlength="255" value="{{venue}}">
+                <input id="venue_input" placeholder="the name of the venue" class="span8" type="text" name="venue" maxlength="255" value="{{venue}}">
                 <br/><span id="venue_error" class="help-inline hide"></span>
             </div>
         </div>

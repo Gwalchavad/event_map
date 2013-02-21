@@ -31,21 +31,9 @@ define([
                 $('#signupError').hide();
             }
         },
-        initialize: function() {
-            var self = this;
+        initialize: function(options) {
+            this.constructor.__super__.initialize.apply(this, [options]);
             this.model.on('change',this.render,this);
-
-            $(window).on('resize', function() {
-                self.height = $(window).height();
-                // shuold be $(".top").height() instead of 60, but top is not there first
-                self.topHeight = $(window).height() - 60;
-                $("#heightStyle").replaceWith(temp_app_css({
-                    height: self.height,
-                    topHeight: self.topHeight
-                }));
-                self.resizeTitleText();
-            });
-
             this.height = $(window).height();
             //60 height of header
             this.topHeight = $(window).height() - 60;
@@ -53,15 +41,26 @@ define([
                 height: this.height,
                 topHeight: this.topHeight
             }));
-            self.render();
-            $(window).trigger("resize");
+            this.render();
+            this.onResize();
+        },
+        onResize: function(e){
+            this.height = $(window).height();
+            // shuold be $(".top").height() instead of 60, but top is not there first
+            this.topHeight = $(window).height() - 60;
+            $("#heightStyle").replaceWith(temp_app_css({
+                height: this.height,
+                topHeight: this.topHeight
+            }));
+            this.resizeTitleText();
         },
         resizeTitleText: function(){
             var site_title_lenght= $(window).height() - $("#mainNavList").height();
             $("#site_title").width(site_title_lenght);
             $("#site_title").textfill();
-            var font_height = parseInt($("#site_title span").css("font-size"),10);
-            $("#site_title").css("left",35 + font_height);
+            var font_height = parseInt($("#site_title span").css("font-size"),10),
+            offset = ($("#mainNavList").width() - font_height)/2;
+            $("#site_title").css("left",120 - offset);
         },
         render: function() {
             //add login template

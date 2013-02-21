@@ -30,16 +30,8 @@ define([
             });
             var json = this.model.toJSON();
             //format the date
-            json.start_date = this.model.get("start_datetime").getWeekdayName();
-            json.start_date += " "+this.model.get("start_datetime").getDateWithSlash();
-            json.start = this.model.get("start_datetime").getTimeCom();
-            json.end = this.model.get("end_datetime").getTimeCom();
-            if(this.model.get("end_datetime").toDateString() != this.model.get("start_datetime").toDateString()){
-                json.end_date = this.model.get("end_datetime").getWeekdayName() +
-                " " + this.model.get("start_datetime").getDateWithSlash();
-            }else{
-                delete json.end_date;
-            }
+            json.start_date = this.model.get("start_datetime").format("dddd, MMMM Do YYYY, h:mm:ss a");
+            json.end_date = this.model.get("end_datetime").format("dddd, MMMM Do YYYY, h:mm:ss a");
             this.$el.html(temp_event(json));
             return this;
         }

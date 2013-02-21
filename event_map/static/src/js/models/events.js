@@ -2,8 +2,9 @@
 define([
     'underscore',
     'backbone',
-    'jquery'
-],function (_,Backbone,$){
+    'jquery',
+    'moment'
+],function (_,Backbone,$,moment){
     "use strict";
     var Event = Backbone.Model.extend({
         /*
@@ -39,21 +40,19 @@ define([
              * Turns the time into a javascipt object "start_datetime" in the original time
              * And Creates an nice looking version of time to be displayed
              */
-            var start_datetime_tz = new Date(this.get("start_date")),
-            start_datetime = new Date(this.get("start_date").substring(0,19));
+            var start_datetime_tz = moment(this.get("start_date")),
+            start_datetime = moment(this.get("start_date").substring(0,19));
             this.set("start_datetime", start_datetime);
             this.set("start_datetime_tz", start_datetime_tz);
-            this.set("start_time", start_datetime.getTimeCom().replace(/\s+/g, ""));
         },
         computeEndTimes:function(){
             /*
              * does the same thing as `computeStartTimes` except for the end times
              */
-            var end_datetime_tz = new Date(this.get("end_date")),
-            end_datetime = new Date(this.get("end_date").substring(0,19));
+            var end_datetime_tz = moment(this.get("end_date")),
+            end_datetime = moment(this.get("end_date").substring(0,19));
             this.set("end_datetime", end_datetime);
             this.set("end_datetime_tz", end_datetime_tz);
-            this.set("end_time", end_datetime.getTimeCom().replace(/\s+/g, ""));
         },
         computeCloseValues:function(){
             /*
@@ -104,7 +103,7 @@ define([
                     errors.content = "remind me agian, why should should I come?";
                 }
                 if(!attrs.address){
-                    errors.address =  "where's the party at bro?";
+                    errors.address =  "where is this event at?";
                 }
                 if(!attrs.lat || !attrs.lng){
                     errors.latlng = "drag the maker somewhere";
@@ -161,7 +160,7 @@ define([
              *  backbone comparator. Sorts events by date and by 1/id to
              * garentee that events with the same date will be in the same order
              */
-            return event.get("start_datetime").getTime();
+            return event.get("start_datetime").unix();
         },
 
         attr: function(prop, value) {

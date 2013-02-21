@@ -74,7 +74,10 @@ label.required:after {
     padding: 3px;
     float:left; 
     white-space: nowrap;
-    
+}
+.open .list_item_content{
+    height: 60px;
+    width: 100%;
 }
 .openIndt{
     float:left; 

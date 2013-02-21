@@ -1,4 +1,4 @@
-/*global define alert confirm app L*/
+/*global define alert confirm app*/
 define([
     'jquery',
     'underscore',
@@ -10,7 +10,7 @@ define([
     'hbs!../../templates/event_add',
     'timeDatePicker'
   // Load our app module and pass it to our definition function
-], function($,_,Backbone,Utils,geocoder,settings,map,temp_event_add){
+], function($,_,Backbone,Utils,geocode,settings,map,temp_event_add){
     "use strict";
     var EventAddView = Backbone.View.extend({
         tagname: "div",
@@ -22,7 +22,8 @@ define([
             "click .cancel": "cancel",
             "click #delete_event": "delete_event"
         },
-        initialize: function() {
+        initialize: function(options) {
+            this.constructor.__super__.initialize.apply(this, [options]);
             this.model.on("invalid", function(model, errors) {
                 _.each(errors, function(error, key) {
                     if(key == "latlng"){
@@ -30,10 +31,8 @@ define([
                         map.marker
                             .bindPopup("<b>You Need To Move The Maker<br> To Where This Event Is Happening</b>")
                             .openPopup();
-                    }else{
-                        $("#" + key + "_error").show().html(error);
-                        $("#" + key).addClass("error");
                     }
+                    $("#" + key + "_error").show().html(error);
                 });
             });
         },
@@ -59,14 +58,14 @@ define([
                 marker = map.add_marker(null,true);
             }
             marker.on('dragend', function(e) {
-                $('#lat').val(e.target._latlng.lat);
-                $('#lng').val(e.target._latlng.lng);
+                $('#id_lat').val(e.target._latlng.lat);
+                $('#id_lng').val(e.target._latlng.lng);
             });
             marker.bindPopup("Move the maker to where the events will be").openPopup();
             //trigger resive event
             //set up datetime picker. destroy?
-            var startDateTextBox = this.$el.find("#start_date_input"),
-            endDateTextBox = this.$el.find("#end_date_input");
+            var startDateTextBox = this.$el.find("#id_start_date"),
+            endDateTextBox = this.$el.find("#id_end_date");
 
             startDateTextBox.datetimepicker({
                 timeFormat: "hh:mm tt",
@@ -106,12 +105,11 @@ define([
             });
             return this;
         },
-        onResize: function(e){
-            var self = e ? e.data : this;
-            if(self.originalHeight <  $(window).height()){
-                $(".form-actions").height($(window).height() - self.originalHeight);
+        onResize: function(){
+            if(this.originalHeight <  $(window).height()){
+                $(".form-actions").height($(window).height() - this.originalHeight);
             }else{
-                $(".form-actions").height(self.formActionHeight);
+                $(".form-actions").height(this.formActionHeight);
             }
         },
         onDOMadd: function(e){
@@ -119,15 +117,15 @@ define([
             this.originalHeight = $(".top").height() + $("#event_add_form").height() - this.formActionHeight;
         },
         geocode: function() {
-            geocoder.mapquest($("#street_input").val() + ", " + $("#city_state_input").val(),
-                function(latlng, lng) {
-                    $('#lat').val(latlng.lat);
-                    $('#lng').val(latlng.lng);
-                    var newCenter = new L.LatLng(latlng.lat, latlng.lng);
-                    map.map.setView(newCenter, 15, false);
-                    map.marker.setLatLng(newCenter);
+            map.geocode($("#id_street").val() + " " + $("#id_city").val(), {
+                onSuccess: function(lat, lng) {
+                    $('#id_lat').val(lat);
+                    $('#id_lng').val(lng);
+                },
+                onFail: function() {
+                    alert("Could not Find, Please drag the Marker to the location of the event");
                 }
-            );
+            });
         },
         add_event: function(e){
             var self = this;
@@ -137,9 +135,9 @@ define([
             $(".label").hide();
             var json = Utils.form2object("#event_add_form");
             if(json.start_date)
-                json.start_date = $("#start_date_input").datetimepicker('getDate').getLocalISOString();
+                json.start_date = json.start_date.replace(" ","T");
             if(json.end_date)
-                json.end_date = $("#end_date_input").datetimepicker('getDate').getLocalISOString();
+                json.end_date = json.end_date.replace(" ","T");
             var promise = this.model.save(json,{isComplete:true});
             if(promise){
                 promise.error(function(response) {

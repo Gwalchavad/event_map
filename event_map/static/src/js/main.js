@@ -22,7 +22,8 @@ require.config({
         "jqueryui": "../../components/jqueryUI/js/jquery-ui-1.10.0.custom",
         "leaflet": "../../components/leaflet/dist/leaflet",
         "require": "../../components/require",
-        "underscore": "../../components/underscore/underscore"
+        "underscore": "../../components/underscore/underscore",
+        "moment": "../../components/moment/moment"
     },
     shim: {
         'underscore':{
@@ -67,6 +68,7 @@ require([
             xhr.setRequestHeader("X-CSRFToken", Utils.getCookie('csrftoken'));
         }
     });
+
     $.fn.displayError = function(errors){
          //get the error message and display it
         var json = JSON.parse(errors),
@@ -135,83 +137,20 @@ require([
             }
         });
     };
-    //redefine the almost useless toSting method
-    Date.prototype.toString = Date.prototype.toJSON;
-    //an ISO string without timezone
-    Date.prototype.toLocalISOString = function () {
-        var month = this.getMonth() + 1,
-        day = this.getDate(),
-        year = this.getFullYear();
-    }
-
-    Date.prototype.getWeekdayName = function(){
-        /*
-         * give a weekday num return a weekday abervation
-         */
-        var weekday=new Array(7);
-        weekday[0]="Sun";
-        weekday[1]="Mon";
-        weekday[2]="Tue";
-        weekday[3]="Wed";
-        weekday[4]="Thu";
-        weekday[5]="Fri";
-        weekday[6]="Sat";
-        return weekday[this.getUTCDay()];
-    };
-    Date.prototype.month2letter = function(num) {
-        /*
-         * Given a month letter (0-11) return the month letter
-         */
-        var number = (typeof(num) != "undefined")?num:this.getMonth();
-        var m_names = new Array("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D");
-        return m_names[number];
-    };
-    Date.prototype.getDateWithSlash = function(){
-        /*
-         *  retruns a date in the format m/d/y
-         */
-        return  this.getUTCMonth()+1+"/"+this.getUTCDate()+"/"+this.getUTCFullYear();
-    };
-    Date.prototype.getDateShort = function(){
-        return  this.getUTCMonth()+"/"+this.getUTCDate();
-    };
-    //returns an ISO time string without the timezone info
-    Date.prototype.getLocalISOString = function(){
-        var year = this.getFullYear(),
-        month = this.getMonth() + 1 < 10 ? "0" + (this.getMonth() + 1) : this.getMonth() + 1,
-        day = this.getDate() < 10 ? "0" + this.getDate() : this.getDate(),
-        hour = this.getHours() < 10 ? "0" + this.getHours() : this.getHours(),
-        minutes = this.getMinutes() < 10 ? "0" + this.getMinutes() : this.getMinutes(),
-        seconds = this.getSeconds() < 10 ? "0" + this.getSeconds() : this.getSeconds();
-
-        return year + "-" + month + "-" + day + "T" + hour + ":" + minutes + ":" + seconds;
-    };
-    Date.prototype.getTimeCom = function(){
-        /*
-         * retruns time with AM or PM attched
-         */
-        var hours = this.getUTCHours(),
-        minutes = this.getUTCMinutes(),
-        orientation;
-        if (minutes < 10){
-            minutes = "0" + minutes;
-        }
-        if(hours > 11){
-            orientation = "PM";
-        } else {
-            orientation = "AM";
-        }
-        hours = hours % 12;
-        var time = hours + ":" + minutes + " "+orientation;
-        return time;
-    };
-
     Backbone.View.prototype.close = function() {
         if (this.onClose) {
             this.onClose();
         }
         this.remove();
         this.unbind();
+    };
+    Backbone.View.prototype.initialize = function(){
+        if (this.onResize){
+            var func = _.debounce(_.bind(this.onResize, this), 300);
+            $(window).on('resize.'+this.cid, func);
+            //var func1 = _.bind($(window).on, this);
+            //func1('resize.'+this.cid, null, this, func);
+        }
     };
 
     app = new Router({});

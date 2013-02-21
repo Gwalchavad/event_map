@@ -199,10 +199,6 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             this.currentView = views;
             views.forEach(function(view) {
                 if (view.onDOMadd) view.onDOMadd();
-                if (view.onResize){
-                    var de_resize = _.debounce(view.onResize, 300);
-                    $(window).on('resize.'+view.cid, view, de_resize);
-                }
             });
 
         },

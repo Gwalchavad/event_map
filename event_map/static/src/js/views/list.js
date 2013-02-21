@@ -51,7 +51,8 @@ define([
             "mouseenter .event_item": "onMouseenter",
             "mouseleave .event_item": "onMouseleave"
         },
-        initialize: function() {
+        initialize: function(options) {
+            this.constructor.__super__.initialize.apply(this, [options]);
             var self = this;
             //process events that are added by fetching
             this.model.on('add',self.onAdd, this);
@@ -131,7 +132,12 @@ define([
             //this is also compute on render becuase model appended are not
             //a refence to models in the collection
             var location_point = model.get("location_point"),
-            index = this.model.indexOf(model);
+            index = this.model.indexOf(model),
+            start_time = model.get("start_datetime").format("h:mm A"),
+            end_time = model.get("end_datetime").format("h:mm A");
+
+            model.set("start_time", start_time);
+            model.set("end_time",end_time);
 
             if(location_point){
                 //for the handlebars temp
@@ -224,9 +230,9 @@ define([
                 $("#event_" + id).height(this.height + this.openHeight);
                 $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
                 //set month
-                var day = model.get("start_datetime").getUTCDate();
-                var month = model.get("start_datetime").getUTCMonth();
-                var year = model.get("start_datetime").getUTCFullYear();
+                var day = model.get("start_datetime").date();
+                var month = model.get("start_datetime").month();
+                var year = model.get("start_datetime").year();
                 var height = $("#month_" + month+"_"+year).height();
                 $("#month_" + month + "_" + year).height(height + this.openHeight);
                 //set day height
@@ -251,9 +257,9 @@ define([
             $("#event_" + id).height(this.height);
             //get model of item thata was clicked
             var model = this.model.get(id);
-            var day = model.get("start_datetime").getUTCDate();
-            var month = model.get("start_datetime").getUTCMonth();
-            var year = model.get("start_datetime").getUTCFullYear();
+            var day = model.get("start_datetime").date();
+            var month = model.get("start_datetime").month();
+            var year = model.get("start_datetime").year();
             //set day height
 
             var height = $("#day_" + day + "_" + month + "_" + year).height();
@@ -269,9 +275,8 @@ define([
             this.setMonthSideBarPosition();
         },
         onResize: function(e) {
-            var self = e ? e.data : this;
             if ($("#event_list").length !== 0) {
-                self.genarateColorsAndMonths(true);
+                this.genarateColorsAndMonths(true);
             }
         },
         onClose: function() {
@@ -286,9 +291,9 @@ define([
         renderEvent: function(position, events){
             var html,
             datetime = events.get("start_datetime"),
-            day = datetime.getUTCDate(),
-            month = datetime.getUTCMonth(),
-            year = datetime.getUTCFullYear(),
+            day = datetime.date(),
+            month = datetime.month(),
+            year = datetime.year(),
             month_data = {
                 month:month,
                 year: year,
@@ -333,7 +338,7 @@ define([
                     position = currentNumOfEl-1;
                 }
                 var nextEvent = $($EventsListEL.children()[position]),
-                ndatetime = new Date(nextEvent.data("date").substring(0,19)),
+                ndatetime = new Date(nextEvent.data("date")),
                 nDay = ndatetime.getUTCDate(),
                 nMonth = ndatetime.getUTCMonth(),
                 nYear = ndatetime.getUTCFullYear();
@@ -351,7 +356,7 @@ define([
                     //expand month
                     this.$el.find("#month_"+month+"_"+year).height(calcHeight);
                     //calculate the text size for the month sidebar
-                    var text = this.month2FullNameOrLetter(month, this.$el.find("#month_"+month+"_"+year).height());
+                    var text = this.month2FullNameOrLetter(datetime, this.$el.find("#month_"+month+"_"+year).height());
                     this.$el.find("#month_"+month+"_"+year).children().text(text);
                     //test if the day exists
                     if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
@@ -445,7 +450,7 @@ define([
             }
         },
         setDay: function(date) {
-            var day = date.getUTCDay();
+            var day = date.day();
             $(".selected_day").removeClass("selected_day");
             $("#day_" + day).addClass("selected_day");
         },
@@ -455,11 +460,11 @@ define([
         setMonthDay: function(date) {
             var self = this;
             //set month on side bar
-            var month = date.month2letter();
-            var day = date.getUTCDate();
+            var month = date.format("MMM")[0];
+            var day = date.date();
             $("#topMonthLetter").text(month + day);
             //set day on side bar
-            $("#topYear").text(date.getFullYear());
+            $("#topYear").text(date.year());
 
         },
         /*
@@ -473,7 +478,7 @@ define([
                     $("#event_list_top_date").height()),
             topModelId = $(topVisbleEl).data("id"),
             top_start_date = this.model.get(topModelId).get("start_datetime"),
-            topMonthId = top_start_date.getUTCMonth() + "_" + top_start_date.getUTCFullYear(),
+            topMonthId = top_start_date.month() + "_" + top_start_date.year(),
             topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height(),
             topElwidth = $("#month_" + topMonthId).children().width(),
             bottomElwidth = $("#month_" + topMonthId).next().children().width(),
@@ -513,27 +518,12 @@ define([
         isListFull: function() {
             return ($("#EventsListView").height() < $("#event_list").height()) ? true : false;
         },
-        month2FullNameOrLetter: function(monthNum, elHeight) {
+        month2FullNameOrLetter: function(date, elHeight) {
             var number0fChar = elHeight / 10;
             if (number0fChar < 10) {
-                return Date.prototype.month2letter(monthNum);
+                return date.format("MMM")[0];
             } else {
-                var m_names = new Array(
-                        ["January", 7],
-                        ["Febuary", 7],
-                        ["March", 5],
-                        ["April", 5],
-                        ["May", 3],
-                        ["June", 4],
-                        ["July", 4],
-                        ["August", 6],
-                        ["September", 9],
-                        ["October", 7],
-                        ["November", 8],
-                        ["December", 8]);
-                var month = m_names[monthNum];
-                //month[0] = month[0].slice(0,number0fChar);
-                return month[0];
+               return date.format("MMMM");
             }
         }
     });
