@@ -24,6 +24,7 @@ define([
             "click #delete_event": "delete_event"
         },
         initialize: function() {
+            this.constructor.__super__.initialize.apply(this);
             this.model.on("invalid", function(model, errors) {
                 _.each(errors, function(error, key) {
                     if(key == "latlng"){
@@ -107,16 +108,16 @@ define([
             return this;
         },
         onResize: function(e){
-            var self = e ? e.data : this;
-            if(self.originalHeight <  $(window).height()){
-                $(".form-actions").height($(window).height() - self.originalHeight);
+            if(this.originalHeight <  $(window).height()){
+                $(".form-actions").height($(window).height() - this.originalHeight);
             }else{
-                $(".form-actions").height(self.formActionHeight);
+                $(".form-actions").height(this.formActionHeight);
             }
         },
         onDOMadd: function(e){
             this.formActionHeight = $(".form-actions").height();
             this.originalHeight = $(".top").height() + $("#event_add_form").height() - this.formActionHeight;
+            this.onResize();
         },
         geocode: function() {
             geocoder.mapquest($("#street_input").val() + ", " + $("#city_state_input").val(),
