@@ -115,6 +115,7 @@ define([
         onDOMadd: function(e){
             this.formActionHeight = $(".form-actions").height();
             this.originalHeight = $(".top").height() + $("#event_add_form").height() - this.formActionHeight;
+            this.onResize()
         },
         geocode: function() {
             map.geocode($("#id_street").val() + " " + $("#id_city").val(), {
