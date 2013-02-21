@@ -291,13 +291,15 @@ define([
         renderEvent: function(position, events){
             var html,
             datetime = events.get("start_datetime"),
+            text = this.month2FullNameOrLetter(datetime, 0),
             day = datetime.date(),
             month = datetime.month(),
             year = datetime.year(),
             month_data = {
-                month:month,
+                month: month,
                 year: year,
-                height: this.height
+                height: this.height,
+                letter: text
             },
             day_data = {
                 day: day,
@@ -355,8 +357,8 @@ define([
                     },this);
                     //expand month
                     this.$el.find("#month_"+month+"_"+year).height(calcHeight);
-                    //calculate the text size for the month sidebar
-                    var text = this.month2FullNameOrLetter(datetime, this.$el.find("#month_"+month+"_"+year).height());
+                    //recalculate the text size for the month sidebar
+                    text = this.month2FullNameOrLetter(datetime, this.$el.find("#month_"+month+"_"+year).height());
                     this.$el.find("#month_"+month+"_"+year).children().text(text);
                     //test if the day exists
                     if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
