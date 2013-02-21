@@ -138,9 +138,9 @@ define([
             $(".label").hide();
             var json = Utils.form2object("#event_add_form");
             if(json.start_date)
-                json.start_date = moment($("#start_date_input").datetimepicker('getDate'));
+                json.start_date = moment($("#start_date_input").datetimepicker('getDate')).toJSON();
             if(json.end_date)
-                json.end_date = moment($("#end_date_input").datetimepicker('getDate'));
+                json.end_date = moment($("#end_date_input").datetimepicker('getDate')).toJSON();
             var promise = this.model.save(json,{isComplete:true});
             if(promise){
                 promise.error(function(response) {
