@@ -152,7 +152,8 @@ require([
             //func1('resize.'+this.cid, null, this, func);
         }
     };
-
-    app = new Router({});
-    Backbone.history.start();
+    $(document).ready(function(){
+        app = new Router({});
+        Backbone.history.start();
+    });
 });

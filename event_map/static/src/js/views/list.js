@@ -289,7 +289,6 @@ define([
 
         },
         renderEvent: function(position, events){
-            console.log(position, events);
             var html,
             datetime = events.get("start_datetime"),
             text = this.month2FullNameOrLetter(datetime, 0),
@@ -350,7 +349,6 @@ define([
                 //create and expand DOM for month and day li
                 //if the month doesn't exist
                 if(this.$el.find("#month_"+month+"_"+year).length === 0){
-                    console.log("inserting month");
                     this.$el.find("#month_"+nMonth+"_"+nYear)[insertMethod](html_months);
                     this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear)[insertMethod](html_days);
                 }else{
@@ -364,7 +362,6 @@ define([
                     this.$el.find("#month_"+month+"_"+year).children().text(text);
                     //test if the day exists
                     if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
-                        console.log("inserting day", insertMethod, day,this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear),html_days);
                         this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear)[insertMethod](html_days);
                     }else{
                         //expand day
