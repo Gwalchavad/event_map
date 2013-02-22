@@ -364,7 +364,7 @@ define([
                     this.$el.find("#month_"+month+"_"+year).children().text(text);
                     //test if the day exists
                     if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
-                        console.log("inserting day", day,this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear),html_days);
+                        console.log("inserting day", insertMethod, day,this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear),html_days);
                         this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear)[insertMethod](html_days);
                     }else{
                         //expand day
