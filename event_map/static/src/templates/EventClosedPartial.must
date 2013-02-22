@@ -1,5 +1,5 @@
 {{#each events}}
-<li id="event_{{slug}}" data-id="{{slug}}" data-date="{{start_datetime}}" class="event_item">
+<li id="event_{{slug}}" data-id="{{slug}}" data-date="{{start_datetime._i}}" class="event_item">
         <div class="list_item_container">
             <div class="openIndt" style="">[+]</div>
             <div class="list_item_width">
