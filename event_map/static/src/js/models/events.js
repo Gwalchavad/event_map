@@ -42,6 +42,7 @@ define([
              */
             var start_datetime_tz = moment(this.get("start_date")),
             start_datetime = moment(this.get("start_date").substring(0,19));
+            start_datetime.utc();
             this.set("start_datetime", start_datetime);
             this.set("start_datetime_tz", start_datetime_tz);
         },
@@ -51,6 +52,7 @@ define([
              */
             var end_datetime_tz = moment(this.get("end_date")),
             end_datetime = moment(this.get("end_date").substring(0,19));
+            end_datetime.utc();
             this.set("end_datetime", end_datetime);
             this.set("end_datetime_tz", end_datetime_tz);
         },
