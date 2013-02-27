@@ -15,8 +15,13 @@
     <div class="row-fluid">
         <div class="span5">
             <h3>
-                WHERE:{{#if venue}}{{venue}} {{/if}}{{#if location}}{{location}}{{/if}}{{#if venue}}{{/if}}
-                <br>
+                {{#if venue}}
+                VENUE:{{venue}}<br>
+                {{/if}}
+                {{#if address}}
+                <span>ADDRESS: {{address}}</span><br>
+                {{/if}}
+
                 <a href="#/author/{{author}}">BY:{{author}}</a>
             </h3>
         </div>
