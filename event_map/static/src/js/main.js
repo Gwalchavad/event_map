@@ -153,6 +153,7 @@ require([
         }
     };
     $(document).ready(function(){
+        $("#loading").remove();
         app = new Router({});
         Backbone.history.start();
     });

@@ -48,7 +48,7 @@ def add_feed(feed_url, user):
     if feed_created:
         new_ug = em_db.UserGroup(user=feed.user, title=feed.user.username)
         new_ug.save()
-        created_events, old_events = import_feed(content, new_ug, feed)
+        created_events, old_events = import_ical(content, new_ug, feed)
     if fg_created:
         #create subscription from the feed group to the user
         user_sub = em_db.Subscription(subscriber=ug, publisher=feed_group)
@@ -65,7 +65,7 @@ def add_feed(feed_url, user):
     return True
 
 
-def import_feed(content, author, feed=None):
+def import_ical(content, author, feed=None):
     #map of ical fields to event_map fields
     name_map = {
         'SUMMARY': 'title',

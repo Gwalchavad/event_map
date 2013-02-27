@@ -178,9 +178,6 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
         //
         //Helper Functions
         //
-        requireLogin: function(callback) {
-            callback();
-        },
         showView: function(views) {
             if (!(views instanceof Array)) {
                 views = [views];

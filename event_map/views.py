@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, logout, login as auth_login
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.shortcuts import render_to_response
+from django.utils import timezone as tz
 from datetime import datetime
 import dateutil.parser
 import itertools
@@ -39,6 +40,7 @@ def index(request):
         {
             'events': jsonevents,
             'session': jsonsession,
+            'serverTimeTz': utils.cal_time(tz.now()),
         },
         context_instance=RequestContext(request))
 
@@ -62,18 +64,31 @@ def import_ical(request, source):
         if source == 'url':
             content = importers.fetch_feed(request.POST['feed_url'])
         else:
-            content = request.FILES['ical_file'].read()
-        created_events, old_events = importers.import_feed(content, request.user.usergroup)
-        if created_events:
-            request.user.usergroup.bfs_propagation(created_events, created=True)
-        if old_events:
-            request.user.usergroup.bfs_propagation(old_events)
-        #raise ApiException("invalid file type", 415)
-        all_events = created_events + old_events
+            content = [rf.read() for rf in request.FILES.values()]
+        if not isinstance(content, list):
+            content = [content]
+        all_events = list()
+        for ical in content:
+            created_events, old_events = importers.import_ical(ical, request.user.usergroup)
+            if created_events:
+                request.user.usergroup.bfs_propagation(created_events, created=True)
+            if old_events:
+                request.user.usergroup.bfs_propagation(old_events)
+            #raise ApiException("invalid file type", 415)
+            all_events = created_events + old_events + all_events
         return utils.json_response([event.to_JSON() for event in all_events])
     else:
         raise ApiException("invalid request type. only POST allowed", 405)
 
+
+def getTime(request):
+    """@todo: Docstring for getTime
+
+    :request: @todo
+    :returns: @todo
+
+    """
+    return utils.json_response({"datetime": tz.now()})
 
 
 class Session(View):

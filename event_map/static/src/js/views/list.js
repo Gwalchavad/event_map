@@ -4,6 +4,7 @@ define([
     'leaflet',
     'underscore',
     'backbone',
+    'moment',
     'utils',
     'views/map',
     'hbs!../../templates/event_list',
@@ -17,6 +18,7 @@ define([
         L,
         _,
         Backbone,
+        moment,
         utils,
         map,
         temp_event_list,
@@ -268,9 +270,7 @@ define([
             height = $("#month_" + month+"_"+year).height();
             $("#month_" + month+"_"+year).height(height -  this.openHeight);
             var color = $("#event_" + id).css("background-color");
-            $("#event_" + id).replaceWith(
-                temp_item_closed({
-                    events: [model.toJSON()]}));
+            //$("#event_" + id).html(temp_item_closed({events: [model.toJSON()]}));
             $("#event_" + id).css("background-color", color);
             this.setMonthSideBarPosition();
         },
@@ -286,6 +286,7 @@ define([
             this.onResize();
             this.backFetch();
             this.forwardFetch();
+            this.renderNow();
 
         },
         renderEvent: function(position, events){
@@ -340,17 +341,15 @@ define([
                     position = currentNumOfEl-1;
                 }
                 var nextEvent = $($EventsListEL.children()[position]),
-                ndatetime = new Date(nextEvent.data("date")),
-                nDay = ndatetime.getUTCDate(),
-                nMonth = ndatetime.getUTCMonth(),
-                nYear = ndatetime.getUTCFullYear();
+                nMonthLi = this.getMonthLi(position),
+                nDayLi = this.getDayLi(position);
                 //insert new event li
                 nextEvent[insertMethod](html_events);
                 //create and expand DOM for month and day li
                 //if the month doesn't exist
                 if(this.$el.find("#month_"+month+"_"+year).length === 0){
-                    this.$el.find("#month_"+nMonth+"_"+nYear)[insertMethod](html_months);
-                    this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear)[insertMethod](html_days);
+                    nMonthLi[insertMethod](html_months);
+                    nDayLi[insertMethod](html_days);
                 }else{
                     var calcHeight = _.bind(function(index, height){
                        return height + this.height;
@@ -362,7 +361,7 @@ define([
                     this.$el.find("#month_"+month+"_"+year).children().text(text);
                     //test if the day exists
                     if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
-                        this.$el.find("#day_"+nDay+"_"+nMonth+"_"+nYear)[insertMethod](html_days);
+                       nDayLi[insertMethod](html_days);
                     }else{
                         //expand day
                         this.$el.find("#day_"+day+"_"+month+"_"+year).height(calcHeight);
@@ -370,6 +369,22 @@ define([
                 }
                 return this;
             }
+        },
+        //creates the "now" line in the event list
+        renderNow: function(){
+            var time = server_time_tz.substr(0,19);
+            var index = this.model.binarySearch(moment(time),"start_datetime"),
+            monthLi = this.getMonthLi(index),
+            dayLi = this.getDayLi(index);
+            this.$el.find("#event_list li:eq("+index+")")
+                .css("border-top","4px")
+                .css("border-top-style","solid");
+            monthLi.height(function(index, height){
+                return height + 4;
+            });
+            dayLi.height(function(index, height){
+                return height + 4;
+            });
         },
         render: function(){
             var html = temp_event_list_empty();
@@ -451,6 +466,23 @@ define([
                 }
             }
         },
+        //give an index of an event item find the corrisponding month li
+        getMonthLi: function(index){
+            var eventItem = this.$el.find("#event_list li").eq(index),
+            datetime = new Date(eventItem.data("date")),
+            year = datetime.getUTCFullYear(),
+            month = datetime.getUTCMonth();
+            return this.$el.find("#month_"+month+"_"+year);
+        },
+        //give an index of an event item find the corrisponding day li
+        getDayLi: function(index){
+            var eventItem = this.$el.find("#event_list li").eq(index),
+            datetime = new Date(eventItem.data("date")),
+            year = datetime.getUTCFullYear(),
+            month = datetime.getUTCMonth(),
+            day = datetime.getUTCDate();
+            return this.$el.find("#day_"+day+"_"+month+"_"+year);
+        },
         setDay: function(date) {
             var day = date.day();
             $(".selected_day").removeClass("selected_day");
@@ -467,7 +499,6 @@ define([
             $("#topMonthLetter").text(month + day);
             //set day on side bar
             $("#topYear").text(date.year());
-
         },
         /*
          * Positions the Month vertical on the side of the list as the

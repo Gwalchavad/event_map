@@ -87,6 +87,7 @@ define([
                     endDateTextBox.datetimepicker('option', 'minDate', startDateTextBox.datetimepicker('getDate') );
                 }
             });
+
             endDateTextBox.datetimepicker({
                 timeFormat: "hh:mm tt",
                 minDate: new Date(),

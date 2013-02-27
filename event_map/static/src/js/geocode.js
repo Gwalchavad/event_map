@@ -3,7 +3,7 @@ define(['jquery','leaflet', 'settings'], function($, L, settings) {
         "use strict";
         var bounds = new L.LatLngBounds(settings.bounds.ul, settings.bounds.lr);
 
-        function mapquest (address, callback) {
+        function mapquest (address, callback, failCallback) {
             var boundString = settings.bounds.ul[0] +
                 "," + settings.bounds.ul[1] +
                 "," + settings.bounds.lr[0] +
@@ -13,8 +13,15 @@ define(['jquery','leaflet', 'settings'], function($, L, settings) {
             "&boundingBox=" + boundString +
             "&location=" + address;
 
-            queryGeoCoder(url, callback, function(data){
-                return data.results[0].locations[0].latLng;
+            queryGeoCoder(url, callback, failCallback, function(data){
+                if( data.results[0].locations[0].geocodeQuality == "POINT" ||
+                    data.results[0].locations[0].geocodeQuality == "ADDRESS" ||
+                    data.results[0].locations[0].geocodeQuality == "INTERSECTION" ||
+                    data.results[0].locations[0].geocodeQuality == "STREET"){
+                    return data.results[0].locations[0].latLng;
+                }else{
+                    return false;
+                }
             });
         }
 
@@ -34,13 +41,17 @@ define(['jquery','leaflet', 'settings'], function($, L, settings) {
         }
 
 
-        function queryGeoCoder(url, callback, locationFilter) {
-            return $.ajax({
+        function queryGeoCoder(url, doneCallback, locationFailCallback, locationFilter) {
+             $.ajax({
                 url: url,
                 dataType: 'jsonp'
-            }).then(function(data) {
+            }).done(function(data) {
                 var latlng = locationFilter(data);
-                callback(latlng,data);
+                if(latlng){
+                    doneCallback(latlng,data);
+                }else if(locationFailCallback){
+                    locationFailCallback(data);
+                }
             });
 
         }

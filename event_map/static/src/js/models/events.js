@@ -162,7 +162,29 @@ define([
              */
             return event.get("start_datetime").unix();
         },
-
+        binarySearch:  function(needle, field) {
+            var high = this.models.length - 1;
+            var low = 0;
+            var haystack = this.models;
+            var mid;
+            var element;
+            while (low <= high) {
+                mid = parseInt((low + high) / 2,10);
+                element = haystack[mid].get(field);
+                if (element > needle) {
+                    high = mid - 1;
+                } else if (element < needle) {
+                    low = mid + 1;
+                } else {
+                    return mid;
+                }
+            }
+            if(high === -1 || haystack[low].get(field) > haystack[high].get(field) ){
+                return low;
+            }else{
+                return high;
+            }
+        },
         attr: function(prop, value) {
             //Setting attributes on a collection
             //http://stackoverflow.com/questions/5930656/setting-attributes-on-a-collection-backbone-js

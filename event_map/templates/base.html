@@ -11,10 +11,10 @@
 		<link href="/static/components/jqueryUI/css/custom-theme/jquery-ui-1.10.0.custom.css" rel="stylesheet">    
         <link href="/static/components/leaflet/dist/leaflet.css"  rel="stylesheet"/>
         {% if DEBUG %}
-        <script data-main="{{STATIC_URL}}src/js/main" src="{{STATIC_URL}}components/require/require.js"></script>
+        <script type="text/javascript" data-main="{{STATIC_URL}}src/js/main" src="{{STATIC_URL}}components/require/require.js"></script>
         <link href="{{STATIC_URL}}src/css/main.css" rel="stylesheet">
         {% else %}
-        <script src="{{BUILT_URL}}js/main.js"></script>
+        <script type="text/javascript" src="{{BUILT_URL}}js/main.js"></script>
         <link href="{{BUILT_URL}}css/main.css" rel="stylesheet">
         {% endif %}
 	</head>
@@ -28,6 +28,8 @@
             </nav>
 		  </div>
 		  <div class="span9">
+            <h1 id="loading">Loading...</h1>
+            <noscript>You need to enable javascript to view this site</noscript>
 		    <div class="row-fluid" id="main">
 		      <div id="map" class="span3 setheight"></div>
 		    </div>
@@ -36,7 +38,9 @@
 		<script type="text/javascript">
             var init_events = {{events|safe|escape}},
             init_user = {{session|safe|escape}},
-            intro_text = "{{verbiage.description}}"
+            server_time_tz = "{{serverTimeTz}}",
+            servre_time = "{{serverTime}}",
+            intro_text = "{{verbiage.description}}";
 		</script>
 		<div class="hide" id="svg">
 		<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -99,10 +103,10 @@
                     <div  id="loginError" class="alert alert-error hide"></div>
                     <form id="loginForm" method="post">
                         <div class="row-fluid">
-                            <div class	="span5">
+                            <div class ="span5">
                                 <input  placeholder="Username" id="id_username" type="text" name="username" maxlength="30">
                             </div>
-                            <div class	="span5">
+                            <div class ="span5">
                                 <input placeholder="Password" type="password" name="password" id="id_password">
                             </div>
                         </div>
@@ -165,6 +169,6 @@
                 </form>
             </div>
         </div>
-    </section
+        </section>
 	</body>
 </html>

@@ -41,9 +41,10 @@ define(['jquery', 'backbone', 'utils', 'hbs!../../templates/ical_upload'
 
                 // FormData only has the file
                 var fileInput = document.getElementById('file-id');
-                var file = fileInput.files[0];
-                formData.append('ical_file', file);
-
+                var files = fileInput.files;
+                for (var i = 0; i < files.length; i++) {
+                    formData.append("file" + i, files[i]);
+                }
                 // Code common to both variants
                 sendXHRequest(formData, action);
             }
