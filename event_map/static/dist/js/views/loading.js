@@ -1,1 +1,1 @@
-define(["backbone","hbs!../../templates/loading"],function(n,t){var e=n.View.extend({tagname:"div",className:"span7",render:function(){return this.$el.html(t()),this}});return e});
+define(["backbone","hbs!../../templates/loading"],function(e,t){var n=e.View.extend({tagname:"div",className:"span7",render:function(){return this.$el.html(t()),this}});return n});
