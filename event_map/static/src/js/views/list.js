@@ -283,11 +283,10 @@ define([
             $("#EventsListView").off("scroll." + this.cid);
         },
         onDOMadd: function() {
+            this.renderNow();
             this.onResize();
             this.backFetch();
             this.forwardFetch();
-            this.renderNow();
-
         },
         renderEvent: function(position, events){
             var html,
@@ -377,6 +376,7 @@ define([
             monthLi = this.getMonthLi(index),
             dayLi = this.getDayLi(index);
             this.$el.find("#event_list li:eq("+index+")")
+                .addClass("Now")
                 .css("border-top","4px")
                 .css("border-top-style","solid");
             monthLi.height(function(index, height){
@@ -405,29 +405,29 @@ define([
             //the range of colors (Hue) to use
             colorRange = 240,
             //find the top elemetns
-            topVisbleEl = document.elementFromPoint($("#event_list").position().left + 0.5,
-                    $("#EventsListView").position().top+ 20);
+            topVisbleEl = $(document.elementFromPoint($("#event_list").position().left + 0.5,
+                    $("#EventsListView").position().top+ 20)),
+            startEl;
+            if(moment(topVisbleEl.data("date")) < moment($(".Now").data("date"))){
+                startEl = $(".Now");
+            }else{
+                startEl = topVisbleEl;
+            }
+
             //have we moved enought to change colors?
-            if ($(topVisbleEl).attr("class") &&
-                    $(topVisbleEl).attr("class").split(" ")[0] ==
-                    "event_item" &&
-                    (this.topVisbleEl != topVisbleEl || regenrate)) {
+            if (topVisbleEl.hasClass("event_item") && (regenrate || this.topVisbleEl[0] != topVisbleEl[0] )) {
+                var top_start_date = moment(topVisbleEl.data("date")),
+                bottomPos = (self.isListFull() ? $("#EventsListView").height() : $("#event_list").height()) - 11,
+                bottomVisbleEl = document.elementFromPoint(
+                        $("#event_list").position().left,
+                        $("#EventsListView").position().top + bottomPos),
+                topIndex = $("#event_list").children().index(startEl),
+                bottomIndex = $("#event_list").children().index(bottomVisbleEl);
+
                 this.topVisbleEl = topVisbleEl;
-                var topModelId = topVisbleEl.id.replace(/event_/, "");
-                var top_start_date = self.model.get(topModelId).get("start_datetime");
                 this.setMonthDay(top_start_date);
                 this.setDay(top_start_date);
                 //set map icons that are not in the current view
-                var bottomPos = self.isListFull() ? $("#EventsListView").height() : $("#event_list").height();
-                //add tolerance
-                bottomPos = bottomPos - 11;
-                var bottomVisbleEl = document.elementFromPoint(
-                        $("#event_list").position().left,
-                        $("#EventsListView").position().top + bottomPos);
-
-                var topIndex = $("#event_list").children().index(topVisbleEl);
-                var bottomIndex = $("#event_list").children().index(bottomVisbleEl);
-
                 //set the color to white for all over elements
                 //$(".event_item").css("background-color", "white");
                 //set up event icons. Clears the prevouse colour
