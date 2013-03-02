@@ -1,4 +1,4 @@
-/*global define*/
+/*global define server_time_tz*/
 define([
     'jquery',
     'leaflet',
@@ -33,9 +33,12 @@ define([
         tagName: "div",
         className: "span4",
         id: "",
+        numOfFades:  6, //how many events markers are shown after you scroll past then
         height: 40,
         openHeight: 38,
-        markers: [],
+        _markers: [], //store referance to makers SO that the zindex can be changed
+        _eventsInView: [],
+        _eventsViewed: [],
         //anything before Wed Dec 31 1969 19:00:00 GMT-0500 (EST) will fuck up the system
         //book keeping to render varibles
         render_var: {
@@ -154,7 +157,7 @@ define([
                 //set map icons
                 var myIcon = L.divIcon({
                     className: "icon",
-                    html: '<div id=\'icon-' + model.get("slug") + '\'></div>',
+                    html: '<div class=\'icon-event\' id=\'icon-' + model.get("slug") + '\'></div>',
                     iconAnchor: [9, 23],
                     iconSize: [24, 30],
                     popupAnchor: [4, - 10]
@@ -168,15 +171,17 @@ define([
                 marker.bindPopup(temp_popup(model.toJSON()));
                 map.group.addLayer(marker);
                 marker.on("click", this.onMarkerClick, this);
-                this.markers[model.get("slug")] = marker;
-                $("#icon-" + model.get("slug")).html($('#svg svg').clone());
+                this._markers[model.get("slug")] = marker;
+                this.getMarkerById(model.get("slug"))
+                    .html($('#svg svg').clone())
+                    .addClass("hidden");
             }
             this.renderEvent(index,model);
         },
 
         onLocationFound: function(e){
             //update the makers start address for directions
-            this.markers.forEach(function(marker){
+            this._markers.forEach(function(marker){
                 var content = $(marker._popup._content);
                 var _href = content.find(".popupAddress").attr("href");
                 _href = utils.updateURLParameter(_href,"saddr",e.latlng.toUrlString());
@@ -186,92 +191,90 @@ define([
         },
 
         onClick: function(event) {
-            var id = event.currentTarget.id.replace(/event_/, "");
-                if ($(event.currentTarget).hasClass("open")) {
-                    this.eventItemClose(id);
-                    if(this.markers[id])
-                        this.markers[id].closePopup();
-                } else {
-                    this.eventItemOpen(id);
-                    if(this.markers[id])
-                        this.markers[id].openPopup();
-                }
+            var id = event.currentTarget.id.replace(/event_/, ""),
+            marker = this._markers[id];
+            if ($(event.currentTarget).hasClass("open")) {
+                this.eventItemClose(id);
+                if(marker)
+                    marker.closePopup();
+            } else {
+                this.eventItemOpen(id);
+                if(marker)
+                    marker.openPopup();
+            }
         },
         onMouseenter: function(target) {
             if (!$(target.currentTarget).hasClass("open")) {
                 var id = target.currentTarget.id.replace(/event_/, "");
-                if(this.markers[id]){
-                    $("#icon-" + id)
+                if(this._markers[id]){
+                    this.getMarkerById(id)
                         .parent()
                         .css("margin-left", - 11)
                         .css("margin-top", - 27)
                         .find(".layer1")
                         .attr("transform", "scale(1.2) translate(-1, -3)");
-                    this.markers[id].setZIndexOffset(200);
+                    this._markers[id].setZIndexOffset(200);
                 }
             }
         },
         onMouseleave: function(target) {
             if (!$(target.currentTarget).hasClass("open")) {
                 var id = target.currentTarget.id.replace(/event_/, "");
-                if(this.markers[id]){
+                if(this._markers[id]){
                     $("#icon-" + id)
                         .parent()
                         .css("margin-left", - 9)
                         .css("margin-top", - 23)
                         .find(".layer1")
                         .attr("transform", "scale(1)");
-                    this.markers[id].setZIndexOffset(10);
+                    this._markers[id].setZIndexOffset(10);
                 }
             }
         },
         eventItemOpen: function(id) {
-            if(!$("#event_" + id).hasClass("open")){
+            var eventEl = $("#event_" + id);
+            if(!eventEl.hasClass("open")){
                 var model = this.model.get(id);
-                $("#event_" + id).addClass("open");
-                $("#event_" + id).height(this.height + this.openHeight);
-                $("#event_" + id).find(".list_item_container").html(temp_item_open(model.toJSON()));
-                //set month
-                var day = model.get("start_datetime").date();
-                var month = model.get("start_datetime").month();
-                var year = model.get("start_datetime").year();
-                var height = $("#month_" + month+"_"+year).height();
-                $("#month_" + month + "_" + year).height(height + this.openHeight);
-                //set day height
+                eventEl
+                    .addClass("open")
+                    .height(this.height + this.openHeight)
+                    .find(".list_item_container")
+                    .html(temp_item_open(model.toJSON()));
 
-                height = $("#day_" + day + "_" + month+"_"+year).height();
-                $("#day_" + day + "_" + month+"_"+year).height(height +  this.openHeight);
-                if(this.markers[id])
-                    this.markers[id].setZIndexOffset(100);
+                var calcHeight = _.bind(function(index, height){
+                    return height + this.openHeight;
+                },this);
+                //set month
+                this.getMonthLiById(id).height(calcHeight);
+                //set day height
+                this.getDayLiById(id).height(calcHeight);
+                if(this.getMarkerById(id))
+                    this._markers[id].setZIndexOffset(100);
             }
         },
         eventItemClose: function(id){
             //close the event icon
-            $("#icon-" + id).find(".circleMarker").hide();
             $("#icon-" + id)
                 .parent()
                 .css("margin-left", - 9)
                 .css("margin-top", - 23)
                 .find(".layer1")
-                .attr("transform", "scale(1)");
-            //close the event
-            $("#event_" + id).removeClass("open");
-            $("#event_" + id).height(this.height);
-            //get model of item thata was clicked
-            var model = this.model.get(id);
-            var day = model.get("start_datetime").date();
-            var month = model.get("start_datetime").month();
-            var year = model.get("start_datetime").year();
-            //set day height
+                .attr("transform", "scale(1)")
+                .find(".circleMarker")
+                .hide();
 
-            var height = $("#day_" + day + "_" + month + "_" + year).height();
-            $("#day_" + day + "_" + month+"_"+year).height(height -  this.openHeight);
-            //set month
-            height = $("#month_" + month+"_"+year).height();
-            $("#month_" + month+"_"+year).height(height -  this.openHeight);
-            var color = $("#event_" + id).css("background-color");
-            //$("#event_" + id).html(temp_item_closed({events: [model.toJSON()]}));
-            $("#event_" + id).css("background-color", color);
+            //close the event
+            $("#event_" + id)
+                .height(this.height)
+                .removeClass("open");
+
+            var calcHeight = _.bind(function(index, height){
+               return height - this.openHeight;
+            },this);
+            //set date height
+            this.getDayLiById(id).height(calcHeight);
+            //set month height
+            this.getMonthLiById(id).height(calcHeight);
             this.setMonthSideBarPosition();
         },
         onResize: function(e) {
@@ -329,8 +332,10 @@ define([
                 html.find("#event_list_month").html(html_months);
                 html.find("#event_list_day").html(html_days);
                 html.find("#event_list").html(html_events);
-                this.$el.html(html);
-                this.$el.find("#EventsListView").on("scroll." + this.cid, this, this.onScroll);
+                this.$el
+                    .html(html)
+                    .find("#EventsListView")
+                    .on("scroll." + this.cid, this, this.onScroll);
                 return this;
             }else{
                 if(position < currentNumOfEl){
@@ -339,14 +344,16 @@ define([
                     insertMethod = "after";
                     position = currentNumOfEl-1;
                 }
-                var nextEvent = $($EventsListEL.children()[position]),
+                var nextEvent = $EventsListEL.children().eq(position),
                 nMonthLi = this.getMonthLi(position),
-                nDayLi = this.getDayLi(position);
+                nDayLi = this.getDayLi(position),
+                monthLi =  this.$el.find("#month_"+month+"_"+year),
+                dayLi = this.$el.find("#day_"+day+"_"+month+"_"+year);
                 //insert new event li
                 nextEvent[insertMethod](html_events);
                 //create and expand DOM for month and day li
                 //if the month doesn't exist
-                if(this.$el.find("#month_"+month+"_"+year).length === 0){
+                if(monthLi.length === 0){
                     nMonthLi[insertMethod](html_months);
                     nDayLi[insertMethod](html_days);
                 }else{
@@ -354,16 +361,16 @@ define([
                        return height + this.height;
                     },this);
                     //expand month
-                    this.$el.find("#month_"+month+"_"+year).height(calcHeight);
+                    monthLi.height(calcHeight);
                     //recalculate the text size for the month sidebar
-                    text = this.month2FullNameOrLetter(datetime, this.$el.find("#month_"+month+"_"+year).height());
-                    this.$el.find("#month_"+month+"_"+year).children().text(text);
+                    text = this.month2FullNameOrLetter(datetime, monthLi.height());
+                    monthLi.children().text(text);
                     //test if the day exists
-                    if(this.$el.find("#day_"+day+"_"+month+"_"+year).length === 0){
+                    if(dayLi.length === 0){
                        nDayLi[insertMethod](html_days);
                     }else{
                         //expand day
-                        this.$el.find("#day_"+day+"_"+month+"_"+year).height(calcHeight);
+                        dayLi.height(calcHeight);
                     }
                 }
                 return this;
@@ -371,14 +378,15 @@ define([
         },
         //creates the "now" line in the event list
         renderNow: function(){
-            var time = server_time_tz.substr(0,19);
-            var index = this.model.binarySearch(moment(time),"start_datetime"),
+            var time = server_time_tz.substr(0,19),
+            index = this.model.binarySearch(moment(time),"start_datetime"),
             monthLi = this.getMonthLi(index),
             dayLi = this.getDayLi(index);
-            this.$el.find("#event_list li:eq("+index+")")
+            this.$el.find("#event_list li").eq(index)
                 .addClass("Now")
                 .css("border-top","4px")
                 .css("border-top-style","solid");
+
             monthLi.height(function(index, height){
                 return height + 4;
             });
@@ -421,54 +429,95 @@ define([
                 bottomVisbleEl = document.elementFromPoint(
                         $("#event_list").position().left,
                         $("#EventsListView").position().top + bottomPos),
+                topVisibleIndex = $("#event_list").children().index(topVisbleEl),
                 topIndex = $("#event_list").children().index(startEl),
-                bottomIndex = $("#event_list").children().index(bottomVisbleEl);
+                bottomIndex = $("#event_list").children().index(bottomVisbleEl),
+                nowIndex = $("#event_list").children().index($(".Now")),
+                eventsViewed = [],
+                numberOfEl = bottomIndex - topIndex,
+                marker;
 
                 this.topVisbleEl = topVisbleEl;
                 this.setMonthDay(top_start_date);
                 this.setDay(top_start_date);
-                //set map icons that are not in the current view
-                //set the color to white for all over elements
-                //$(".event_item").css("background-color", "white");
-                //set up event icons. Clears the prevouse colour
-                $(".viewed").removeClass("viewing");
-                $(".viewed").each(function(index, el) {
-                    var id = el.id.replace(/icon-/, "");
-                    var model = self.model.get(id);
-                    if (model.get("start_datetime") < top_start_date) {
-                        H = 0;
-                    } else {
-                        H = colorRange;
-                    }
-                    $(el).find(".svgForeground")
-                        .css("stroke", "grey")
-                        .css("fill-opacity", 0.4)
-                        .css("fill", "hsl(" + H + ",100%, 50%)");
-                    self.markers[id].setZIndexOffset(-10);
-                });
-                //add color event items
-                var numberOfEl = bottomIndex - topIndex;
-                for (var i = 0; i <= numberOfEl; ++i) {
-                    var id = $(".event_item")[i + topIndex].id.replace(/event_/, "");
-                    if(this.markers[id]){
-                        var H = (i / numberOfEl) * colorRange;
-                        $("#event_" + id).css("background-color", "hsl(" + H + ",100%, 50%)");
+
+                //add color
+                for (var i = topIndex; i <= numberOfEl + topIndex; ++i) {
+                    marker = this.getMarker(i);
+                    eventsViewed.push(marker[0]);
+                    if(marker){
+                        var H;
+                        if(numberOfEl === 0){
+                            H = colorRange;
+                        }else{
+                            H = ((i - topIndex) / numberOfEl) * colorRange;
+                        }
+                        this.getEventLi(i).css("background-color", "hsl(" + H + ",100%, 50%)");
                         //add colors to icons
-                        $("#icon-" + id)
-                            .addClass("viewed")
-                            .addClass("viewing")
+                        marker
                             .find(".svgForeground")
-                            .css("fill", "hsl(" + H + ",100%, 50%)")
-                            .css("fill-opacity", 1)
-                            .css("stroke", "black");
-                        this.markers[id].setZIndexOffset(10);
+                            .css("fill", "hsl(" + H + ",100%, 50%)");
+                        this.setZIndex(i, 10);
                     }
                 }
+                //mark witch markers are visible
+                for (var i = topVisibleIndex; i <= bottomIndex; i++){
+                    marker = this.getMarker(i);
+                    marker.addClass("viewing")
+                        .removeClass("hidden")
+                        .find(".svgForeground")
+                        .css("fill-opacity", 1)
+                        .css("stroke", "black");
+                    eventsViewed.push(marker[0]);
+                }
+                //fade icons before the list
+                for (var i=topVisibleIndex - 1 ; i > topVisibleIndex - this.numOfFades - 1; i--) {
+                    if(i < nowIndex)
+                        break;
+                    marker = this.getMarker(i);
+                    if(marker){
+                        if(!_.contains(this._eventsInView , marker[0]))
+                            break;
+                        eventsViewed.push(marker[0]);
+                        marker.find(".svgForeground")
+                            .css("stroke", "grey")
+                            .css("fill", "hsl(0,100%, 50%)")
+                            .css("fill-opacity",1 -  (topVisibleIndex - i)/this.numOfFades);
+                        this.setZIndex(i,-10);
+                    }
+                }
+
+                //fade icons after the list
+                var i = bottomIndex + 1 < nowIndex ? nowIndex :  bottomIndex + 1;
+                for (i; i < bottomIndex + this.numOfFades + 1; i++) {
+                    marker = this.getMarker(i);
+                    if(marker){
+                        if( !_.contains(this._eventsInView, marker[0]))
+                            break;
+                        eventsViewed.push(marker[0]);
+                        marker.find(".svgForeground")
+                            .css("stroke", "grey")
+                            .css("fill", "hsl(" + colorRange + ",100%, 50%)")
+                            .css("fill-opacity", 1 - (i - bottomIndex - 1)/this.numOfFades);
+                        this.setZIndex(i,-10);
+                    }
+                }
+                //get the differnce, _.diffefence doesn't work in $ land
+                var toHide = _.filter(this._eventsInView,function(evnt,i){
+                    return !_.contains(eventsViewed, evnt);
+                }, this);
+                toHide.forEach(function(evnt){
+                    $(evnt).addClass("hidden");
+                });
+                this._eventsInView = eventsViewed;
             }
+        },
+        getEventLi: function(index){
+            return this.$el.find("#event_list li").eq(index);
         },
         //give an index of an event item find the corrisponding month li
         getMonthLi: function(index){
-            var eventItem = this.$el.find("#event_list li").eq(index),
+            var eventItem = this.getEventLi(index),
             datetime = new Date(eventItem.data("date")),
             year = datetime.getUTCFullYear(),
             month = datetime.getUTCMonth();
@@ -482,6 +531,34 @@ define([
             month = datetime.getUTCMonth(),
             day = datetime.getUTCDate();
             return this.$el.find("#day_"+day+"_"+month+"_"+year);
+        },
+        getDayLiById: function(id){
+            var model = this.model.get(id),
+            day = model.get("start_datetime").date(),
+            month = model.get("start_datetime").month(),
+            year = model.get("start_datetime").year();
+            return this.$el.find("#day_" + day + "_" + month+"_"+year);
+        },
+        getMonthLiById: function(id){
+            var model = this.model.get(id),
+            month = model.get("start_datetime").month(),
+            year = model.get("start_datetime").year();
+            return this.$el.find("#month_" + month+"_"+year);
+        },
+        getMarkerById: function(id){
+            return $("#icon-"+id).length > 0 ? $("#icon-"+id) : false;
+        },
+        getMarker: function(index){
+            var model = this.model.at(index);
+            if(model){
+                return this.getMarkerById(model.get("slug"));
+            }else{
+                return false;
+            }
+        },
+        setZIndex: function(index,zIndex){
+            var id = this.model.at(index).get("slug");
+            this._markers[id].setZIndexOffset(zIndex);
         },
         setDay: function(date) {
             var day = date.day();
