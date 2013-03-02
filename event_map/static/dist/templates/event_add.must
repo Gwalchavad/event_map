@@ -13,7 +13,7 @@
         <div id="start_date" class="control-group">
             <label for="start_date_input" class="required control-label">Time & Date</label>
             <div class="controls">
-                <input type="datetime" name="start_date" id="start_date_input" value="{{start_date}}" required> - <input type="datetime" name="end_date" id="end_date_input" value="{{end_date}}">
+                <input type="text" name="start_date" id="start_date_input" value="{{start_date}}" required> - <input type="text" name="end_date" id="end_date_input" value="{{end_date}}">
                 <br/><span id="start_date_error" class="help-inline hide"></span>
             </div>
         </div>

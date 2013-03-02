@@ -523,7 +523,7 @@ define([
             month = datetime.getUTCMonth();
             return this.$el.find("#month_"+month+"_"+year);
         },
-        //give an index of an event item find the corrisponding day li
+        //give an index on an LI of an event find the corrisponding day li
         getDayLi: function(index){
             var eventItem = this.$el.find("#event_list li").eq(index),
             datetime = new Date(eventItem.data("date")),
@@ -588,11 +588,11 @@ define([
                     $("#event_list_top_date").height()),
             topModelId = $(topVisbleEl).data("id"),
             top_start_date = this.model.get(topModelId).get("start_datetime"),
-            topMonthId = top_start_date.month() + "_" + top_start_date.year(),
-            topElBottom = $("#month_" + topMonthId).position().top + $("#month_" + topMonthId).height(),
-            topElwidth = $("#month_" + topMonthId).children().width(),
-            bottomElwidth = $("#month_" + topMonthId).next().children().width(),
-            current_top_month = $("#month_" + topMonthId).children();
+            $topMonth =$("#month_" + top_start_date.month() + "_" + top_start_date.year()),
+            topElBottom = $topMonth.position().top + $topMonth.height(),
+            topElwidth = $topMonth.children().width(),
+            bottomElwidth = $topMonth.next().children().width(),
+            current_top_month = $topMonth.children();
             if(!this.current_top_month || (this.current_top_month[0] !== current_top_month[0])){
                 $(".monthFixed").removeClass("monthFixed");
                 //this fixes an edge condition of collapsing the top event
@@ -608,7 +608,7 @@ define([
                     .css("top", $("#EventsListView").position().top);
             } else {
                 //set the top month to be at the bottom of the li
-                var parentHeight = $("#month_" + topMonthId).height();
+                var parentHeight = $topMonth.height();
                 var new_height = parentHeight - topElwidth - tolarance;
                 if (new_height < 0)
                     new_height = 0;
