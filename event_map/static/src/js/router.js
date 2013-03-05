@@ -49,46 +49,55 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             this.showView(new LoadingView());
         },
         list: function(date) {
-            this.viewList();
+            this.viewList(date);
         },
         viewAuthor: function(user, status) {
-            var data = {
-                author: user
+            var options = {
+                data:{
+                    author: user
+                }
             };
             if (typeof(status) != 'undefined' && status == "uncomplete") {
-                data.complete = false;
+                options.data.complete = false;
             } else {
-                data.complete = true;
+                options.data.complete = true;
             }
-            this.viewList(data);
+            this.viewList(options);
+        },
+        me: function(status) {
+            var options = {
+                data:{
+                    me: true
+                }
+            };
+            if (typeof(status) != 'undefined' && status == "uncomplete") {
+                options.data.complete = false;
+            } else {
+                options.data.complete = true;
+            }
+            this.viewList(options);
         },
         addedEvents: function() {
             this.viewList(undefined, false, this.recentEvents);
         },
-        me: function(status) {
-            var data = {
-                me: true
-            };
-            if (typeof(status) != 'undefined' && status == "uncomplete") {
-                data.complete = false;
-            } else {
-                data.complete = true;
-            }
-            this.viewList(data);
-        },
-        viewList: function(data, subList, events) {
+        viewList: function(options, subList, events) {
             var self = this;
+            if (typeof(options) == 'undefined')
+                options = {};
             require(['views/list', 'views/list_info'], function(list, ListInfoView) {
                 //TODO: test to see if eventlist is in a hash based on the filter, first
-                var newEventList,
-                options = {};
-                if (typeof(events) != 'undefined'){
+                var date = false,
+                newEventList;
+                if(options.date){
+                    date = options.date;
+                }
+
+                if (typeof(events) != 'undefined' ){
                     newEventList = new EventModel.EventCollection(events);
-                }else if (typeof(data) != 'undefined') {
-                    options = data;
+                }else if (typeof(options.data) != 'undefined') {
                     newEventList = new EventModel.EventCollection(
-                        self.eventList.where(data), {
-                            data: data
+                        self.eventList.where(options.data), {
+                            data: options.data
                         });
                     //if the filter produces an subset of all, current only happens when filtering by author
                     if (subList) {
@@ -96,7 +105,11 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
                         newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
                     }
                 } else {
-                    newEventList = self.eventList;
+                    if(!date || self.eventList.models[0].get("start_date") < date && _.last(self.eventList.models).get("start_date") > date){
+                        newEventList = self.eventList;
+                    }else{
+                        newEventList = new EventModel.EventCollection(null,{data:{start: options.date}});
+                    }
                 }
                 options.model = newEventList;
                 var eventListView = new list.EventsListView(options);

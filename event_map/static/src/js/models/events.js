@@ -138,9 +138,9 @@ define([
             this._attributes = {};
             this._attributes.modified = (new Date()).toISOString();
             $.extend(true,this._attributes,this.defaults);
-            if(options)
+            if(options){
                 $.extend(true,this._attributes,options);
-
+            }
             this.on("reset",function(){
                 if(this.models && this.models.length){
                     //this assumes that incoming initail models are in order
@@ -162,6 +162,12 @@ define([
              */
             return event.get("start_datetime").unix();
         },
+        /*
+         *A binary search, search for a needle on a given field
+         *return and index if the needle is found
+         *-1 if the needle is above
+         *-2 if the needle is below
+         */
         binarySearch:  function(needle, field) {
             var high = this.models.length - 1;
             var low = 0;
@@ -179,7 +185,12 @@ define([
                     return mid;
                 }
             }
-            if(high === -1 || haystack[low].get(field) > haystack[high].get(field) ){
+            //if below
+            if (high === -1){
+                return -2;
+            }else if (low >  this.models.length -1){
+                return -1;
+            }else if(haystack[low].get(field) > haystack[high].get(field) ){
                 return low;
             }else{
                 return high;

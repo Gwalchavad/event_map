@@ -36,6 +36,8 @@ define([
         numOfFades:  6, //how many events markers are shown after you scroll past then
         height: 40,
         openHeight: 38,
+        nowIndex: false, //does todays date fall within the range of this list?
+        colorEvents: true, //do we want to color the events?
         _markers: [], //store referance to makers SO that the zindex can be changed
         _eventsInView: [],
         _eventsViewed: [],
@@ -58,9 +60,8 @@ define([
         },
         initialize: function(options) {
             this.constructor.__super__.initialize.apply(this, [options]);
-            var self = this;
             //process events that are added by fetching
-            this.model.on('add',self.onAdd, this);
+            this.model.on('add',this.onAdd, this);
             /*
             this.model.update(function(events){
                 if(events.length){
@@ -78,7 +79,7 @@ define([
             this.eventItemOpen( e.target.options.modelID);
             //if the target event is not currently viewble in the list, then scroll to it
             if (!$(e.target._icon.children).hasClass("viewing")) {
-                this.scrollTo(e.target.options.modelID);
+                this.scrollToId(e.target.options.modelID);
             }
         },
         onPopupOpen: function(event) {
@@ -87,12 +88,13 @@ define([
         },
         onScroll: function(e) {
             //if at the bottom get more events
-            var self = e.data;
-            var tolerance = 60;
-            if ($("#EventsListView").scrollTop() <= tolerance) {
+            var self = e.data,
+            tolerance = 60;
+            self.scrollPosition = $("#EventsListView").scrollTop();
+            if (self.scrollPosition <= tolerance) {
                 e.data.backFetch(e.data);
             } else if(
-                $("#EventsListView")[0].scrollHeight - $("#EventsListView").scrollTop() <
+                $("#EventsListView")[0].scrollHeight - self.scrollPosition <
                 ($("#EventsListView").outerHeight() + tolerance)){
                 self.forwardFetch(self);
             }
@@ -111,7 +113,14 @@ define([
                 self.model.rfetch({
                     successCallback: function(events) {
                         //bind event incase it wasn't bond in onDOM
-                        var scrollPosistion = events.length * self.height;
+                        if(!self.nowIndex){
+                            self.renderNow();
+                        }
+                        if(self.searchDateBelow){
+                            self.gotoDate(self.options.date);
+                            self.searchDateBelow = false;
+                        }
+                        var scrollPosistion = self.scrollPosition + events.length * self.height;
                         $("#EventsListView").scrollTop(scrollPosistion);
                         self.genarateColorsAndMonths(true);
                         self.backward_lock = false;
@@ -126,6 +135,13 @@ define([
                 self.model.ffetch({
                     successCallback: function(events) {
                         //bind event incase it wasn't bond in onDOM
+                        if(!self.nowIndex){
+                            self.renderNow();
+                        }
+                        if(self.searchDateAbove){
+                            self.gotoDate(self.options.date);
+                            this.searchDateAbove = false;
+                        }
                         self.genarateColorsAndMonths(true);
                         self.forward_lock = false;
                     }
@@ -288,8 +304,15 @@ define([
         onDOMadd: function() {
             this.renderNow();
             this.onResize();
+            this.scrollPosition = $("#EventsListView").scrollTop();
             this.backFetch();
             this.forwardFetch();
+            if(!this.options.date)
+                this.options.date = moment();
+            if(!this.gotoDate(this.options.date)){
+                this.searchDateAbove = true;
+                this.searchDateBelow = true;
+            }
         },
         renderEvent: function(position, events){
             var html,
@@ -379,20 +402,25 @@ define([
         //creates the "now" line in the event list
         renderNow: function(){
             var time = server_time_tz.substr(0,19),
-            index = this.model.binarySearch(moment(time),"start_datetime"),
-            monthLi = this.getMonthLi(index),
-            dayLi = this.getDayLi(index);
-            this.$el.find("#event_list li").eq(index)
+            index = this.model.binarySearch(moment(time),"start_datetime");
+            if(index > 0){
+                this.colorEvents = true;
+                this.nowIndex = index;
+                var monthLi = this.getMonthLi(index),
+                dayLi = this.getDayLi(index),
+                nowEl = this.$el.find("#event_list li").eq(index)
                 .addClass("Now")
                 .css("border-top","4px")
                 .css("border-top-style","solid");
-
-            monthLi.height(function(index, height){
-                return height + 4;
-            });
-            dayLi.height(function(index, height){
-                return height + 4;
-            });
+                            monthLi.height(function(index, height){
+                    return height + 4;
+                });
+                dayLi.height(function(index, height){
+                    return height + 4;
+                });
+            }else if(index === -2){
+                this.colorEvents = false;
+            }
         },
         render: function(){
             var html = temp_event_list_empty();
@@ -440,27 +468,10 @@ define([
                 this.topVisbleEl = topVisbleEl;
                 this.setMonthDay(top_start_date);
                 this.setDay(top_start_date);
+                this.setURL(top_start_date);
 
-                //add color
-                for (var i = topIndex; i <= numberOfEl + topIndex; ++i) {
-                    marker = this.getMarker(i);
-                    eventsViewed.push(marker[0]);
-                    if(marker){
-                        var H;
-                        if(numberOfEl === 0){
-                            H = colorRange;
-                        }else{
-                            H = ((i - topIndex) / numberOfEl) * colorRange;
-                        }
-                        this.getEventLi(i).css("background-color", "hsl(" + H + ",100%, 50%)");
-                        //add colors to icons
-                        marker
-                            .find(".svgForeground")
-                            .css("fill", "hsl(" + H + ",100%, 50%)");
-                        this.setZIndex(i, 10);
-                    }
-                }
                 //mark witch markers are visible
+                $(".viewing").removeClass("viewing");
                 for (var i = topVisibleIndex; i <= bottomIndex; i++){
                     marker = this.getMarker(i);
                     marker.addClass("viewing")
@@ -470,36 +481,58 @@ define([
                         .css("stroke", "black");
                     eventsViewed.push(marker[0]);
                 }
-                //fade icons before the list
-                for (var i=topVisibleIndex - 1 ; i > topVisibleIndex - this.numOfFades - 1; i--) {
-                    if(i < nowIndex)
-                        break;
-                    marker = this.getMarker(i);
-                    if(marker){
-                        if(!_.contains(this._eventsInView , marker[0]))
-                            break;
+                if(this.colorEvents){
+                    //add color
+                    for (var i = topIndex; i <= numberOfEl + topIndex; ++i) {
+                        marker = this.getMarker(i);
                         eventsViewed.push(marker[0]);
-                        marker.find(".svgForeground")
-                            .css("stroke", "grey")
-                            .css("fill", "hsl(0,100%, 50%)")
-                            .css("fill-opacity",1 -  (topVisibleIndex - i)/this.numOfFades);
-                        this.setZIndex(i,-10);
+                        if(marker){
+                            var H;
+                            if(numberOfEl === 0){
+                                H = colorRange;
+                            }else{
+                                H = ((i - topIndex) / numberOfEl) * colorRange;
+                            }
+                            this.getEventLi(i).css("background-color", "hsl(" + H + ",100%, 50%)");
+                            //add colors to icons
+                            marker
+                                .find(".svgForeground")
+                                .css("fill", "hsl(" + H + ",100%, 50%)");
+                            this.setZIndex(i, 10);
+                        }
                     }
-                }
 
-                //fade icons after the list
-                var i = bottomIndex + 1 < nowIndex ? nowIndex :  bottomIndex + 1;
-                for (i; i < bottomIndex + this.numOfFades + 1; i++) {
-                    marker = this.getMarker(i);
-                    if(marker){
-                        if( !_.contains(this._eventsInView, marker[0]))
+                    //fade icons before the list
+                    for (var i=topVisibleIndex - 1 ; i > topVisibleIndex - this.numOfFades - 1; i--) {
+                        if(i < nowIndex)
                             break;
-                        eventsViewed.push(marker[0]);
-                        marker.find(".svgForeground")
-                            .css("stroke", "grey")
-                            .css("fill", "hsl(" + colorRange + ",100%, 50%)")
-                            .css("fill-opacity", 1 - (i - bottomIndex - 1)/this.numOfFades);
-                        this.setZIndex(i,-10);
+                        marker = this.getMarker(i);
+                        if(marker){
+                            if(!_.contains(this._eventsInView , marker[0]))
+                                break;
+                            eventsViewed.push(marker[0]);
+                            marker.find(".svgForeground")
+                                .css("stroke", "grey")
+                                .css("fill", "hsl(0,100%, 50%)")
+                                .css("fill-opacity",1 -  (topVisibleIndex - i)/this.numOfFades);
+                            this.setZIndex(i,-10);
+                        }
+                    }
+
+                    //fade icons after the list
+                    var i = bottomIndex + 1 < nowIndex ? nowIndex :  bottomIndex + 1;
+                    for (i; i < bottomIndex + this.numOfFades + 1; i++) {
+                        marker = this.getMarker(i);
+                        if(marker){
+                            if( !_.contains(this._eventsInView, marker[0]))
+                                break;
+                            eventsViewed.push(marker[0]);
+                            marker.find(".svgForeground")
+                                .css("stroke", "grey")
+                                .css("fill", "hsl(" + colorRange + ",100%, 50%)")
+                                .css("fill-opacity", 1 - (i - bottomIndex - 1)/this.numOfFades);
+                            this.setZIndex(i,-10);
+                        }
                     }
                 }
                 //get the differnce, _.diffefence doesn't work in $ land
@@ -577,6 +610,9 @@ define([
             //set day on side bar
             $("#topYear").text(date.year());
         },
+        setURL: function(date){
+            app.navigate("?date=" + date.format("YYYY-MM-DD"), {trigger: false, replace: true});
+        },
         /*
          * Positions the Month vertical on the side of the list as the
          * user scolls
@@ -615,15 +651,29 @@ define([
                 current_top_month.addClass("relative").removeClass("monthFixed").css("top", new_height); //set to botto
             }
         },
-        scrollTo: function(id) {
+        gotoDate: function(date){
+            var index = this.model.binarySearch(moment(date),"start_datetime");
+            if(index < 0){
+                return false;
+            }else{
+                var scrollPosistion = index * this.height;
+                $("#EventsListView").scrollTop(scrollPosistion);
+                return true;
+            }
+        },
+        scrollToId: function(id) {
+            this.scrollTo($("#event_" + id));
+        },
+        scrollTo: function(el) {
             var targetOffset = $("#EventsListView").scrollTop() -
                 $("#EventsListView").position().top +
-                $("#event_" + id).position().top;
+                el.position().top;
             //$("#EventsListView").scrollTop(scrollTop);
             $("#EventsListView").animate({
                 scrollTop: targetOffset
             }, 700);
         },
+
         //test to see if the list of events is full
         isListFull: function() {
             return ($("#EventsListView").height() < $("#event_list").height()) ? true : false;

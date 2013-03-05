@@ -12,6 +12,7 @@ require.config({
     paths: {
         "backbone": "../../components/backbone/backbone",
         "routefilter": "../../components/backbone.routefilter/dist/backbone.routefilter",
+        "query-parameters": "../../components/backbone-query-parameters/backbone-query-parameters/backbone.queryparams",
         "bootstrap": "../../components/bootstrap/js/bootstrap",
         "handlebars":"../../components/handlebars/handlebars",
         "hbs": "../../components/require-handlebars-plugin/hbs",
@@ -38,6 +39,7 @@ require.config({
             exports: 'Backbone'
         },
         'routefilter': ['backbone'],
+        'query-parameters': ['backbone','underscore'],
         'handlebars': {
             exports: 'Handlebars'
         },
@@ -57,6 +59,7 @@ require([
   'router', // Request router.js
   'utils',
   'routefilter',
+  'query-parameters',
   //>>includeStart("debug", pragmas.debug);
   'debug'
   //>>includeEnd("debug");
