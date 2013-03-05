@@ -73,7 +73,7 @@ define([
             */
             map.map.on("popupopen", this.onPopupOpen);
             map.map.on('locationfound', this.onLocationFound,this);
-
+            this.baseFragment =  Backbone.history.fragment.split("?")[0];
         },
         onMarkerClick: function(e) {
             this.eventItemOpen( e.target.options.modelID);
@@ -119,9 +119,10 @@ define([
                         if(self.searchDateBelow){
                             self.gotoDate(self.options.date);
                             self.searchDateBelow = false;
+                        }else{
+                            var scrollPosistion = self.scrollPosition + events.length * self.height;
+                            $("#EventsListView").scrollTop(scrollPosistion);
                         }
-                        var scrollPosistion = self.scrollPosition + events.length * self.height;
-                        $("#EventsListView").scrollTop(scrollPosistion);
                         self.genarateColorsAndMonths(true);
                         self.backward_lock = false;
                     }
@@ -305,14 +306,17 @@ define([
             this.renderNow();
             this.onResize();
             this.scrollPosition = $("#EventsListView").scrollTop();
-            this.backFetch();
-            this.forwardFetch();
-            if(!this.options.date)
+            if(!this.options.date){
                 this.options.date = moment();
+            }else{
+                this.options.date = moment(this.options.date);
+            }
             if(!this.gotoDate(this.options.date)){
                 this.searchDateAbove = true;
                 this.searchDateBelow = true;
             }
+            this.backFetch();
+            this.forwardFetch();
         },
         renderEvent: function(position, events){
             var html,
@@ -611,7 +615,7 @@ define([
             $("#topYear").text(date.year());
         },
         setURL: function(date){
-            app.navigate("?date=" + date.format("YYYY-MM-DD"), {trigger: false, replace: true});
+            app.navigate(this.baseFragment + "?date=" + date.format("YYYY-MM-DD"), {trigger: false, replace: true});
         },
         /*
          * Positions the Month vertical on the side of the list as the
@@ -652,7 +656,7 @@ define([
             }
         },
         gotoDate: function(date){
-            var index = this.model.binarySearch(moment(date),"start_datetime");
+            var index = this.model.binarySearch(date,"start_datetime");
             if(index < 0){
                 return false;
             }else{

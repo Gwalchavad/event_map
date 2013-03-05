@@ -1,5 +1,5 @@
 /*global define require init_user init_events*/
-define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'models/session', 'views/frame', 'views/map', 'views/loading'], function($, _, Backbone, UserModels, EventModel, SessionModel, FrameView, MapView, LoadingView) {
+define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/events', 'models/session', 'views/frame', 'views/map', 'views/loading'], function($, _, Backbone, moment, UserModels, EventModel, SessionModel, FrameView, MapView, LoadingView) {
     "use strict";
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -51,7 +51,7 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
         list: function(date) {
             this.viewList(date);
         },
-        viewAuthor: function(user, status) {
+        viewAuthor: function(user, status, params) {
             var options = {
                 data:{
                     author: user
@@ -62,9 +62,12 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
             } else {
                 options.data.complete = true;
             }
+            if(params){
+                options.date = params.date;
+            }
             this.viewList(options);
         },
-        me: function(status) {
+        me: function(status, params) {
             var options = {
                 data:{
                     me: true
@@ -74,6 +77,9 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
                 options.data.complete = false;
             } else {
                 options.data.complete = true;
+            }
+            if(params){
+                options.date = params.date;
             }
             this.viewList(options);
         },
@@ -89,16 +95,28 @@ define(['jquery', 'underscore', 'backbone', 'models/users', 'models/events', 'mo
                 var date = false,
                 newEventList;
                 if(options.date){
-                    date = options.date;
+                    date = moment(options.date);
                 }
 
                 if (typeof(events) != 'undefined' ){
                     newEventList = new EventModel.EventCollection(events);
                 }else if (typeof(options.data) != 'undefined') {
+                    var filteredList = self.eventList.where(options.data);
+                    if(date){
+                        options.data.start = options.date;
+                        //if the goto date is NOT in range
+                        if(filteredList.models &&
+                            (filteredList.models[0].get("start_date") > date &&
+                            _.last(filteredList.models).get("start_date") < date)){
+                            filteredList = null;
+                        }
+                    }
                     newEventList = new EventModel.EventCollection(
-                        self.eventList.where(options.data), {
+                        filteredList,
+                        {
                             data: options.data
-                        });
+                        }
+                    );
                     //if the filter produces an subset of all, current only happens when filtering by author
                     if (subList) {
                         newEventList._attributes.futureEvents.more = self.eventList._attributes.futureEvents.more;
