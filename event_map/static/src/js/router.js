@@ -106,8 +106,8 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                         options.data.start = options.date;
                         //if the goto date is NOT in range
                         if(filteredList.models &&
-                            (filteredList.models[0].get("start_date") > date &&
-                            _.last(filteredList.models).get("start_date") < date)){
+                            (filteredList.models[0].get("start_datetime") > date &&
+                            _.last(filteredList.models).get("start_datetime") < date)){
                             filteredList = null;
                         }
                     }
