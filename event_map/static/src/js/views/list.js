@@ -309,7 +309,7 @@ define([
             this.onResize();
             this.scrollPosition = $("#EventsListView").scrollTop();
             if(!this.options.date){
-                this.options.date = moment();
+                this.options.date = moment(server_time_tz.substr(0,19));
             }else{
                 this.options.date = moment(this.options.date);
             }
