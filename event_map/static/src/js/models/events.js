@@ -157,10 +157,9 @@ define([
         },
         comparator: function(event) {
             /*
-             *  backbone comparator. Sorts events by date and by 1/id to
-             * garentee that events with the same date will be in the same order
+             *  backbone comparator.
              */
-            return event.get("start_datetime").unix();
+            return [event.get("start_datetime").unix(), event.get("start_date_index")];
         },
         /*
          *A binary search, search for a needle on a given field

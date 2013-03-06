@@ -191,7 +191,7 @@ class EventTimeLine(View):
         GET[group] gets all the events in a particular group
         GET[me] get all of the events in the usergroup of the current user
         """
-        events = db.Event.objects.order_by('start_date')
+        events = db.Event.objects.order_by('start_date', 'start_date_index')
 
         if request.GET.get('complete') and request.GET.get('complete').lower() == 'false':
             events = events.filter(complete=False)

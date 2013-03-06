@@ -208,6 +208,9 @@ class Event(emObject):
         null=True,
         blank=True,
         help_text="""When is your event ending?""")
+    start_date_index = models.IntegerField(
+        default=0,
+        help_text="""if there are multiple events at the same time, this is an index to provide a persistant order""")
     address = models.CharField(
         blank=True,
         max_length=255,
@@ -260,6 +263,7 @@ class Event(emObject):
             "id": self.id,
             "title": self.title,
             "start_date": self.start_date,
+            "start_date_index": self.start_date_index,
             "end_date": self.end_date,
             "content": self.content,
             "author": self.author.user.username,
@@ -274,6 +278,8 @@ class Event(emObject):
         }
 
     def save(self, *args, **kwargs):
+        if not self.pk:
+            self.start_date_index = Event.objects.filter(start_date=self.start_date).count()
         if self.start_date and self.location_point and self.title and self.content:
             self.complete = True
         super(Event, self).save()
