@@ -118,7 +118,7 @@ define([
                         }
                         if(self.searchDateBelow){
                             if(self.gotoDate(self.options.date))
-                                this.searchDateAbove = false;
+                                self.searchDateAbove = false;
                             self.searchDateBelow = false;
                         }else{
                             var scrollPosistion = self.scrollPosition + events.length * self.height;
@@ -142,8 +142,8 @@ define([
                         }
                         if(self.searchDateAbove){
                             if(self.gotoDate(self.options.date))
-                                this.searchDateBelow = false;
-                            this.searchDateAbove = false;
+                                self.searchDateBelow = false;
+                            self.searchDateAbove = false;
                         }
                         self.genarateColorsAndMonths(true);
                         self.forward_lock = false;
@@ -664,6 +664,7 @@ define([
             }else{
                 var scrollPosistion = index * this.height;
                 $("#EventsListView").scrollTop(scrollPosistion);
+                this.setMonthSideBarPosition();
                 return true;
             }
         },
