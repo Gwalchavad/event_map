@@ -117,7 +117,8 @@ define([
                             self.renderNow();
                         }
                         if(self.searchDateBelow){
-                            self.gotoDate(self.options.date);
+                            if(self.gotoDate(self.options.date))
+                                this.searchDateAbove = false;
                             self.searchDateBelow = false;
                         }else{
                             var scrollPosistion = self.scrollPosition + events.length * self.height;
@@ -140,7 +141,8 @@ define([
                             self.renderNow();
                         }
                         if(self.searchDateAbove){
-                            self.gotoDate(self.options.date);
+                            if(self.gotoDate(self.options.date))
+                                this.searchDateBelow = false;
                             this.searchDateAbove = false;
                         }
                         self.genarateColorsAndMonths(true);

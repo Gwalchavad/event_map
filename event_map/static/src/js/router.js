@@ -123,7 +123,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                         newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
                     }
                 } else {
-                    if(!date || self.eventList.models[0].get("start_date") < date && _.last(self.eventList.models).get("start_date") > date){
+                    if(!date || self.eventList.models[0].get("start_datetime") < date && _.last(self.eventList.models).get("start_datetime") > date){
                         newEventList = self.eventList;
                     }else{
                         newEventList = new EventModel.EventCollection(null,{data:{start: options.date}});
