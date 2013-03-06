@@ -126,7 +126,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                     if(!date || self.eventList.models[0].get("start_datetime") < date && _.last(self.eventList.models).get("start_datetime") > date){
                         newEventList = self.eventList;
                     }else{
-                        newEventList = new EventModel.EventCollection(null,{data:{start: options.date}});
+                        newEventList = self.eventList = new EventModel.EventCollection(null,{data:{start: options.date}});
                     }
                 }
                 options.model = newEventList;
