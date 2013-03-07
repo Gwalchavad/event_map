@@ -5,6 +5,7 @@
 import os
 from setuptools import setup
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -18,7 +19,7 @@ setup(
     license              = 'GNU AGPL v3 or later',
     install_requires     = ['Django>=1.4', 'south>=0.7.5', 
         'django-celery', 'celery-with-redis','django-autoslug',
-        'django_ical','markdown','django-uuidfield'],
+        'django_ical','markdown','django-uuidfield','docutils'],
     zip_safe             = False,
     classifiers = [
         "Development Status :: 5 - Production/Stable",

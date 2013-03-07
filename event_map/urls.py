@@ -5,6 +5,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^$', 'event_map.views.index',  name='event'),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
     #atom feeds
     url(r'^atom/all/$', feeds.atomAllFeed(), name='atom-all'),

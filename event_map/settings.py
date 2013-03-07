@@ -127,13 +127,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "event_map.context_processors.goodies"
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.admindocs',
     'django.contrib.admin',
     'django.contrib.gis',
     'django.contrib.markup',
@@ -141,12 +142,9 @@ INSTALLED_APPS = (
     'django_push.subscriber',
     'event_map',
     'feed_import',
-    'south',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
-)
+    'south'
+
+]
 
 # Do you want to run celery? this controlls all of modules that pull data from extranal sources.
 ENABLE_CELERY = True
