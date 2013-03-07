@@ -148,6 +148,7 @@ define([
                     throw new Error("Server Error:" + response);
                 });
                 promise.success(function(response) {
+                    app.eventList.add(self.model,{merge: true});
                     app.navigate('event/' + self.model.id, {
                         trigger: true
                     });

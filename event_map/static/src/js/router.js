@@ -97,9 +97,11 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                 if(options.date){
                     date = moment(options.date);
                 }
-
+                //display a set amount of events
                 if (typeof(events) != 'undefined' ){
                     newEventList = new EventModel.EventCollection(events);
+                    newEventList._attributes.futureEvents.more = false;
+                    newEventList._attributes.pastEvents.more = false;
                 }else if (typeof(options.data) != 'undefined') {
                     var filteredList = self.eventList.where(options.data);
                     if(date){

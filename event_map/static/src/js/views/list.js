@@ -303,6 +303,7 @@ define([
         },
         onClose: function() {
             $("#EventsListView").off("scroll." + this.cid);
+            this.model.off('add',this.onAdd, this);
         },
         onDOMadd: function() {
             this.renderNow();
@@ -480,12 +481,14 @@ define([
                 $(".viewing").removeClass("viewing");
                 for (var i = topVisibleIndex; i <= bottomIndex; i++){
                     marker = this.getMarker(i);
-                    marker.addClass("viewing")
-                        .removeClass("hidden")
-                        .find(".svgForeground")
-                        .css("fill-opacity", 1)
-                        .css("stroke", "black");
-                    eventsViewed.push(marker[0]);
+                    if(marker){
+                        marker.addClass("viewing")
+                            .removeClass("hidden")
+                            .find(".svgForeground")
+                            .css("fill-opacity", 1)
+                            .css("stroke", "black");
+                        eventsViewed.push(marker[0]);
+                    }
                 }
                 if(this.colorEvents){
                     //add color

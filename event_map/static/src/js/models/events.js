@@ -28,6 +28,10 @@ define([
              */
             this.on("change:start_date",this.computeStartTimes);
             this.on("change:end_date",this.computeEndTimes);
+            this.on("change:title", function(){
+                this.computeCloseValues();
+                this.computeOpenValues();
+            });
             if(this.get("start_date")){
                 this.computeStartTimes();
                 this.computeEndTimes();
@@ -112,6 +116,8 @@ define([
             //count keys
             if(Object.keys(errors).length > 0){
                 return errors;
+            }else{
+                this.set("complete",true);
             }
         }
     });

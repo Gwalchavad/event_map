@@ -7,7 +7,6 @@ define(['jquery', 'backbone', 'utils', 'hbs!../../templates/ical_upload'
         tagName: "div",
         className: "replace span7 overflow setheight",
         id: "event_view",
-        height: 0,
         initialize: function() {
             var self = this;
             app.session.on("change", function(model) {
@@ -34,18 +33,13 @@ define(['jquery', 'backbone', 'utils', 'hbs!../../templates/ical_upload'
         upload_event: function(e) {
             if (this.useAjax) {
                 e.preventDefault();
-                var formData = new FormData();
-
-                // Since this is the file only, we send it to a specific location
-                var action = '/upload';
-
-                // FormData only has the file
-                var fileInput = document.getElementById('file-id');
-                var files = fileInput.files;
+                var formData = new FormData(),
+                action = '/upload',
+                fileInput = document.getElementById('file-id'),
+                files = fileInput.files;
                 for (var i = 0; i < files.length; i++) {
                     formData.append("file" + i, files[i]);
                 }
-                // Code common to both variants
                 sendXHRequest(formData, action);
             }
         },
@@ -99,26 +93,30 @@ define(['jquery', 'backbone', 'utils', 'hbs!../../templates/ical_upload'
         } catch (e) {
             return;
         }
-        //readyState == DONE
+        //readyState == DONE == 4
         if (evt.currentTarget.readyState === 4) {
             if (status == '200' && evt.target.responseText) {
                 var events = JSON.parse(evt.target.responseText);
+                //show newly add events
                 if (events.length > 0) {
-                    app.recentEvents = events;
-                    app.navigate('added/', {
-                        trigger: true
-                    });
-
-                    //show newly add events
+                    app.eventList.add(events);
+                    if (events.length === 1){
+                        app.navigate('event/'+events[0].slug + "/edit", {
+                            trigger: true
+                        });
+                    }else{
+                        app.recentEvents = events;
+                        app.navigate('added', {
+                            trigger: true
+                        });
+                    }
                 } else {
                     alert("no events added!");
                 }
             } else {
-                //state 4 is done
                 $("#upload_event_error").displayError(evt.target.responseText);
             }
         }
     }
-
     return UploadView;
 });
