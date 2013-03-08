@@ -138,6 +138,7 @@ define([
             //hide error messages
             $(".label").hide();
             var json = Utils.form2object("#event_add_form");
+            json.location_point = { coordinates: [json.lng,json.lat]};
             if(json.start_date)
                 json.start_date = moment($("#start_date_input").datetimepicker('getDate')).toJSON();
             if(json.end_date)

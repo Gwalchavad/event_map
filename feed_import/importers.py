@@ -132,13 +132,13 @@ def import_ical(content, author, feed=None):
             else:
                 if 'date_modified' in event and event_obj.date_modified < event['date_modified']:
                     #untested: update events
-                    event_obj.title = event.title
-                    event_obj.start_date = event.start_date
-                    event_obj.end_date = event.end_date
-                    event_obj.content = event.content
-                    event_obj.address = event.address
-                    event_obj.link = event.link
-                    event_obj.location_point = event.location_point
+                    event_obj.title = event["title"]
+                    event_obj.start_date = event["start_date"]
+                    event_obj.end_date = event["end_date"]
+                    event_obj.content = event["content"]
+                    event_obj.address = event["address"]
+                    event_obj.link = event["link"]
+                    event_obj.location_point = event["location_point"]
                     event_obj.save()
                 if event_obj.author != author:
                     #if the event is the same as one from a different feed
