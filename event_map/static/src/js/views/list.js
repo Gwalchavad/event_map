@@ -36,7 +36,7 @@ define([
         numOfFades:  6, //how many events markers are shown after you scroll past then
         height: 40,
         openHeight: 38,
-        nowIndex: false, //does todays date fall within the range of this list?
+        nowFound: false,
         colorEvents: true, //do we want to color the events?
         _markers: [], //store referance to makers SO that the zindex can be changed
         _eventsInView: [],
@@ -113,7 +113,7 @@ define([
                 self.model.rfetch({
                     successCallback: function(events) {
                         //bind event incase it wasn't bond in onDOM
-                        if(!self.nowIndex){
+                        if(!self.nowFound){
                             self.renderNow();
                         }
                         if(self.searchDateBelow){
@@ -137,7 +137,7 @@ define([
                 self.model.ffetch({
                     successCallback: function(events) {
                         //bind event incase it wasn't bond in onDOM
-                        if(!self.nowIndex){
+                        if(!self.nowFound){
                             self.renderNow();
                         }
                         if(self.searchDateAbove){
@@ -412,7 +412,7 @@ define([
             index = this.model.binarySearch(moment(time),"start_datetime");
             if(index > 0){
                 this.colorEvents = true;
-                this.nowIndex = index;
+                this.nowFound = true;
                 var monthLi = this.getMonthLi(index),
                 dayLi = this.getDayLi(index),
                 nowEl = this.$el.find("#event_list li").eq(index)
@@ -426,7 +426,7 @@ define([
                     return height + 4;
                 });
             }else if(index === -2){
-                this.colorEvents = false;
+                this.colorEvents = true;
             }
         },
         render: function(){
