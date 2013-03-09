@@ -427,6 +427,8 @@ define([
                 });
             }else if(index === -2){
                 this.colorEvents = true;
+            }else if(index === -1){
+                this.colorEvents = false;
             }
         },
         render: function(){
