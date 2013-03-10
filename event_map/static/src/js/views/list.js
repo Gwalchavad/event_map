@@ -303,7 +303,15 @@ define([
         },
         onClose: function() {
             $("#EventsListView").off("scroll." + this.cid);
+            var self = this;
+            _.each(_.values(this._markers),function(marker,i){
+                marker.off("click");
+                delete self._markers[i];
+            });
+            delete this._markers;
             this.model.off('add',this.onAdd, this);
+            //this.$el.remove();
+            //delete this.$el;
         },
         onDOMadd: function() {
             this.renderNow();

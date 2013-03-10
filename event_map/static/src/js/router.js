@@ -18,7 +18,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             "upload": "upload",
             "added": "addedEvents"
         },
-        loginRequired: ["event/:id/edit", "me(/:status)", "add/event", "added"],
+        loginRequired: ["event/:id/edit", "me(/:status)", "add/event", "added", "upload"],
         initialize: function(options) {
             //remove trailing slashes
             var re = new RegExp("(\/)+$", "g");
