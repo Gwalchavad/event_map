@@ -331,6 +331,7 @@ define([
             this.forwardFetch();
         },
         renderEvent: function(position, events){
+            console.log(position,events);
             var html,
             datetime = events.get("start_datetime"),
             text = this.month2FullNameOrLetter(datetime, 0),
