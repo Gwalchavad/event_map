@@ -33,6 +33,7 @@ define([
         tagName: "div",
         className: "span4",
         id: "",
+        colorRange: 240, //the difference of colors from teh top and bottom colored item
         numOfFades:  6, //how many events markers are shown after you scroll past then
         height: 40,
         openHeight: 38,
@@ -454,32 +455,31 @@ define([
          * And Generate the the Date Display at the top of the list
          */
         genarateColorsAndMonths: function(regenrate) {
-            var self = this,
-            //the range of colors (Hue) to use
-            colorRange = 240,
             //find the top elemetns
-            topVisbleEl = $(document.elementFromPoint($("#event_list").position().left + 0.5,
-                    $("#EventsListView").position().top+ 20)),
-            startEl;
-            if(moment(topVisbleEl.data("date")) < moment($(".Now").data("date"))){
-                startEl = $(".Now");
-            }else{
-                startEl = topVisbleEl;
-            }
+            var topVisbleEl = $(document.elementFromPoint($("#event_list").position().left + 0.5,
+                    $("#EventsListView").position().top+ 20));
 
             //have we moved enought to change colors?
-            if (topVisbleEl.hasClass("event_item") && (regenrate || this.topVisbleEl[0] != topVisbleEl[0] )) {
+            if (topVisbleEl.hasClass("event_item") && (regenrate || this.topVisbleEl[0] != topVisbleEl[0] )){
+                var self = this,
+                startIndex, //the index we start coloring from
+                nowIndex = $("#event_list").children().index($(".Now")),
+                topVisibleIndex = $("#event_list").children().index(topVisbleEl);
+                if(nowIndex > topVisibleIndex){
+                    startIndex = nowIndex;
+                }else{
+                    startIndex = topVisibleIndex;
+                }
+
                 var top_start_date = moment(topVisbleEl.data("date")),
                 bottomPos = (self.isListFull() ? $("#EventsListView").height() : $("#event_list").height()) - 11,
                 bottomVisbleEl = document.elementFromPoint(
                         $("#event_list").position().left,
                         $("#EventsListView").position().top + bottomPos),
-                topVisibleIndex = $("#event_list").children().index(topVisbleEl),
-                topIndex = $("#event_list").children().index(startEl),
                 bottomIndex = $("#event_list").children().index(bottomVisbleEl),
-                nowIndex = $("#event_list").children().index($(".Now")),
                 eventsViewed = [],
-                numberOfEl = bottomIndex - topIndex,
+                //number of els to be colored
+                numberOfEl = bottomIndex - startIndex,
                 marker;
 
                 this.topVisbleEl = topVisbleEl;
@@ -502,15 +502,15 @@ define([
                 }
                 if(this.colorEvents){
                     //add color
-                    for (var i = topIndex; i <= numberOfEl + topIndex; ++i) {
+                    for (var i = startIndex; i <= numberOfEl + startIndex; ++i) {
                         marker = this.getMarker(i);
                         eventsViewed.push(marker[0]);
                         if(marker){
                             var H;
                             if(numberOfEl === 0){
-                                H = colorRange;
+                                H = this.colorRange;
                             }else{
-                                H = ((i - topIndex) / numberOfEl) * colorRange;
+                                H = ((i - startIndex) / numberOfEl) * this.colorRange;
                             }
                             this.getEventLi(i).css("background-color", "hsl(" + H + ",100%, 50%)");
                             //add colors to icons
@@ -548,7 +548,7 @@ define([
                             eventsViewed.push(marker[0]);
                             marker.find(".svgForeground")
                                 .css("stroke", "grey")
-                                .css("fill", "hsl(" + colorRange + ",100%, 50%)")
+                                .css("fill", "hsl(" + this.colorRange + ",100%, 50%)")
                                 .css("fill-opacity", 1 - (i - bottomIndex - 1)/this.numOfFades);
                             this.setZIndex(i,-10);
                         }
@@ -608,10 +608,16 @@ define([
                 return false;
             }
         },
+        //get the first visible event to the list
+        getTopEvent: function(){
+            return  document.elementFromPoint($("#event_list").position().left + 0.5,
+                    $("#EventsListView").position().top+ 20);
+        },
         setZIndex: function(index,zIndex){
             var id = this.model.at(index).get("slug");
             this._markers[id].setZIndexOffset(zIndex);
         },
+        //setd the day of the week on the top
         setDay: function(date) {
             var day = date.day();
             $(".selected_day").removeClass("selected_day");
@@ -677,8 +683,15 @@ define([
             }else{
                 var scrollPosistion = index * this.height;
                 $("#EventsListView").scrollTop(scrollPosistion);
+
                 this.setMonthSideBarPosition();
-                return true;
+                var topEvent = this.getTopEvent();
+                var gotoEvent = this.getEventLi(index);
+                if(topEvent != gotoEvent[0]){
+                    return false;
+                }else{
+                    return true;
+                }
             }
         },
         scrollToId: function(id) {
