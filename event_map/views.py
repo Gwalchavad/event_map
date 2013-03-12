@@ -234,7 +234,8 @@ class EventTimeLine(View):
                 #3, 4 works
                 if end >= 0:
                     events = events.\
-                        filter(start_date__gte=begin)[offset: offset + end]
+                        filter(start_date__gte=begin).\
+                        order_by('start_date', 'start_date_index')[offset: offset + end]
                 #3 -2 works
                 elif offset + end >= 0:
                     events = events.\
