@@ -13,6 +13,14 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 
+#http://zmsmith.com/2010/05/django-check-if-a-field-has-changed/
+def has_changed(instance, field):
+    if not instance.pk:
+        return False
+    old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
+    return not getattr(instance, field) == old_value
+
+
 class emObject(models.Model):
     uid = models.CharField(
         max_length=255,
@@ -88,7 +96,7 @@ class AbstractGroup(emObject):
         argument"""
         if events:
             if not created:
-                #if some of the events happen to be in a subscription, remove it.
+                #if some of the events happen to be in a subscription,remove i
                 #Cuz now its going to be in the group
                 qset = Q()
                 for event in events:
@@ -277,12 +285,22 @@ class Event(emObject):
             "complete": self.complete
         }
 
+    def reindex_start_date(self, start_date):
+        events = Event.objects.filter(start_date=start_date).order_by("end_date")
+        for i, event in enumerate(events):
+            event.start_date_index = i
+            event.save()
+
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.start_date_index = Event.objects.filter(start_date=self.start_date).count()
+        reindex = False
+        if not self.pk or has_changed(self, 'start_date') or has_changed(self, 'end_date'):
+            reindex = True
         if self.start_date and self.location_point and self.title and self.content:
             self.complete = True
+
         super(Event, self).save()
+        if reindex:
+            self.reindex_start_date(self.start_date)
         #publish
         if 'create_sge' in kwargs and kwargs['create_sge']:
             sge = SubGroupEvent(event=self, group=self.author)

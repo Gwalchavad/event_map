@@ -5,7 +5,7 @@ from event_map import models as db
 
 class EventAdmin(OSMGeoAdmin):
     readonly_fields = ('slug', 'date_modified', 'date_created')
-    list_display = ('title', 'author', 'start_date', 'date_modified', 'date_created')
+    list_display = ('title', 'author', 'start_date', 'end_date', 'start_date_index', 'date_modified', 'date_created')
     search_fields = ('title', 'author__username')
     default_lat = 39.95
     default_lon = -75.16

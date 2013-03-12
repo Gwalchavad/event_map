@@ -26,7 +26,7 @@ def index(request):
     and get the initail session status for the user
     """
     begin = datetime.now()
-    init_events = db.Event.objects.filter(start_date__gte=begin, complete=True).order_by('start_date')[:20]
+    init_events = db.Event.objects.filter(start_date__gte=begin, complete=True).order_by('start_date', 'start_date_index')[:20]
     response = [event.to_JSON() for event in init_events]
     jsonevents = json.dumps(response, default=utils.clean_data)
     init_events = {
@@ -191,7 +191,7 @@ class EventTimeLine(View):
         GET[group] gets all the events in a particular group
         GET[me] get all of the events in the usergroup of the current user
         """
-        events = db.Event.objects.order_by('start_date', 'start_date_index')
+        events = db.Event.objects
 
         if request.GET.get('complete') and request.GET.get('complete').lower() == 'false':
             events = events.filter(complete=False)
@@ -239,17 +239,17 @@ class EventTimeLine(View):
                 elif offset + end >= 0:
                     events = events.\
                         filter(start_date__gte=begin).\
-                        order_by('start_date')[offset + end: offset]
+                        order_by('start_date', 'start_date_index')[offset + end: offset]
                     events = list(events)
                     events.reverse()
                 #3 - 5 works
                 else:
                     before_events = events.\
                         filter(start_date__lte=begin).\
-                        order_by('-start_date')[:abs(offset + end)]
+                        order_by('-start_date', '-start_date_index')[:abs(offset + end)]
                     events = events.\
                         filter(start_date__gte=begin).\
-                        order_by('start_date')[:offset]
+                        order_by('start_date', 'start_date_index')[:offset]
                     events = list(events)
                     events.reverse()
                     events.extend(before_events)
@@ -259,15 +259,15 @@ class EventTimeLine(View):
                 if end <= 0:
                     events = events.\
                         filter(start_date__lte=begin).\
-                        order_by('-start_date')[abs(offset): abs(offset + end)]
+                        order_by('-start_date', '-start_date_index')[abs(offset): abs(offset + end)]
                 #-1, 4
                 elif end + offset >= 0:
                     after_events = events.\
                         filter(start_date__gte=begin).\
-                        order_by('start_date')[:abs(end + offset)]
+                        order_by('start_date', 'start_date_index')[:abs(end + offset)]
                     events = events.\
                         filter(start_date__lte=begin).\
-                        order_by('-start_date')[:abs(offset)]
+                        order_by('-start_date', '-start_date_index')[:abs(offset)]
                     events = list(events)
                     events.reverse()
                     events.extend(after_events)
@@ -275,14 +275,14 @@ class EventTimeLine(View):
                 else:
                     events = events.\
                         filter(start_date__lte=begin).\
-                        order_by('-start_date')[abs(offset + end): abs(offset)]
+                        order_by('-start_date', '-start_date_index')[abs(offset + end): abs(offset)]
                     events = list(events)
                     events.reverse()
         else:
             #todo specify defaults
             if offset < 0:
-                before_events = events.filter(start_date__lte=begin).order_by('-start_date')[:abs(offset)]
-                after_events = events.filter(start_date__gte=begin).order_by('start_date')
+                before_events = events.filter(start_date__lte=begin).order_by('-start_date', '-start_date_index')[:abs(offset)]
+                after_events = events.filter(start_date__gte=begin).order_by('start_date', 'start_date_index')
                 events = list(itertools.chain(before_events.reverse(), after_events))
             else:
                 events = events.filter(start_date__gte=begin)[offset:]
