@@ -32,3 +32,6 @@
 
 {{/nl2br}}
 </div>
+<div class="options">
+    <a href="/ical/event/{{slug}}.ical" target="_blank">Export<a/>
+</div>

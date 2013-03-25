@@ -205,7 +205,7 @@ class EventTimeLine(View):
             except (ValueError, OverflowError):
                 raise ApiException("Invalid ISO date", 400, "start")
         else:
-            begin = datetime.now()
+            begin = datetime.utcnow().replace(tzinfo=tz.utc)
 
         if request.GET.get('modified'):
             try:
@@ -369,25 +369,63 @@ class Group(View):
 
     def get(self, request, **kwargs):
         """Get info about a group"""
-        group = db.Group.objects.get(id=kwargs['id'])
-        permission = group.permission_set.all().get(user=request.user)
-        permission_json = {
-            "admin": permission.admin,
-            "read": permission.read,
-            "write": permission.write,
-            "banned": permission.banned,
-        }
+        def getGroup(groupType):
+            if(groupType == "user"):
+                return db.UserGroup.objects.get(title=kwargs['title'])
+            elif(groupType == "group"):
+                return db.Group.objects.get(title=kwargs['title'])
+            elif(groupType == "feed"):
+                return db.feedGroup.objects.get(title=kwargs['title'])
+
+        group = getGroup(kwargs["type"])
+
+        #permission = group.permission_set.all().get(user=request.user)
+        #permission_json = {
+        #    "admin": permission.admin,
+        #    "read": permission.read,
+        #    "write": permission.write,
+        #    "banned": permission.banned,
+        #}
         response = {
             "id": group.id,
             "title": group.title,
-            "description": group.description,
-            "permissions": permission_json
+            "groupType": kwargs["type"],
+            "description": group.description
         }
         return utils.json_response(response)
 
     def put(self, request, **kwargs):
         """modifiey a group"""
-        raise ApiException("NOT Implemented", 401)
+        def getGroup(groupType):
+            if(groupType == "user"):
+                return db.UserGroup.objects.get(id=kwargs['title'])
+            elif(groupType == "group"):
+                return db.Group.objects.get(title=kwargs['title'])
+            elif(groupType == "feed"):
+                return db.feedGroup.objects.get(title=kwargs['title'])
+
+        groupType = kwargs["type"]
+        group = getGroup(groupType)
+        if(groupType == "user"):
+            if group.user != request.user:
+                raise ApiException("Permission Denied, you do not have permission to edit", 401)
+        elif(groupType == "group"):
+            pass
+        elif(groupType == "feed"):
+            pass
+
+        json_post = json.loads(request.raw_post_data)
+        #if can edit
+
+        form = forms.UserGroupForm(json_post, instance=group.abstractgroup_ptr)
+        if form.is_valid():
+            group = form.save()
+            return utils.json_response({
+                'success': True,
+            })
+        else:
+            raise ApiException(utils.form_errors_to_json(form), 401)
+
 
     def post(self, request):
         """create an a group"""

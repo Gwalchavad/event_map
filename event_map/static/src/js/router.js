@@ -1,4 +1,4 @@
-/*global define require init_user init_events*/
+/*global define require init_user init_events intro_text */
 define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/events', 'models/session', 'views/frame', 'views/map', 'views/loading'], function($, _, Backbone, moment, UserModels, EventModel, SessionModel, FrameView, MapView, LoadingView) {
     "use strict";
     var AppRouter = Backbone.Router.extend({
@@ -49,14 +49,26 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             this.showView(new LoadingView());
         },
         list: function(date) {
-            this.viewList(date);
+            var options = {
+                group: {
+                    title: "ALL EVENTS",
+                    description: intro_text
+                }
+            };
+            this.viewList(_.extend(options, date));
         },
         viewAuthor: function(user, status, params) {
             var options = {
-                data:{
+                data: {
                     author: user
+                },
+                group: {
+                    type:"user",
+                    icalURL: "ical/user/" + user + ".ical",
+                    id: user
                 }
             };
+
             if (typeof(status) != 'undefined' && status == "uncomplete") {
                 options.data.complete = false;
             } else {
@@ -86,11 +98,15 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
         addedEvents: function() {
             this.viewList(undefined, false, this.recentEvents);
         },
+        //options
+        //@date the date the list starts ar
+        //@data data that is used filter the list
+        //@icalURL the location for ical export
         viewList: function(options, subList, events) {
             var self = this;
             if (typeof(options) == 'undefined')
                 options = {};
-            require(['views/list', 'views/list_info'], function(list, ListInfoView) {
+            require(['views/list', 'views/list_info', 'models/groups'], function(List, ListInfoView, GroupModel) {
                 //TODO: test to see if eventlist is in a hash based on the filter, first
                 var date = false,
                 newEventList;
@@ -125,15 +141,18 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                         newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
                     }
                 } else {
-                    if(!date || self.eventList.models[0].get("start_datetime") < date && _.last(self.eventList.models).get("start_datetime") > date){
+                    if(!date ||
+                            self.eventList.models[0].get("start_datetime") < date &&
+                            _.last(self.eventList.models).get("start_datetime") > date){
                         newEventList = self.eventList;
                     }else{
                         newEventList = self.eventList = new EventModel.EventCollection(null,{data:{start: options.date}});
                     }
                 }
                 options.model = newEventList;
-                var eventListView = new list.EventsListView(options);
-                var information = new ListInfoView();
+                var eventListView = new List.EventsListView(options),
+                group = new GroupModel(options.group),
+                information = new ListInfoView({'model': group});
                 self.showView([information, eventListView]);
             });
         },

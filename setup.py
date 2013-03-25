@@ -18,7 +18,7 @@ setup(
     long_description     = read('README.rst'),
     license              = 'GNU AGPL v3 or later',
     install_requires     = ['Django>=1.4', 'south>=0.7.5', 
-        'django-celery', 'celery-with-redis','django-autoslug',
+        'django-celery', 'celery-with-redis','django-autoslug', 'django-guardian'
         'django_ical','markdown','django-uuidfield','docutils'],
     zip_safe             = False,
     classifiers = [

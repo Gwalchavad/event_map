@@ -37,6 +37,7 @@ class emObject(models.Model):
 
 
 class AbstractGroup(emObject):
+
     visibility_choices = (
         ('public', 'Public'),
         ('private', 'Private'),
@@ -139,6 +140,7 @@ class AbstractGroup(emObject):
 
 
 class UserGroup(AbstractGroup):
+
     title = models.CharField(
         unique=True,
         max_length=255,
@@ -164,6 +166,10 @@ class UserGroup(AbstractGroup):
 
 
 class Group(AbstractGroup):
+    class Meta:
+        permissions = (
+            ("group_admin", "Can admin group"),
+        )
     creator = models.ForeignKey(
         UserGroup)
     title = models.CharField(
@@ -316,9 +322,6 @@ class Event(emObject):
 class Permission(models.Model):
     class Meta:
         unique_together = ("subject", "emobject")
-    banned = models.BooleanField(
-        default=False,
-        help_text="""is this user banned?""")
     read = models.BooleanField(
         default=False,
         help_text="""can this user view the group?""")

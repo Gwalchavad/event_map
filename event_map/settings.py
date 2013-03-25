@@ -7,7 +7,7 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
+ANONYMOUS_USER_ID = -1
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'
@@ -18,6 +18,10 @@ DATABASES = {
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -138,6 +142,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.gis',
     'django.contrib.markup',
+    'guardian',
     'django_push.hub',
     'django_push.subscriber',
     'event_map',
@@ -188,26 +193,12 @@ LOGGING = {
         },
     }
 }
+
 # Django settings for event_map project.
 try:
-   from settings_local import *
+    from settings_local import *
 except ImportError, e:
-   pass
+    pass
 
-#
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.contrib.gis.db.backends.postgis', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#        'NAME': 'event_map',                      # Or path to database file if using sqlite3.
-#        'USER': '',                      # Not used with sqlite3.
-#        'PASSWORD': '',                  # Not used with sqlite3.
-#        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-#    }
-#}
-#STATICFILES_DIRS = (
-#    "/home/name/event_map/lib/python2.7/site-packages/django/contrib/admin/static/admin",
-#)
-#STATIC_ROOT = "/home/name/event_map/event_map/event_map/static"
 #
 #./manage.py collectstatic

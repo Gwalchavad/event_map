@@ -5,6 +5,7 @@ from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
+from guardian.shortcuts import assign_perm
 
 
 class EventForm(forms.ModelForm):
@@ -53,6 +54,11 @@ class GroupForm(forms.ModelForm):
         model = db.Group
         fields = ('title', 'description', 'visibility', 'posting_option')
 
+class UserGroupForm(forms.ModelForm):
+    class Meta:
+        model = db.AbstractGroup
+        fields = ['description']
+
 
 class SignUpForm(forms.Form):
     username = forms.RegexField(
@@ -79,4 +85,6 @@ class SignUpForm(forms.Form):
         #create an user group
         userGroup = db.UserGroup(user=user, title=username)
         userGroup.save()
+        #give user admin privelages to thier profile group
+        #assign_perm("group_admin", user, userGroup.abstractgroup_ptr)
         return user
