@@ -1,0 +1,14 @@
+form#group_add_form(action='/#', method='post')
+    fieldset
+        label.required(for='id_url')
+          | Feed URL
+          span#url_error.label.label-important.hide
+        input#id_url.span9(type='text', name='url', maxlength='255', value='#{url}')
+        span.help-block The URL
+        .form-actions
+          if id
+            button#add_group.btn.btn-primary(type='submit') Update Event
+            button#delete_group.btn.btn-danger Delete
+          else
+            button#add_group.btn.btn-primary(type='submit') Add Feed
+          button.btn.cancel Cancel

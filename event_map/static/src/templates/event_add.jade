@@ -1,0 +1,54 @@
+.row-fluid.top
+    h1 Add Event
+    form#event_add_form.form-horizontal(action='/#', method='post', name='event_add_form')
+      fieldset
+        #title.control-group
+          label.required.control-label(for='title_input') Title
+          .controls
+            input#title_input.span9(type='text', name='title', maxlength='255', value='#{title}', required='required')
+            br
+            span#title_error.help-inline.hide
+        #start_date.control-group
+          label.required.control-label(for='start_date_input') Time & Date
+          .controls
+            input#start_date_input(type='text', name='start_date', value='#{start_date}', required='required')
+            | -
+            input#end_date_input(type='text', name='end_date', value='#{end_date}')
+            br
+            span#start_date_error.help-inline.hide
+        #address.control-group
+          label.required.control-label(for='street_input') Street Address
+          .controls
+            input#street_input.span7(type='text', placeholder='', name='address', maxlength='255', value='#{address}')
+            .input-append
+              input#city_state_input.input-small(type='text', value='#{settings.city}, #{settings.state}', name='city')
+              button#geocode_button.btn(type='button') Find!
+            br
+            span#address_error.help-inline.hide
+        #venue.control-group
+          label.control-label(for='venue_input') Venue
+          .controls
+            input#venue_input.span8(placeholder='the name of the venue', type='text', name='venue', maxlength='255', value='#{venue}')
+            br
+            span#venue_error.help-inline.hide
+        #link.control-group
+          label.control-label(for='link_input') Link
+          .controls
+            input#link_input.span8(type='url', placeholder='A link to more infromation', name='link', maxlength='255', value='#{link}')
+            br
+            span#link_error.help-inline.hide
+        #content.control-group
+          label.control-label.required(for='content_input') Event Description
+          .controls
+            textarea#content_input.span9(rows='10', wrap='hard', name='content', required='required') #{content}
+            br
+            span#content_error.help-inline.hide
+        .form-actions
+          if id
+            button#add_event.btn.btn-primary(type='submit') Update Event
+            button#delete_event.btn.btn-danger Delete
+          else
+            button#add_event.btn.btn-primary(type='submit') Create Event
+          button.btn.cancel Cancel
+        input#lat(type='hidden', name='lat', value='#{location_point.lat}')
+        input#lng(type='hidden', name='lng', value='#{location_point.lng}')

@@ -1,0 +1,22 @@
+h1 Import Events
+  form#form-upload.form-horizontal(action='/upload', method='post', enctype='multipart/form-data')
+      fieldset
+        legend Upload an ical file
+        //
+           The file to upload 
+        #upload_event_error.row.hide
+        .control-group
+          .controls
+            input#file-id(type='file', multiple='true', name='our-file')
+        .control-group
+          .controls
+            input#upload_event.btn.btn-primary(type='submit', value='Upload')
+        p#upload-status
+        p#progress
+    form#form-import.form-horizontal(action='/import', enctype='multipart/form-data')
+      fieldset
+        legend Or add by URL
+        .control-group
+          .controls
+            input(type='text', name='feed_url', placeholder='calender URL')
+            input#import_url.btn.btn-primary(type='submit', value='Import')

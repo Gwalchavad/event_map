@@ -1,0 +1,7 @@
+span(id="popup_#{id}")
+    h3
+      a(href='/#event/#{slug}')= title
+      br
+      | #{start_time}-#{end_time}
+      br
+      a.popupAddress.btn.btn-info.btn-small(href='#{direction_url}', target='_blank') Directions

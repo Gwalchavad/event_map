@@ -1,6 +1,0 @@
-.openIndt [-]
-  .list_item_width
-      .list_item_content
-        | #{start_time} - #{end_time}
-        a(href='#/event/#{slug}') #{title}
-        | | #{content}

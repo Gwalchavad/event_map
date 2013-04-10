@@ -1,0 +1,13 @@
+each event in events
+  li.event_item(data-id='#{event.slug}', id='event_#{event.slug}', data-date='#{event.start_datetime._i}')
+      .list_item_container
+        .openIndt(style='') [+]
+        .list_item_width
+          .list_item_content
+            if event.complete
+              | #{event.start_time} - #{event.end_time}&nbsp;
+              a(href='#/event/#{event.slug}')= event.titleClose
+            else
+              | #{event.start_time} - #{event.end_time}&nbsp;
+              a(href='#/event/#{event.slug}')= event.titleClose
+

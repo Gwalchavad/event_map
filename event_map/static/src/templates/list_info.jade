@@ -1,0 +1,15 @@
+.row-fluid.top
+  h1 #{title}
+#ListOptionView(style='margin: 20px;')
+  p
+    span#description #{description}
+    if permissions.group_admin
+      button#editProfile.btn.btn-link Edit
+
+#actions(style='margin: 20px;')
+  if permissions.add_event
+    a.btn.btn-large.btn-block.btn-primary(href='#add/event', type='button') Add Event
+
+#listOptionPanels
+  div
+    a(href='{{icalURL}}', target='_blank') Export

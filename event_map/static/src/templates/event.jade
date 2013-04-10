@@ -1,0 +1,26 @@
+div
+    h1= title
+      if edit
+        a.btn.btn-primary(href='#/event/#{slug}/edit') EDIT
+      .row-fluid
+        .span10
+          h3
+            if end_date
+            | START: #{start_date}
+            br
+            | END: #{end_date}
+
+      .row-fluid
+        .span5
+          h3
+            if venue
+            | VENUE:#{venue}
+            br
+            if address
+              span ADDRESS: #{address}
+            br
+            a(href='#/author/#{author}') BY:#{author}
+    div= content
+    .options
+      a(href='/ical/event/#{slug}.ical', target='_blank')
+        | Export

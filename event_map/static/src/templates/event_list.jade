@@ -1,0 +1,29 @@
+style
+  #event_list li{
+     height: #{height}px
+  }
+
+#event_list_top_date.row-fluid.top
+  #topMonthLetter.span2.top_text
+  .span8
+    .row-fluid(style='height: 60px;')
+      #topWeekLetter.span6(style='text-align: center;')
+        div(style='display: inline-block;')
+          span#day_0 S
+          span#day_1 M
+          span#day_2 T
+          span#day_3 W
+          span#day_4 T
+          span#day_5 F
+          span#day_6 S
+      #topYear.span4.top_text(style='text-align: center;')
+#EventsListView.replace.overflow.setheightWithTop
+  .row-fluid
+    .span1
+      .row-fluid
+        .span5
+          ul#event_list_month
+        .span5
+          ul#event_list_day
+    .span9
+      ul#event_list
