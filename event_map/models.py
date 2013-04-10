@@ -37,6 +37,10 @@ class emObject(models.Model):
 
 
 class AbstractGroup(emObject):
+    class Meta:
+        permissions = (
+            ("group_admin", "Can admin group"),
+        )
 
     visibility_choices = (
         ('public', 'Public'),
@@ -84,8 +88,18 @@ class AbstractGroup(emObject):
             return self.group.title
         elif hasattr(self, 'usergroup'):
             return self.usergroup.title
+        elif hasattr(self, 'feedgroup'):
+            return self.feedgroup.title
         else:
             return self.description
+
+    def get_type(self):
+        if hasattr(self, 'group'):
+            return 'group'
+        elif hasattr(self, 'usergroup'):
+            return 'user'
+        elif hasattr(self, 'feedgroup'):
+            return 'feed'
 
     def get_all_events(self):
         """returns all events in the groups and in the subcriptions"""
@@ -153,8 +167,6 @@ class UserGroup(AbstractGroup):
 
     def save(self, *args, **kwargs):
         self.title = self.user.username
-        self.visibility = "public"
-        self.description = "Write something about You"
         self.posting_option = "restricted"
         return super(UserGroup, self).save(*args, **kwargs)
 
@@ -166,10 +178,6 @@ class UserGroup(AbstractGroup):
 
 
 class Group(AbstractGroup):
-    class Meta:
-        permissions = (
-            ("group_admin", "Can admin group"),
-        )
     creator = models.ForeignKey(
         UserGroup)
     title = models.CharField(
@@ -185,7 +193,8 @@ class FeedGroup(AbstractGroup):
     class Meta:
         unique_together = ("creator", "feed")
     creator = models.ForeignKey(
-        UserGroup)
+        AbstractGroup,
+        related_name='creator_group')
     title = models.CharField(
         max_length=255,
         help_text=""" the name of the group""")

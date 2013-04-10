@@ -1,5 +1,5 @@
 /*global define app alert*/
-define(['jquery', 'backbone', 'utils', 'hbs!../../templates/ical_upload'
+define(['jquery', 'backbone', 'utils', 'jade!../../templates/ical_upload'
 // Load our app module and pass it to our definition function
 ], function($, Backbone, utils, temp) {
     "use strict";

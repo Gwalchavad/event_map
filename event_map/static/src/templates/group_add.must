@@ -1,38 +1,32 @@
-<form id="group_add_form" action="/#" method="post">
-	<fieldset>	
-		<label for="id_title" class="required">Title &nbsp;<span id="title_error" class="label label-important hide"></span></label>
-        <input id="id_title" class="span9" type="text" name="title" maxlength="255" value="{{title}}">
-        <span class="help-block">A one-line title</span>
-
-        <label for="id_description" class="required">Description &nbsp;<span id="description_error" class="label label-important hide"></span></label>
-        <textarea id="id_description" class="span9" rows=10 name="description">{{content}}</textarea>
-        <span class="help-block">Write a nice little description about why this group exists</span>
-        
-        <label for="id_visibility" class="required">Visibility</label>
-        <select id="id_visibility" class="span9" name="visibility">
-          <option selected="selected" value="public">Everyone!</option>
-          <option value="private"> Invite Only</option>
-          <option value="unlisted">Hiddened from View but anyone can access URL</option>
-        </select>
-        <span class="help-block">Who should be able to see this group?</span>
-        
-        <label for="id_posting_option" class="required">Posting</label>
-        <select id="id_posting_option" class="span9" name="posting_option">
-          <option value="open">Open to anyone!</option>
-          <option value="queue">Open to anyone!, but go into a Queue</option>
-          <option selected="selected" value="restricted">Resticted - only select People</option>
-        </select>
-        <span class="help-block">Who should be able to see this group?</span>        
-        
-        <div class="controlls" class="form-actions">
-            {{#if id}}
-            <button type="submit" id="add_group" class="btn btn-primary">Update Event</button>
-            <button id="delete_group" class="btn btn-danger">Delete</button>				
-            {{else}}
-            <button type="submit" id="add_group" class="btn btn-primary">Create Event</button>
-            {{/if}}
-            <button class="btn cancel">Cancel</button>
-        </div>
-        
-    </fieldset>
-</form>
+form#group_add_form(action='/#', method='post')
+    fieldset
+        label.required(for='id_title')
+          | Title
+          span#title_error.label.label-important.hide
+        input#id_title.span9(type='text', name='title', maxlength='255', value='{{title}}')
+        span.help-block A one-line title
+        label.required(for='id_description')
+          | Description
+          span#description_error.label.label-important.hide
+        textarea#id_description.span9(rows='10', name='description') {{content}}
+        span.help-block Write a nice little description about why this group exists
+        label.required(for='id_visibility') Visibility
+        select#id_visibility.span9(name='visibility')
+          option(selected='selected', value='public') Everyone!
+          option(value='private')  Invite Only
+          option(value='unlisted') Hiddened from View but anyone can access URL
+        span.help-block Who should be able to see this group?
+        label.required(for='id_posting_option') Posting
+        select#id_posting_option.span9(name='posting_option')
+          option(value='open') Open to anyone!
+          option(value='queue') Open to anyone!, but go into a Queue
+          option(selected='selected', value='restricted') Resticted - only select People
+        span.help-block Who should be able to see this group?
+        .form-actions
+          | {{#if id}}
+          button#add_group.btn.btn-primary(type='submit') Update Event
+          button#delete_group.btn.btn-danger Delete
+          | {{else}}
+          button#add_group.btn.btn-primary(type='submit') Create Event
+          | {{/if}}
+          button.btn.cancel Cancel

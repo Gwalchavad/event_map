@@ -2,9 +2,8 @@
 define([
    'jquery',
    'underscore',
-   'handlebars'
   // Load our app module and pass it to our definition function
-], function($,_,handlebars){
+], function($,_){
     "use strict";
     //send the CSRFToken in the header. from django docs
     var getCookie = function(name) {

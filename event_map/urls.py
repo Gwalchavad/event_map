@@ -13,11 +13,11 @@ urlpatterns = patterns(
     #ical feeds
     url(r'^ical/all.ical$', feeds.iCalFeed(), name='ical-all'),
     url(r'^ical/all-historical.ical$', feeds.iCalFeedHistorical(), name='ical-all-historical'),
+    url(r'^ical/event/(?P<slug>[-_\d\w]+)$', feeds.iCalEvent()),
+    url(r'^ical/event/(?P<slug>[-_\d\w]+)\.ical$', feeds.iCalEvent(), name='ical-event'),
     url(r'^ical/(?P<groupType>[-_\d\w]+)/(?P<group_id>[-_\d\w]+)\-historical.ical$', feeds.iCalFeedHistorical(), name='ical-user-historical'),
     url(r'^ical/(?P<groupType>[-_\d\w]+)/(?P<group_id>[-_\d\w]+)\.ical$', feeds.iCalFeed(), name='ical-user'),
 
-    url(r'^ical/event/(?P<slug>[-_\d\w]+)$', feeds.iCalEvent()),
-    url(r'^ical/event/(?P<slug>[-_\d\w]+)\.ical$', feeds.iCalEvent(), name='ical-event'),
     #ical uploader
     url(r'^upload$', views.upload_file),
     url(r'^import$', views.import_url),
@@ -34,6 +34,7 @@ urlpatterns = patterns(
     url(r'^api/event/id/(?P<id>\d+)$', views.Event.as_view()),
     url(r'^api/event/(?P<slug>[-_\d\w]+)$', views.Event.as_view()),
     url(r'^api/group$', views.Group.as_view()),
+    url(r'^api/group/(?P<type>[-_\d\w]+)$', views.Group.as_view()),
     url(r'^api/group/(?P<type>[-_\d\w]+)/(?P<title>[-_\d\w]+)$', views.Group.as_view()),
     url(r'^api/feed$', views.FeedView.as_view()),
     url(r'^api/notifications$', views.Notifications.as_view()),

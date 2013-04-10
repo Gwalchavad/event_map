@@ -17,6 +17,8 @@ import json
 from event_map import utils, forms, models as db
 from event_map.utils import json_api_errors, ApiException
 from feed_import import importers
+from guardian.shortcuts import assign_perm
+from guardian.shortcuts import get_perms
 
 
 @ensure_csrf_cookie
@@ -373,24 +375,33 @@ class Group(View):
             if(groupType == "user"):
                 return db.UserGroup.objects.get(title=kwargs['title'])
             elif(groupType == "group"):
-                return db.Group.objects.get(title=kwargs['title'])
+                return db.Group.objects.get(id=kwargs['title'])
             elif(groupType == "feed"):
                 return db.feedGroup.objects.get(title=kwargs['title'])
 
         group = getGroup(kwargs["type"])
 
-        #permission = group.permission_set.all().get(user=request.user)
-        #permission_json = {
-        #    "admin": permission.admin,
-        #    "read": permission.read,
-        #    "write": permission.write,
-        #    "banned": permission.banned,
-        #}
+        if request.user.is_authenticated():
+            usergroup = request.user.usergroup
+        else:
+            usergroup = None
+
+        subs = None
+        #TODO: check viewing permission
+        permissions = get_perms(request.user, group.abstractgroup_ptr)
+        if group.posting_option == "open":
+            permissions.append("add_event")
+        if group.visibility == 'public' or group == usergroup:
+            subscriptions = db.Subscription.objects.filter(subscriber=group)
+            subs = [{"title": sub.publisher.get_title(), "id": sub.publisher.id, "type": sub.publisher.get_type()} for sub in subscriptions]
+
         response = {
             "id": group.id,
             "title": group.title,
             "groupType": kwargs["type"],
-            "description": group.description
+            "description": group.description,
+            "subscriptions": subs,
+            "permissions": permissions
         }
         return utils.json_response(response)
 
@@ -400,7 +411,7 @@ class Group(View):
             if(groupType == "user"):
                 return db.UserGroup.objects.get(id=kwargs['title'])
             elif(groupType == "group"):
-                return db.Group.objects.get(title=kwargs['title'])
+                return db.Group.objects.get(id=kwargs['title'])
             elif(groupType == "feed"):
                 return db.feedGroup.objects.get(title=kwargs['title'])
 
@@ -426,14 +437,13 @@ class Group(View):
         else:
             raise ApiException(utils.form_errors_to_json(form), 401)
 
-
-    def post(self, request):
+    def post(self, request, **kwargs):
         """create an a group"""
         json_post = json.loads(request.raw_post_data)
-        form = forms.GroupForm(json_post)
+        form = forms.GroupForm(request.user, json_post)
         if form.is_valid():
             group = form.save()
-            db.Permission.objects.create(admin=True, user=request.user, group=group)
+            assign_perm("group_admin", request.user, group.abstractgroup_ptr)
             response = {
                 "id": group.id,
                 "title": group.title,

@@ -14,10 +14,7 @@ require.config({
         "routefilter": "../../components/backbone.routefilter/dist/backbone.routefilter",
         "query-parameters": "../../components/backbone-query-parameters/backbone-query-parameters/backbone.queryparams",
         "bootstrap": "../../components/bootstrap/js/bootstrap",
-        "handlebars":"../../components/handlebars/handlebars",
-        "hbs": "../../components/require-handlebars-plugin/hbs",
-        "i18nprecompile": "../../components/require-handlebars-plugin/hbs/i18nprecompile",
-        "json2": "../../components/require-handlebars-plugin/hbs/json2",
+        "jade": "../../components/require-jade/jade",
         "jquery": "../../components/jquery/jquery",
         "timeDatePicker": "../../components/jquery-timepicker-addon/jquery-ui-timepicker-addon",
         "jqueryui": "../../components/jqueryUI/js/jquery-ui-1.10.0.custom",
@@ -27,8 +24,8 @@ require.config({
         "moment": "../../components/moment/moment"
     },
     shim: {
-        'underscore':{
-             exports: '_'
+        'underscore': {
+            exports: '_'
         },
         'backbone': {
             //These script dependencies should be loaded before loading
@@ -39,15 +36,12 @@ require.config({
             exports: 'Backbone'
         },
         'routefilter': ['backbone'],
-        'query-parameters': ['backbone','underscore'],
-        'handlebars': {
-            exports: 'Handlebars'
-        },
-        'bootstrap':['jquery'],
+        'query-parameters': ['backbone', 'underscore'],
+        'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'timeDatePicker':['jqueryui'],
-        'leaflet':{
-            exports:'L'
+        'timeDatePicker': ['jqueryui'],
+        'leaflet': {
+            exports: 'L'
         }
     }
 });
@@ -63,7 +57,7 @@ require([
   //>>includeStart("debug", pragmas.debug);
   'debug'
   //>>includeEnd("debug");
-], function(_,$,Backbone, Router,Utils){
+], function (_, $, Backbone, Router, Utils) {
     "use strict";
     // add jquery plugins
     $(document).ajaxSend(function(event, xhr, settings) {

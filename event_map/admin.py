@@ -1,4 +1,5 @@
 from django.contrib import admin
+from guardian.admin import GuardedModelAdmin
 from django.contrib.gis.admin import OSMGeoAdmin
 from event_map import models as db
 
@@ -14,9 +15,9 @@ class EventAdmin(OSMGeoAdmin):
     map_height = 500
 
 admin.site.register(db.Event, EventAdmin)
-admin.site.register(db.AbstractGroup)
+admin.site.register(db.AbstractGroup, GuardedModelAdmin)
 admin.site.register(db.Group)
-admin.site.register(db.UserGroup,)
+admin.site.register(db.UserGroup)
 admin.site.register(db.FeedGroup)
 admin.site.register(db.Permission)
 admin.site.register(db.Verbiage)

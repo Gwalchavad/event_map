@@ -1,21 +1,24 @@
-<style>
-    #editProfile{
-        float: right;
-        padding-left: 11px;
-        background-color: rgb(245, 245, 220);
-    }
-</style>
 <div class="row-fluid top">
     <h1>{{title}}</h1>
 </div>
 <div id="ListOptionView" style="margin: 20px;">
-    <p><span id="description">{{description}}</span><button id="editProfile" class="btn btn-link" style="display: none">Edit</button></p>
-    {{#if allow_add}}
+    <p><span id="description">{{description}}</span>{{#if permissions.group_admin}}<button id="editProfile" class="btn btn-link">Edit</button>{{/if}}</p>
+    {{#if permissions.add_event}}
     <a href="#add/event" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
     {{/if}}
     </div>
 <div id="listOptionPanels">
-    {{#if icalURL}}
-    <a href="{{icalURL}}" target="_blank">Export<a/>
+<div>
+    {{#if subscriptions}}
+    <h2>Subsciptions</h2>
+    <ul>
+    {{#each subscriptions}}
+    <li><a href="#group/{{id}}">{{title}}</a> <input id="sub_{{title}}" type="checkbox" checked="true"></li>
+    {{/each}}
+    </ul>
     {{/if}}
+</div>
+{{#if icalURL}}
+<a href="{{icalURL}}" target="_blank">Export</a>
+{{/if}}
 </div>

@@ -1,7 +1,7 @@
 define([
     'underscore',
     'backbone',
-    'hbs!../../templates/list_option'
+    'jade!../../templates/list_option'
 ],function (_,Backbone,temp_list_option){
      var ListOptionView = Backbone.View.extend({
         tagName: "div",

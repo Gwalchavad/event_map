@@ -8,10 +8,10 @@ define([
     'geocode',
     'settings',
     'views/map',
-    'hbs!../../templates/event_add',
+    'jade!../../templates/event_add',
     'timeDatePicker'
   // Load our app module and pass it to our definition function
-], function($,_,Backbone, moment, Utils, geocoder,settings,map,temp_event_add){
+], function ($, _, Backbone, moment, Utils, geocoder, settings, map, temp_event_add) {
     "use strict";
     var EventAddView = Backbone.View.extend({
         tagname: "div",

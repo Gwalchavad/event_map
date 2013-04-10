@@ -9,6 +9,9 @@
     optimizeCss: "standard",
     //removeCombined: true,
     //findNestedDependencies: true,
+    pragmasOnSave: {
+        excludeJade : true
+    },
     pragmas: {
         debug: false
     },

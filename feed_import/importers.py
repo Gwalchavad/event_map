@@ -38,7 +38,7 @@ def fetch_feed(feed_url):
 
     return r.content
 
-
+#TODO feedgroups should take abstractgroup and not usergroups 
 def add_feed(feed_url, user):
     content = fetch_feed(feed_url)
     ug = em_db.UserGroup.objects.get(user=user)

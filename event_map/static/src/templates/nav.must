@@ -1,9 +1,13 @@
-{{#if authenticated}}
-<li> <a id="user">{{username}}</a></li>
-<li> <a id="logout">LOGOUT</a></li>
-<li><a id="id_addevent" href="#me" title="Add your event" href="">MY EVENTS</a></li>
-{{else}}
-<li> <a id="login">LOGIN</a></li>
-{{/if}}
-<li><a id="id_about" href="#user/{{username}}" title="ABOUT MUTHUR FUCKKER" href="">ABOUT</a></li>
-
+| {{#if authenticated}}
+  li
+      a#user {{username}}
+    li
+      a#logout LOGOUT
+    li
+      a#id_addevent(href='', title='Add your event') MY EVENTS
+    | {{else}}
+    li
+      a#login LOGIN
+    | {{/if}}
+    li
+      a#id_about(href='', title='ABOUT MUTHUR FUCKKER') ABOUT

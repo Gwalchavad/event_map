@@ -142,7 +142,7 @@ class iCalFeed(iCalFeedHistorical):
     """Generates an Ical for all upcoming events"""
     def get_object(self, request, groupType=None, group_id=None):
         events = super(iCalFeed, self).get_object(request, groupType, group_id)
-        return events.filter(start_date__gte=datetime.datetime.utcnow().replace(tzinfo=tz.utc))
+        return events.filter(start_date__gte=datetime.utcnow().replace(tzinfo=tz.utc))
 
 class iCalEvent(iCalFeedHistorical):
     """Generates an Ical for a single event"""

@@ -13,14 +13,19 @@ define([
         urlRoot: "/api/event",
         idAttribute: "slug",
         defaults: {
-            title:"",
-            start_date:"",
-            end_date:"",
-            organization:"",
-            user:"",
-            city:"",
-            location:"",
-            location_point:""
+            id: false,
+            title: "",
+            start_date: "",
+            end_date: "",
+            organization: "",
+            user: "",
+            address: "",
+            venue: "",
+            link: "",
+            city: "",
+            content: "",
+            location: "",
+            location_point: ""
         },
         initialize: function () {
             /*

@@ -54,6 +54,22 @@ class GroupForm(forms.ModelForm):
         model = db.Group
         fields = ('title', 'description', 'visibility', 'posting_option')
 
+    def __init__(self, user, *args, **kwargs):
+        self.usergroup = user.usergroup
+        super(GroupForm, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        model = super(GroupForm, self).save(commit=False)
+
+        model.creator = self.usergroup
+        model.save()
+
+        #create subscription from the feed group to the user
+        user_sub = db.Subscription(subscriber=model.creator, publisher=model)
+        user_sub.save()
+        return model
+
+
 class UserGroupForm(forms.ModelForm):
     class Meta:
         model = db.AbstractGroup

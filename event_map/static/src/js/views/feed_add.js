@@ -4,7 +4,7 @@ define([
     'underscore',
     'backbone',
     'utils',
-    'hbs!../../templates/feed_add'
+    'jade!../../templates/feed_add'
 ], function($,_,Backbone,Utils,temp_group_add){
     "use strict";
     var groupAdd = Backbone.View.extend({

@@ -1,5 +1,5 @@
 /*global define require init_user init_events intro_text */
-define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/events', 'models/session', 'views/frame', 'views/map', 'views/loading'], function($, _, Backbone, moment, UserModels, EventModel, SessionModel, FrameView, MapView, LoadingView) {
+define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/events', 'models/session', 'views/frame', 'views/map', 'views/loading'], function ($, _, Backbone, moment, UserModels, EventModel, SessionModel, FrameView, MapView, LoadingView) {
     "use strict";
     var AppRouter = Backbone.Router.extend({
         routes: {
@@ -19,11 +19,11 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             "added": "addedEvents"
         },
         loginRequired: ["event/:id/edit", "me(/:status)", "add/event", "added", "upload"],
-        initialize: function(options) {
+        initialize: function (options) {
             //remove trailing slashes
             var re = new RegExp("(\/)+$", "g");
             /*jshint regexp: false*/
-            this.route(/(.*)\/+$/, "trailFix", function(id) {
+            this.route(/(.*)\/+$/, "trailFix", function (id) {
                 // remove all trailing slashes if more than one
                 id = id.replace(re, '');
                 this.navigate(id, true);
@@ -38,7 +38,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             this.eventList = new EventModel.EventCollection();
             this.eventList.reset(init_events);
         },
-        before: function(prama, route) {
+        before: function (prama, route) {
             this.map.group.clearLayers();
             if (_.contains(this.loginRequired, route)) {
                 if (!this.session.is_authenticated()) {
@@ -48,22 +48,23 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             }
             this.showView(new LoadingView());
         },
-        list: function(date) {
+        list: function (date) {
             var options = {
                 group: {
                     title: "ALL EVENTS",
-                    description: intro_text
+                    description: intro_text,
+                    permissions: {allow_add: true}
                 }
             };
             this.viewList(_.extend(options, date));
         },
-        viewAuthor: function(user, status, params) {
+        viewAuthor: function (user, status, params) {
             var options = {
                 data: {
                     author: user
                 },
                 group: {
-                    type:"user",
+                    type: "user",
                     icalURL: "ical/user/" + user + ".ical",
                     id: user
                 }
@@ -74,14 +75,14 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             } else {
                 options.data.complete = true;
             }
-            if(params){
+            if (params) {
                 options.date = params.date;
             }
             this.viewList(options);
         },
-        me: function(status, params) {
+        me: function (status, params) {
             var options = {
-                data:{
+                data: {
                     me: true
                 }
             };
@@ -90,42 +91,42 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
             } else {
                 options.data.complete = true;
             }
-            if(params){
+            if (params) {
                 options.date = params.date;
             }
             this.viewList(options);
         },
-        addedEvents: function() {
+        addedEvents: function () {
             this.viewList(undefined, false, this.recentEvents);
         },
         //options
         //@date the date the list starts ar
         //@data data that is used filter the list
         //@icalURL the location for ical export
-        viewList: function(options, subList, events) {
+        viewList: function (options, subList, events) {
             var self = this;
             if (typeof(options) == 'undefined')
                 options = {};
-            require(['views/list', 'views/list_info', 'models/groups'], function(List, ListInfoView, GroupModel) {
+            require(['views/list', 'views/list_info', 'models/groups'], function (List, ListInfoView, GroupModel) {
                 //TODO: test to see if eventlist is in a hash based on the filter, first
                 var date = false,
                 newEventList;
-                if(options.date){
+                if (options.date) {
                     date = moment(options.date);
                 }
                 //display a set amount of events
-                if (typeof(events) != 'undefined' ){
+                if (typeof(events) != 'undefined') {
                     newEventList = new EventModel.EventCollection(events);
                     newEventList._attributes.futureEvents.more = false;
                     newEventList._attributes.pastEvents.more = false;
-                }else if (typeof(options.data) != 'undefined') {
+                } else if (typeof(options.data) != 'undefined') {
                     var filteredList = self.eventList.where(options.data);
-                    if(date){
+                    if (date) {
                         options.data.start = options.date;
                         //if the goto date is NOT in range
-                        if(filteredList.length !== 0 &&
+                        if (filteredList.length !== 0 &&
                             (filteredList[0].get("start_datetime") > date &&
-                            _.last(filteredList).get("start_datetime") < date)){
+                            _.last(filteredList).get("start_datetime") < date)) {
                             filteredList = null;
                         }
                     }
@@ -141,12 +142,12 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                         newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
                     }
                 } else {
-                    if(!date ||
+                    if (!date ||
                             self.eventList.models[0].get("start_datetime") < date &&
-                            _.last(self.eventList.models).get("start_datetime") > date){
+                            _.last(self.eventList.models).get("start_datetime") > date) {
                         newEventList = self.eventList;
-                    }else{
-                        newEventList = self.eventList = new EventModel.EventCollection(null,{data:{start: options.date}});
+                    } else {
+                        newEventList = self.eventList = new EventModel.EventCollection(null, {data: {start: options.date}});
                     }
                 }
                 options.model = newEventList;
@@ -156,21 +157,42 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                 self.showView([information, eventListView]);
             });
         },
-        viewGroup: function(id) {},
-        addGroup: function(id, context) {
+        viewGroup: function (id, status, params) {
+            var options = {
+                data: {},
+                group: {
+                    type: "group",
+                    icalURL: "ical/group/" + id + ".ical",
+                    id: id
+                }
+            };
+
+            if (typeof(status) != 'undefined' && status == "uncomplete") {
+                options.data.complete = false;
+            } else {
+                options.data.complete = true;
+            }
+            if (params) {
+                options.date = params.date;
+            }
+            this.viewList(options);
+        },
+        addGroup: function (id, context) {
             var self = context ? context : this;
-            require(['models/groups', 'views/group_add'], function(Group, AddGroupView) {
-                var group = new Group();
+            require(['models/groups', 'views/group_add'], function (Group, AddGroupView) {
+                var group = new Group({
+                    type: "group"
+                });
                 var groupView = new AddGroupView({
                     model: group
                 });
                 self.showView(groupView);
             });
         },
-        viewFeed: function(id) {},
-        addFeed: function(id, context) {
+        viewFeed: function (id) {},
+        addFeed: function (id, context) {
             var self = context ? context : this;
-            require(['models/feed', 'views/feed_add'], function(Feed, AddFeedView) {
+            require(['models/feed', 'views/feed_add'], function (Feed, AddFeedView) {
                 var feed = new Feed();
                 var feedView = new AddFeedView({
                     model: feed
@@ -178,7 +200,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                 self.showView(feedView);
             });
         },
-        eventDetails: function(id, fevent, context) {
+        eventDetails: function (id, fevent, context) {
             var self = context ? context : this;
             var event = fevent ? fevent : self.eventList.get(id);
             //check to see if we already have the event and if not fetch it
@@ -187,14 +209,14 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                 self.fetchEvent(id, this.eventDetails);
                 return;
             }
-            require(['views/event'], function(EventView) {
+            require(['views/event'], function (EventView) {
                 var eventView = new EventView.EventView({
                     model: event
                 });
                 self.showView(eventView);
             });
         },
-        eventAdd: function(id, fevent, context) {
+        eventAdd: function (id, fevent, context) {
             var self = context ? context : this,
                 event;
             if (id) {
@@ -208,7 +230,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                 //creating a new event
                 event = new EventModel.Event();
             }
-            require(['views/event_add'], function(event_add) {
+            require(['views/event_add'], function (event_add) {
                 //create a new event
                 var newEventView = new event_add.EventAddView({
                     model: event
@@ -216,12 +238,12 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                 self.showView(newEventView);
             });
         },
-        about: function() {
+        about: function () {
             //about view goes here
         },
-        upload: function() {
+        upload: function () {
             var self = this;
-            require(['views/ical_upload'], function(UploadView) {
+            require(['views/ical_upload'], function (UploadView) {
                 var feedView = new UploadView();
                 self.showView(feedView);
             });
@@ -230,37 +252,37 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
         //
         //Helper Functions
         //
-        showView: function(views) {
+        showView: function (views) {
             if (!(views instanceof Array)) {
                 views = [views];
             }
             if (this.currentView) {
-                this.currentView.forEach(function(view) {
+                this.currentView.forEach(function (view) {
                     if (view.close) view.close();
                 });
             }
             //open new view
             var fragment = document.createDocumentFragment();
-            views.forEach(function(view) {
+            views.forEach(function (view) {
                 fragment.appendChild(view.render().el);
             });
             $("#main").prepend(fragment);
             this.currentView = views;
-            views.forEach(function(view) {
+            views.forEach(function (view) {
                 if (view.onDOMadd) view.onDOMadd();
             });
 
         },
-        fetchEvent: function(id, callback) {
+        fetchEvent: function (id, callback) {
             var self = this;
             var event = new EventModel.Event({
                 slug: id
             });
             var request = event.fetch();
-            request.error(function() {
+            request.error(function () {
                 throw ("event not found");
             });
-            request.success(function(data) {
+            request.success(function (data) {
                 callback(id, event, self);
             });
         }

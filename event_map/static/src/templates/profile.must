@@ -1,4 +1,5 @@
-<p><span id="description">{{description}}</span><button id="editProfile" class="btn btn-link" style="display: none">Edit</button></p>
+<p><span id="description">{{description}}</span><button id="editProfile" class="btn btn-link">Edit</button></p>
 {{#if allow_add}}
 <a href="#add/event" class="btn btn-large btn-block btn-primary" type="button">Add Event</a>
 {{/if}}
+

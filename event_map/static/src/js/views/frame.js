@@ -6,8 +6,8 @@ define([
     'utils',
     'models/users',
     'models/session',
-    'hbs!../../templates/app_css',
-    'hbs!../../templates/nav',
+    'jade!../../templates/app_css',
+    'jade!../../templates/nav',
     'bootstrap'
 // Load our app module and pass it to our definition function
 ], function($, _, Backbone, Utils, User, Session, temp_app_css, temp_nav) {
@@ -36,11 +36,11 @@ define([
             this.model.on('change',this.render,this);
             this.height = $(window).height();
             //60 height of header
-            this.topHeight = $(window).height() - 60;
             this.$el.append(temp_app_css({
-                height: this.height,
-                topHeight: this.topHeight
+                height: this.height - 10,
+                topHeight: this.topHeight - 10
             }));
+
             this.render();
             this.onResize();
         },
@@ -49,8 +49,8 @@ define([
             // shuold be $(".top").height() instead of 60, but top is not there first
             this.topHeight = $(window).height() - 60;
             $("#heightStyle").replaceWith(temp_app_css({
-                height: this.height,
-                topHeight: this.topHeight
+                height: this.height-1,
+                topHeight: this.topHeight-1
             }));
             this.resizeTitleText();
         },

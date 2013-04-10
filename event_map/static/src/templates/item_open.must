@@ -1,6 +1,6 @@
-<div class="openIndt">[-]</div>
-<div class="list_item_width">
-    <div class="list_item_content">
-        {{start_time }} - {{end_time }} <a href="#/event/{{ slug }}">{{ title }}</a> | {{content}}
-    </div>
-</div>
+.openIndt [-]
+  .list_item_width
+      .list_item_content
+        | #{start_time} - #{end_time}
+        a(href='#/event/#{slug}') #{title}
+        | | #{content}

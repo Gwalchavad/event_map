@@ -2,7 +2,7 @@
 define([
     'utils',
     'backbone',
-    'hbs!../../templates/event'
+    'jade!../../templates/event'
   // Load our app module and pass it to our definition function
 ], function(Utils,Backbone,temp_event){
     "use strict";
