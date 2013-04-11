@@ -142,7 +142,9 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
                         newEventList._attributes.pastEvents.more = self.eventList._attributes.pastEvents.more;
                     }
                 } else {
+                    //is requested date with the range of our current list?
                     if (!date ||
+                            self.eventList.length === 0 ||
                             self.eventList.models[0].get("start_datetime") < date &&
                             _.last(self.eventList.models).get("start_datetime") > date) {
                         newEventList = self.eventList;
