@@ -1,1 +1,0 @@
-Handlebars.registerHelper("nl2br",function(t){return t=Handlebars.Utils.escapeExpression(t),t=t.replace(/\r\n|\r|\n/g,"<br/>"),new Handlebars.SafeString(t)});
