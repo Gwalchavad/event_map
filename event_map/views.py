@@ -28,20 +28,34 @@ def index(request):
     and get the initail session status for the user
     """
     begin = datetime.now()
-    init_events = db.Event.objects.filter(start_date__gte=begin, complete=True).order_by('start_date', 'start_date_index')[:20]
+    init_events = db.Event.objects.\
+        filter(start_date__gte=begin, complete=True).\
+        order_by('start_date', 'start_date_index')[:20]
+
     response = [event.to_JSON() for event in init_events]
+    description = db.Verbiage.get(name="description")
     jsonevents = json.dumps(response, default=utils.clean_data)
-    init_events = {
+    init_session = {
         'authenticated': request.user.is_authenticated(),
         'username': request.user.username,
         'id': request.user.id
     }
-    jsonsession = json.dumps(init_events, default=utils.clean_data)
+    jsonsession = json.dumps(init_session, default=utils.clean_data)
+    init_group = {
+        "title": "all",
+        "groupType": "All",
+        "description": description,
+        "icalURL": "ical/all.ical",
+        "subscriptions": None,
+        "permissions": []
+    }
+    jsongroup = json.dumps(init_group, default=utils.clean_data)
     return render_to_response(
         'base.html',
         {
             'events': jsonevents,
             'session': jsonsession,
+            'group': jsongroup,
             'serverTimeTz': utils.cal_time(tz.now()),
         },
         context_instance=RequestContext(request))

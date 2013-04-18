@@ -1,4 +1,4 @@
-/*global define require init_user init_events intro_text */
+/*global define require init_user init_group init_events intro_text */
 define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/events', 'models/session', 'views/frame', 'views/map', 'views/loading'], function ($, _, Backbone, moment, UserModels, EventModel, SessionModel, FrameView, MapView, LoadingView) {
     "use strict";
     var AppRouter = Backbone.Router.extend({
@@ -50,11 +50,7 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
         },
         list: function (date) {
             var options = {
-                group: {
-                    title: "ALL EVENTS",
-                    description: intro_text,
-                    permissions: {allow_add: true}
-                }
+                group: init_group
             };
             this.viewList(_.extend(options, date));
         },

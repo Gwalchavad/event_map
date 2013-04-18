@@ -7,6 +7,7 @@ from autoslug import AutoSlugField
 import uuid
 import django_push.hub
 import feed_import.models as fi_db
+from guardian.shortcuts import get_perms
 
 
 def generate_uuid():
@@ -101,6 +102,36 @@ class AbstractGroup(emObject):
         elif hasattr(self, 'feedgroup'):
             return 'feed'
 
+    def to_JSON(self, user):
+        """@todo: Docstring for to_JSON
+
+        :arg1: @todo
+        :returns: @todo
+
+        """
+        if user.is_authenticated():
+            usergroup = user.usergroup
+        else:
+            usergroup = None
+
+        subs = None
+        #TODO: check viewing permission
+        permissions = get_perms(user, self.abstractgroup_ptr)
+        if self.posting_option == "open":
+            permissions.append("add_event")
+        if self.visibility == 'public' or self == usergroup:
+            subscriptions = Subscription.objects.filter(subscriber=self)
+            subs = [{"title": sub.publisher.get_title(), "id": sub.publisher.id, "type": sub.publisher.get_type()} for sub in subscriptions]
+
+        return {
+            "id": self.id,
+            "title": self.title,
+            "groupType": self.get_type,
+            "description": self.description,
+            "subscriptions": subs,
+            "permissions": permissions
+        }
+
     def get_all_events(self):
         """returns all events in the groups and in the subcriptions"""
         return SubGroupEvent.objects.filter(group=self)
@@ -184,9 +215,6 @@ class Group(AbstractGroup):
         unique=True,
         max_length=255,
         help_text=""" the name of the group""")
-
-    def __unicode__(self):
-        return self.title
 
 
 class FeedGroup(AbstractGroup):

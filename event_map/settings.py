@@ -1,7 +1,8 @@
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 APPEND_SLASH = False
+ALLOWED_HOSTS = ['localhost', '127.0.0.1'] 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )

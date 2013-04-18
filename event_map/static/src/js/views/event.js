@@ -32,7 +32,7 @@ define([
             //format the date
             json.start_date = this.model.get("start_datetime").format("dddd, MMMM Do YYYY, h:mm:ss a");
             json.end_date = this.model.get("end_datetime").format("dddd, MMMM Do YYYY, h:mm:ss a");
-            this.$el.html(temp_event(json));
+            this.$el.html(temp_event(json, {'pretty': true}));
             return this;
         }
     });

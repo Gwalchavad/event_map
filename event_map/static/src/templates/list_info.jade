@@ -10,6 +10,14 @@
   if permissions.add_event
     a.btn.btn-large.btn-block.btn-primary(href='#add/event', type='button') Add Event
 
+#subscriptions
+  if subscriptions
+    h1 Subscriptions
+    for sub in subscriptions
+      input(type="checkbox", checked="true") 
+      &nbsp; 
+      a(href="group/#{sub.id}") #{sub.title}
+
 #listOptionPanels
   div
-    a(href='{{icalURL}}', target='_blank') Export
+    a(href='#{icalURL}', target='_blank') Export
