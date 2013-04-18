@@ -18,6 +18,7 @@ define([
             start_date: "",
             end_date: "",
             organization: "",
+            author: "",
             user: "",
             address: "",
             venue: "",
