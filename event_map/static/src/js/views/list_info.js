@@ -1,11 +1,12 @@
 /*global define app intro_text*/
 define([
     'backbone',
+    'underscore',
     'jquery',
     'jade!../../templates/list_info',
     'jade!../../templates/edit_profile'
   // Load our app module and pass it to our definition function
-], function (Backbone, $, temp_list_info, temp_edit_profile) {
+], function (Backbone, _, $, temp_list_info, temp_edit_profile) {
     "use strict";
     var ListInfoView = Backbone.View.extend({
         tagName: "div",
@@ -23,6 +24,13 @@ define([
             function _render() {
                 var editable = null;
                 var title;
+                var permissions = self.model.get("permissions");
+                var true_array = [];
+                for (var i = 0; i < permissions.length; i++) {
+                    true_array[i] = true;
+                }
+               
+                self.model.set("permissions", _.object(permissions, true_array));
                 //if any user, group or feed is being viewed
                 if (self.model) {
                     if (self.model.get("title") == app.session.get("username")) {
@@ -45,7 +53,6 @@ define([
             } else {
                 _render();
             }
-
             return this;
         },
         editProfile: function () {

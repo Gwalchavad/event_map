@@ -131,39 +131,39 @@ define([
                 }
             );
         },
-        add_event: function(e){
+        add_event: function (e) {
             var self = this;
             //override the na
             e.preventDefault();
             //hide error messages
             $(".label").hide();
             var json = Utils.form2object("#event_add_form");
-            json.location_point = { coordinates: [json.lng,json.lat]};
-            if(json.start_date)
+            json.location_point = { coordinates: [json.lng, json.lat]};
+            if (json.start_date)
                 json.start_date = moment($("#start_date_input").datetimepicker('getDate')).toJSON();
-            if(json.end_date)
+            if (json.end_date)
                 json.end_date = moment($("#end_date_input").datetimepicker('getDate')).toJSON();
-            var promise = this.model.save(json,{isComplete:true});
-            if(promise){
-                promise.error(function(response) {
+            var promise = this.model.save(json, {isComplete: true});
+            if (promise) {
+                promise.error(function (response) {
                     throw new Error("Server Error:" + response);
                 });
-                promise.success(function(response) {
-                    app.eventList.add(self.model,{merge: true});
+                promise.success(function (response) {
+                    app.eventList.add(self.model, {merge: true});
                     app.navigate('event/' + self.model.id, {
                         trigger: true
                     });
                 });
             }
         },
-        cancel: function(e) {
+        cancel: function (e) {
             //todo addddddd delete
             e.preventDefault();
             app.navigate('/#', {
                 trigger: true
             });
         },
-        delete_event: function(e) {
+        delete_event: function (e) {
             e.preventDefault();
             var self = this;
             if (confirm("Do you want to Delete your event?")) {

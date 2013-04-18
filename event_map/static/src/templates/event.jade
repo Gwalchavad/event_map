@@ -20,7 +20,7 @@ div
               span ADDRESS: #{address}
             br
             a(href='#/author/#{author}') BY:#{author}
-    div= content
+    div !{content}
     .options
       a(href='/ical/event/#{slug}.ical', target='_blank')
         | Export

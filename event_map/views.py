@@ -42,12 +42,12 @@ def index(request):
     }
     jsonsession = json.dumps(init_session, default=utils.clean_data)
     init_group = {
-        "title": "all",
+        "title": "All Events",
         "groupType": "All",
         "description": description,
         "icalURL": "ical/all.ical",
         "subscriptions": None,
-        "permissions": []
+        "permissions": ["add_event"]
     }
     jsongroup = json.dumps(init_group, default=utils.clean_data)
     return render_to_response(
@@ -243,6 +243,8 @@ class EventTimeLine(View):
         else:
             offset = 0
 
+        
+
         if request.GET.get('n'):
             end = int(request.GET.get('n'))
             #example end=1
@@ -408,7 +410,8 @@ class Group(View):
         if group.visibility == 'public' or group == usergroup:
             subscriptions = db.Subscription.objects.filter(subscriber=group)
             subs = [{"title": sub.publisher.get_title(), "id": sub.publisher.id, "type": sub.publisher.get_type()} for sub in subscriptions]
-
+            if len(subs) == 0:
+                subs = None
         response = {
             "id": group.id,
             "title": group.title,
