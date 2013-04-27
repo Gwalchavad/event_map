@@ -157,7 +157,9 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
         },
         viewGroup: function (id, status, params) {
             var options = {
-                data: {},
+                data: {
+                    group: id
+                },
                 group: {
                     type: "group",
                     icalURL: "ical/group/" + id + ".ical",
@@ -217,7 +219,10 @@ define(['jquery', 'underscore', 'backbone', 'moment', 'models/users', 'models/ev
         eventAdd: function (id, fevent, context) {
             var self = context ? context : this,
                 event;
-            if (id) {
+            if (_.isObject(id) && id.id) {
+                //if id is actully groups from the GET parameters
+                event = new EventModel.Event(id);
+            } else if (id) {
                 //look up the event and fetch if it is not in the collection
                 event = fevent ? fevent : self.eventList.get(id);
                 if (!event) {

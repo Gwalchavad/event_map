@@ -234,16 +234,19 @@ class EventTimeLine(View):
             #gets events by the author's username
             events = events.filter(
                 author__user__username=request.GET.get('author'))
-
+     
+        #get your personal user group
         if request.GET.get('me'):
             events = events.filter(subgroupevent__group_id=request.user.usergroup.id)
+     
+        #get group
+        if request.GET.get('group'):
+            events = events.filter(subgroupevent__group_id=request.GET.get('group'))
 
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
         else:
             offset = 0
-
-        
 
         if request.GET.get('n'):
             end = int(request.GET.get('n'))
@@ -405,6 +408,7 @@ class Group(View):
         subs = None
         #TODO: check viewing permission
         permissions = get_perms(request.user, group.abstractgroup_ptr)
+        #TODO: add if admin?
         if group.posting_option == "open":
             permissions.append("add_event")
         if group.visibility == 'public' or group == usergroup:

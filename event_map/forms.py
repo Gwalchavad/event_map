@@ -5,7 +5,6 @@ from django.contrib.gis.geos import Point
 from django.contrib.auth.models import User
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
-from guardian.shortcuts import assign_perm
 
 
 class EventForm(forms.ModelForm):
@@ -14,6 +13,7 @@ class EventForm(forms.ModelForm):
         fields = ('title', 'link', 'contact_info', 'address', 'venue', 'content', 'city')
     start_date = forms.CharField(required=True)
     end_date = forms.CharField(required=True)
+    groups = forms.CharField(required=False)
     lat = forms.FloatField(required=False, widget=forms.HiddenInput)
     lng = forms.FloatField(required=False, widget=forms.HiddenInput)
 
@@ -46,6 +46,12 @@ class EventForm(forms.ModelForm):
         model.author = self.user.usergroup
         model.published = datetime.now()
         model.save(create_sge=True)
+        import ipdb
+        ipdb.set_trace()
+
+        group_id = self.cleaned_data['groups']
+        group = db.Group.objects.get(pk=group_id)
+        group.bfs_propagation(model, created=True)
         return model
 
 

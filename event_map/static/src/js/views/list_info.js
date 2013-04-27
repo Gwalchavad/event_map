@@ -29,8 +29,12 @@ define([
                 for (var i = 0; i < permissions.length; i++) {
                     true_array[i] = true;
                 }
+                permissions =  _.object(permissions, true_array);
+                if (permissions.group_admin) {
+                    permissions.add_event = true;
+                }
                
-                self.model.set("permissions", _.object(permissions, true_array));
+                self.model.set("permissions", permissions);
                 //if any user, group or feed is being viewed
                 if (self.model) {
                     if (self.model.get("title") == app.session.get("username")) {

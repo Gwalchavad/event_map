@@ -49,7 +49,7 @@ class groupFeed(geoFeed):
             if(groupType == "user"):
                 return events.filter(author__user__username=group_id)
             elif(groupType == "group"):
-                return events.filter(author__user__username=group_id)
+                return events.filter(subgroupevent__group_id=group_id)
             elif(groupType == "feed"):
                 return events.filter(author__user__username=group_id)
         else:

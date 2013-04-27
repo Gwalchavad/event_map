@@ -41,6 +41,7 @@ class AbstractGroup(emObject):
     class Meta:
         permissions = (
             ("group_admin", "Can admin group"),
+            ("add_event", "Can Add Events")
         )
 
     visibility_choices = (
@@ -75,14 +76,15 @@ class AbstractGroup(emObject):
         through="SubGroupEvent")
 
     def __unicode__(self):
-        if hasattr(self, 'group'):
-            return "group: "+self.group.__unicode__()
-        elif hasattr(self, 'usergroup'):
-            return "usergroup: "+self.usergroup.__unicode__()
-        elif hasattr(self, 'feedgroup'):
-            return "feedgroup: "+self.feedgroup.__unicode__()
-        else:
-            return self.description
+        #the following code creates recusion
+        #if hasattr(self, 'group'):
+        #    return "group: "+self.group.__unicode__()
+        #elif hasattr(self, 'usergroup'):
+        #    return "usergroup: "+self.usergroup.__unicode__()
+        #elif hasattr(self, 'feedgroup'):
+        #    return "feedgroup: "+self.feedgroup.__unicode__()
+        #else:
+        return self.description
 
     def get_title(self):
         if hasattr(self, 'group'):
@@ -139,8 +141,15 @@ class AbstractGroup(emObject):
     def add_events(self, events, created=False, subscription=None):
         """takes a list of events and adds them to the group
         If the events were newly created use the created
-        argument"""
+        argument
+        -arguments
+        :events: a list of events to add
+        :created: wether the event was just created or not
+        :subscription: the subscription the events are from
+        """
         if events:
+            if type(events) != "list":
+                events = [events]
             if not created:
                 #if some of the events happen to be in a subscription,remove i
                 #Cuz now its going to be in the group
@@ -168,7 +177,7 @@ class AbstractGroup(emObject):
         pass
 
     def bfs_propagation(self, events, created=False):
-        """Propgate events from this group using BFS"""
+        """Add and Propgate events from this group using BFS"""
         visited = set([self])
         frontier = [self]
         self.add_events(events, created=created)
@@ -185,7 +194,6 @@ class AbstractGroup(emObject):
 
 
 class UserGroup(AbstractGroup):
-
     title = models.CharField(
         unique=True,
         max_length=255,
@@ -310,6 +318,15 @@ class Event(emObject):
         return self.title
 
     def to_JSON(self):
+        subs = self.subscription_set.all()
+        if len(subs):
+            subs = subs[0]
+            subs = {
+                "sub": subs.subscriber.id
+            }
+        else:
+            subs = None
+
         return {
             "id": self.id,
             "title": self.title,
@@ -325,7 +342,8 @@ class Event(emObject):
             "location_point": self.location_point,
             "link": self.link,
             "slug": self.slug,
-            "complete": self.complete
+            "complete": self.complete,
+            "subs": subs
         }
 
     def reindex_start_date(self, start_date):
@@ -354,26 +372,6 @@ class Event(emObject):
             'http://%s%s' % (Site.objects.get_current().domain,
                              self.get_absolute_url()),
         )
-
-
-class Permission(models.Model):
-    class Meta:
-        unique_together = ("subject", "emobject")
-    read = models.BooleanField(
-        default=False,
-        help_text="""can this user view the group?""")
-    write = models.BooleanField(
-        default=False,
-        help_text="""can the user post to this group""")
-    admin = models.BooleanField(
-        default=False, help_text="""does user have admin privilages?""")
-    subject = models.ForeignKey(
-        AbstractGroup,
-        related_name='permissions')
-    emobject = models.ForeignKey(emObject)
-
-    def __unicode__(self):
-        return str(self.subject) + " --> " + str(self.emobject)
 
 
 class Subscription(models.Model):

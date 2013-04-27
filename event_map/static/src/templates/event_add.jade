@@ -43,6 +43,15 @@
             textarea#content_input.span9(rows='10', wrap='hard', name='content', required='required') #{content}
             br
             span#content_error.help-inline.hide
+
+        if groups
+          #groups.control-group
+            label.control-label(for="groups_input") Groups
+            .controls
+              select#groups_input.span8.chzn-select(name='groups', type='text', multiple, data-placeholder='select which groups to post to')
+                option(selected, value="#{id}")= groups
+
+
         .form-actions
           if id
             button#add_event.btn.btn-primary(type='submit') Update Event

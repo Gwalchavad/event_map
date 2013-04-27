@@ -8,7 +8,7 @@
 
 #actions(style='margin: 20px;')
   if permissions.add_event
-    a.btn.btn-large.btn-block.btn-primary(href='#add/event', type='button') Add Event
+    a.btn.btn-large.btn-block.btn-primary(href='#add/event?groups=#{title}&id=#{id}', type='button') Add Event
 
 #subscriptions
   if subscriptions

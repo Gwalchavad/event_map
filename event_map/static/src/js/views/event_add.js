@@ -116,6 +116,7 @@ define([
             }
         },
         onDOMadd: function(e){
+            $(".chzn-select").chosen();
             this.formActionHeight = $(".form-actions").height();
             this.originalHeight = $(".top").height() + $("#event_add_form").height() - this.formActionHeight;
             this.onResize();

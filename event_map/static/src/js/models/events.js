@@ -3,7 +3,8 @@ define([
     'underscore',
     'backbone',
     'jquery',
-    'moment'
+    'moment',
+    'chosen'
 ],function (_,Backbone,$,moment){
     "use strict";
     var Event = Backbone.Model.extend({
@@ -26,19 +27,20 @@ define([
             city: "",
             content: "",
             location: "",
-            location_point: ""
+            location_point: "",
+            groups: ""
         },
-        initialize: function () {
+        initialize: function (options) {
             /*
              * Backbone Init
              */
-            this.on("change:start_date",this.computeStartTimes);
-            this.on("change:end_date",this.computeEndTimes);
-            this.on("change:title", function(){
+            this.on("change:start_date", this.computeStartTimes);
+            this.on("change:end_date", this.computeEndTimes);
+            this.on("change:title", function () {
                 this.computeCloseValues();
                 this.computeOpenValues();
             });
-            if(this.get("start_date")){
+            if (this.get("start_date")) {
                 this.computeStartTimes();
                 this.computeEndTimes();
                 this.computeCloseValues();

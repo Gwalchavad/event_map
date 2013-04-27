@@ -1,14 +1,6 @@
 // Require.js allows us to configure shortcut alias
 /*global require*/
 require.config({
-    hbs : {
-        templateExtension : 'must',
-        // if disableI18n is `true` it won't load locales and the i18n helper
-        // won't work as well.
-        disableI18n : true,
-        helperDirectory : "../templates/helpers/"
-    },
-
     paths: {
         "backbone": "../../components/backbone/backbone",
         "routefilter": "../../components/backbone.routefilter/dist/backbone.routefilter",
@@ -21,7 +13,8 @@ require.config({
         "leaflet": "../../components/leaflet/dist/leaflet",
         "require": "../../components/require",
         "underscore": "../../components/underscore/underscore",
-        "moment": "../../components/moment/moment"
+        "moment": "../../components/moment/moment",
+        "chosen": "../../components/chosen/chosen/chosen.jquery"
     },
     shim: {
         'underscore': {
@@ -40,6 +33,7 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'timeDatePicker': ['jqueryui'],
+        'chosen': ['jquery'],
         'leaflet': {
             exports: 'L'
         }

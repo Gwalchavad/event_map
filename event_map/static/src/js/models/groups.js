@@ -9,6 +9,7 @@ define([
             return "/api/group/" + this.get("type");
         },
         defaults: {
+            id: false,
             type: "user",
             title: "",
             description: "",
