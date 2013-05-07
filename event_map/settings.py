@@ -1,4 +1,3 @@
-
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 APPEND_SLASH = False
@@ -89,7 +88,7 @@ STATICFILES_FINDERS = (
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '@6^0en@4gufp_@$o5u+6b^s7+yy(2@bm1_f!=fm42z081e+2zc'
+SECRET_KEY = 'kittens'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
