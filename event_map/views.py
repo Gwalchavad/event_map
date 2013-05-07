@@ -32,7 +32,7 @@ def index(request):
         filter(start_date__gte=begin, complete=True).\
         order_by('start_date', 'start_date_index')[:20]
 
-    response = [event.to_JSON() for event in init_events]
+    response = [event.__json__() for event in init_events]
     description = db.Verbiage.get(name="description")
     jsonevents = json.dumps(response, default=utils.clean_data)
     init_session = {
@@ -207,13 +207,13 @@ class EventTimeLine(View):
         GET[group] gets all the events in a particular group
         GET[me] get all of the events in the usergroup of the current user
         """
-        events = db.Event.objects
+        sge = db.SubGroupEvent.objects.select_related('events')
 
         if request.GET.get('complete') and request.GET.get('complete').lower() == 'false':
-            events = events.filter(complete=False)
+            sge  = sge.filter(event__complete=False)
         else:
-            events = events.filter(complete=True)
-
+            sge = sge.filter(event__complete=True)
+        
         if request.GET.get('start'):
             #change to use actully date
             try:
@@ -228,20 +228,21 @@ class EventTimeLine(View):
                 mod_date = dateutil.parser.parse(request.GET.get('modified').replace("Z", ""))
             except (ValueError, OverflowError):
                 raise ApiException("Invalid ISO date", 400, "start")
-            events = events.filter(date_modified__gte=mod_date)
+            sge = sge.filter(event__date__modified__gte=mod_date)
 
         if request.GET.get('author'):
             #gets events by the author's username
-            events = events.filter(
-                author__user__username=request.GET.get('author'))
-     
+            sge = sge.filter(
+                event__author__user__username=request.GET.get('author'))
         #get your personal user group
-        if request.GET.get('me'):
-            events = events.filter(subgroupevent__group_id=request.user.usergroup.id)
-     
+        elif request.GET.get('me'):
+            sge = sge.filter(group_id=request.user)
         #get group
-        if request.GET.get('group'):
-            events = events.filter(subgroupevent__group_id=request.GET.get('group'))
+        elif request.GET.get('group'):
+            sge = sge.filter(group_id=request.GET.get('group'))
+        else:
+            #if aggergating accross multiple groups then select distint events
+            sge = sge.filter(subscription__isnull=True).distinct()
 
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
@@ -254,61 +255,62 @@ class EventTimeLine(View):
             if offset >= 0:
                 #3, 4 works
                 if end >= 0:
-                    events = events.\
-                        filter(start_date__gte=begin).\
-                        order_by('start_date', 'start_date_index')[offset: offset + end]
+                    sge = sge.\
+                        filter(event__start_date__gte=begin).\
+                        order_by('event__start_date', 'event__start_date_index')[offset: offset + end]
                 #3 -2 works
                 elif offset + end >= 0:
-                    events = events.\
-                        filter(start_date__gte=begin).\
-                        order_by('start_date', 'start_date_index')[offset + end: offset]
-                    events = list(events)
-                    events.reverse()
+                    sge = sge.\
+                        filter(event__start_date__gte=begin).\
+                        order_by('event__start_date', 'event__start_date_index')[offset + end: offset]
+                    sge = list(sge)
+                    sge.reverse()
                 #3 - 5 works
                 else:
-                    before_events = events.\
-                        filter(start_date__lte=begin).\
-                        order_by('-start_date', '-start_date_index')[:abs(offset + end)]
-                    events = events.\
-                        filter(start_date__gte=begin).\
-                        order_by('start_date', 'start_date_index')[:offset]
-                    events = list(events)
-                    events.reverse()
-                    events.extend(before_events)
+                    before_sge = sge.\
+                        filter(event__start_date__lte=begin).\
+                        order_by('-event__start_date', '-event__start_date_index')[:abs(offset + end)]
+                    sge = sge.\
+                        filter(event__start_date__gte=begin).\
+                        order_by('event__start_date', 'event__start_date_index')[:offset]
+                    sge = list(sge)
+                    sge.reverse()
+                    sge.extend(before_sge)
             #-1,
             else:
                 #-1 -5
                 if end <= 0:
-                    events = events.\
-                        filter(start_date__lte=begin).\
-                        order_by('-start_date', '-start_date_index')[abs(offset): abs(offset + end)]
+                    sge = sge.\
+                        filter(event__start_date__lte=begin).\
+                        order_by('-event__start_date', '-event__start_date_index')[abs(offset): abs(offset + end)]
                 #-1, 4
                 elif end + offset >= 0:
-                    after_events = events.\
-                        filter(start_date__gte=begin).\
-                        order_by('start_date', 'start_date_index')[:abs(end + offset)]
-                    events = events.\
-                        filter(start_date__lte=begin).\
-                        order_by('-start_date', '-start_date_index')[:abs(offset)]
-                    events = list(events)
-                    events.reverse()
-                    events.extend(after_events)
+                    after_sge = sge.\
+                        filter(event__start_date__gte=begin).\
+                        order_by('event__start_date', 'event__start_date_index')[:abs(end + offset)]
+                    sge = sge.\
+                        filter(event__start_date__lte=begin).\
+                        order_by('-event__start_date', '-event__start_date_index')[:abs(offset)]
+                    sge = list(sge)
+                    sge.reverse()
+                    sge.extend(sge)
                 #-10 6
                 else:
-                    events = events.\
-                        filter(start_date__lte=begin).\
-                        order_by('-start_date', '-start_date_index')[abs(offset + end): abs(offset)]
-                    events = list(events)
-                    events.reverse()
+                    sge = sge.\
+                        filter(event__start_date__lte=begin).\
+                        order_by('-event__start_date', '-event__start_date_index')[abs(offset + end): abs(offset)]
+                    sge = list(sge)
+                    sge.reverse()
         else:
             #todo specify defaults
             if offset < 0:
-                before_events = events.filter(start_date__lte=begin).order_by('-start_date', '-start_date_index')[:abs(offset)]
-                after_events = events.filter(start_date__gte=begin).order_by('start_date', 'start_date_index')
-                events = list(itertools.chain(before_events.reverse(), after_events))
+                before_sge = sge.filter(event__start_date__lte=begin).order_by('-event__start_date', '-event__start_date_index')[:abs(offset)]
+                after_sge = sge.filter(event__start_date__gte=begin).order_by('event__start_date', 'event__start_date_index')
+                sge = list(itertools.chain(before_sge.reverse(), after_sge))
             else:
-                events = events.filter(start_date__gte=begin)[offset:]
-        return utils.json_response([event.to_JSON() for event in events])
+                sge = sge.filter(event__start_date__gte=begin)[offset:]
+        return utils.json_response([_sge.__json__() for _sge in sge])
+
 
 
 class Event(View):
@@ -363,7 +365,7 @@ class Event(View):
         form = forms.EventForm(request.user, json_post)
         if form.is_valid():
             event = form.save()
-            return utils.json_response(event.to_JSON())
+            return utils.json_response(event.__json__())
         else:
             raise ApiException(utils.form_errors_to_json(form), 401)
 

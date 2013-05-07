@@ -86,6 +86,36 @@ class AbstractGroup(emObject):
         #else:
         return self.description
 
+    def __json__(self, user=None):
+        """@todo: Docstring for to_JSON
+
+        :arg1: @todo
+        :returns: @todo
+
+        """
+        if user and user.is_authenticated():
+            usergroup = user.usergroup
+        else:
+            usergroup = None
+
+        subs = None
+        #TODO: check viewing permission
+        #permissions = get_perms(user, self)
+        #if self.posting_option == "open":
+        #    permissions.append("add_event")
+        if self.visibility == 'public' or self == usergroup:
+            subscriptions = Subscription.objects.filter(subscriber=self)
+            subs = [sub.__json__() for sub in subscriptions]
+
+        return {
+            "id": self.id,
+            "title": self.get_title(),
+            "groupType": self.get_type(),
+            "description": self.description,
+            "subscriptions": subs,
+         #   "permissions": permissions
+        }
+
     def get_title(self):
         if hasattr(self, 'group'):
             return self.group.title
@@ -104,35 +134,6 @@ class AbstractGroup(emObject):
         elif hasattr(self, 'feedgroup'):
             return 'feed'
 
-    def to_JSON(self, user):
-        """@todo: Docstring for to_JSON
-
-        :arg1: @todo
-        :returns: @todo
-
-        """
-        if user.is_authenticated():
-            usergroup = user.usergroup
-        else:
-            usergroup = None
-
-        subs = None
-        #TODO: check viewing permission
-        permissions = get_perms(user, self.abstractgroup_ptr)
-        if self.posting_option == "open":
-            permissions.append("add_event")
-        if self.visibility == 'public' or self == usergroup:
-            subscriptions = Subscription.objects.filter(subscriber=self)
-            subs = [{"title": sub.publisher.get_title(), "id": sub.publisher.id, "type": sub.publisher.get_type()} for sub in subscriptions]
-
-        return {
-            "id": self.id,
-            "title": self.title,
-            "groupType": self.get_type,
-            "description": self.description,
-            "subscriptions": subs,
-            "permissions": permissions
-        }
 
     def get_all_events(self):
         """returns all events in the groups and in the subcriptions"""
@@ -317,16 +318,7 @@ class Event(emObject):
     def __unicode__(self):
         return self.title
 
-    def to_JSON(self):
-        subs = self.subscription_set.all()
-        if len(subs):
-            subs = subs[0]
-            subs = {
-                "sub": subs.subscriber.id
-            }
-        else:
-            subs = None
-
+    def __json__(self):
         return {
             "id": self.id,
             "title": self.title,
@@ -343,8 +335,12 @@ class Event(emObject):
             "link": self.link,
             "slug": self.slug,
             "complete": self.complete,
-            "subs": subs
         }
+
+    def find_origins(self):
+        #find where the event was orginal posted
+        origins = SubGroupEvent.objects.filter(event__id=self.id, subscription__isnull=True)
+        return [sge.group for sge in origins]
 
     def reindex_start_date(self, start_date):
         events = Event.objects.filter(start_date=start_date).order_by("end_date")
@@ -383,7 +379,6 @@ class Subscription(models.Model):
     publisher = models.ForeignKey(
         AbstractGroup,
         related_name='publisher')
-    sub_events = models.ManyToManyField(Event, through='SubGroupEvent')
     uncomplete_events = models.BooleanField(
         default=False,
         help_text="""Does the subscriber want uncomplete events?""")
@@ -391,18 +386,12 @@ class Subscription(models.Model):
     def __unicode__(self):
         return str(self.publisher) + "-->" + str(self.subscriber)
 
-    def to_JSON(self):
-        j_events = []
-        #add subrciption info to the events in the subscription
-        for event in self.events:
-            j_event = event.to_JSON()
-            j_event['subscipition'] = {
-                'type': 'feed',
-                'title': self.subscriber.title,
-                'id': self.subscriber.id,
-                'url': self.subscriber.to_absolute_url()}
-            j_events.push(j_event)
-        return j_events
+    def __json__(self):
+        return {
+            "title": self.publisher.get_title(),
+            "id": self.publisher.id,
+            "type": self.publisher.get_type()
+        }
 
 
 class SubGroupEvent(models.Model):
@@ -421,9 +410,23 @@ class SubGroupEvent(models.Model):
 
     def __unicode__(self):
         if self.subscription:
-            return str(self.subscription)  # + " (" + str(self.event) + ")"
+            return "sub: " + str(self.subscription) + " |event:" + self.event.__unicode__()
+        elif self.event:
+            return "group: " + str(self.group) + " |event:" + self.event.__unicode__()
         else:
-            return str(self.group)  # + " (" + str(self.event) + ")"
+            return "group: " + str(self.group)
+
+    def __json__(self):
+        event_j = self.event.__json__()
+        if self.subscription:
+            #TODO: test
+            event_j['subscription'] = self.subscription.__json__()
+            #find where the event was orginal posted
+            origins = self.event.find_origins()
+            event_j["origin"] = [origin.__json__() for origin in origins]
+        else:
+            event_j["origin"] = [self.group.__json__()]
+        return event_j
 
 
 class Verbiage(models.Model):
