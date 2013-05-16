@@ -93,17 +93,17 @@ class AbstractGroup(emObject):
         :returns: @todo
 
         """
-        if user and user.is_authenticated():
-            usergroup = user.usergroup
+        if user and Subscription.objects.filter(subscriber=user, publisher=self).count() > 0:
+            subscribed = True
         else:
-            usergroup = None
+            subscribed = False
 
         subs = None
         #TODO: check viewing permission
         #permissions = get_perms(user, self)
         #if self.posting_option == "open":
         #    permissions.append("add_event")
-        if self.visibility == 'public' or self == usergroup:
+        if self.visibility == 'public' or self.usergroup == user:
             subscriptions = Subscription.objects.filter(subscriber=self)
             subs = [sub.__json__() for sub in subscriptions]
 
@@ -113,7 +113,7 @@ class AbstractGroup(emObject):
             "groupType": self.get_type(),
             "description": self.description,
             "subscriptions": subs,
-         #   "permissions": permissions
+            "subscribed": subscribed
         }
 
     def get_title(self):
@@ -124,7 +124,7 @@ class AbstractGroup(emObject):
         elif hasattr(self, 'feedgroup'):
             return self.feedgroup.title
         else:
-            return self.description
+            return self.title
 
     def get_type(self):
         if hasattr(self, 'group'):

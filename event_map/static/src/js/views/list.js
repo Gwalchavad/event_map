@@ -7,6 +7,7 @@ define([
     'moment',
     'utils',
     'views/map',
+    'models/events',
     'jade!../../templates/event_list',
     'jade!../../templates/event_list_empty',
     'jade!../../templates/item_open',
@@ -21,6 +22,7 @@ define([
         moment,
         utils,
         map,
+        EventModel,
         temp_event_list,
         temp_event_list_empty,
         temp_item_open,
@@ -39,6 +41,8 @@ define([
             openHeight: 38,
             nowFound: false,
             colorEvents: true, //do we want to color the events?
+            _currentFilter: null,
+            _unfilteredList: null,
             _markers: [], //store referance to makers SO that the zindex can be changed
             _eventsInView: [],
             _eventsViewed: [],
@@ -75,6 +79,7 @@ define([
                 map.map.on("popupopen", this.onPopupOpen);
                 map.map.on('locationfound', this.onLocationFound, this);
                 this.baseFragment =  Backbone.history.fragment.split("?")[0];
+                this._unfilteredList = this.model.toJSON();
             },
             onMarkerClick: function (e) {
                 this.eventItemOpen(e.target.options.modelID);
@@ -158,6 +163,8 @@ define([
                 //compute the vaules for open and close
                 //this is also compute on render becuase model appended are not
                 //a refence to models in the collection
+
+                this._unfilteredlist = this.model.toJSON();
                 var location_point = model.get("location_point"),
                 index = this.model.indexOf(model),
                 start_time = model.get("start_datetime").format("h:mm A"),
@@ -198,7 +205,14 @@ define([
                         .html($('#svg svg').clone())
                         .addClass("hidden");
                 }
-                this.renderEvent(index, model);
+                //test to see if the event is filtered or not.
+                if(this._currentFilter) {
+                    if(this._currentFilter(model)) {
+                        this.renderEvent(index, model);
+                    }
+                }else{
+                    this.renderEvent(index, model);
+                }
             },
 
             onLocationFound: function (e) {
@@ -416,6 +430,18 @@ define([
                     }
                     return this;
                 }
+            },
+            //filter the event list by a comparasion function and then rerenders
+            filterList: function(fn, unfiltered){
+                var f_events;
+                this._currentFilter = fn;
+                if(unfiltered){
+                    f_events = this._unfilteredList.filter(fn);
+                }else{
+                    f_events = this.model.filter(fn);
+                }
+                this.model = new EventModel.EventCollection(f_events);
+                this.render();
             },
             //creates the "now" line in the event list
             renderNow: function () {

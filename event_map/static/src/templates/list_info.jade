@@ -14,9 +14,10 @@
   if subscriptions
     h1 Subscriptions
     for sub in subscriptions
-      input(type="checkbox", checked="true") 
-      &nbsp; 
-      a(href="#group/#{sub.id}") &nbsp;#{sub.title}
+      div
+        input(type="checkbox", value="#{sub.id}", checked="true").subSelection 
+        &nbsp; 
+        a(href="#group/#{sub.id}") &nbsp;#{sub.title}
 
 #listOptionPanels
   div

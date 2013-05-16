@@ -333,7 +333,7 @@ class Event(View):
                 event = db.Event.objects.get(slug=kwargs['slug'])
         except ObjectDoesNotExist:
             raise ApiException("Event Not Found", 404)
-        return utils.json_response(event.to_JSON())
+        return utils.json_response(event.__json__())
 
     def put(self, request, **kwargs):
         """Modify an Event via a post based on it id"""
@@ -406,27 +406,7 @@ class Group(View):
             usergroup = request.user.usergroup
         else:
             usergroup = None
-
-        subs = None
-        #TODO: check viewing permission
-        permissions = get_perms(request.user, group.abstractgroup_ptr)
-        #TODO: add if admin?
-        if group.posting_option == "open":
-            permissions.append("add_event")
-        if group.visibility == 'public' or group == usergroup:
-            subscriptions = db.Subscription.objects.filter(subscriber=group)
-            subs = [{"title": sub.publisher.get_title(), "id": sub.publisher.id, "type": sub.publisher.get_type()} for sub in subscriptions]
-            if len(subs) == 0:
-                subs = None
-        response = {
-            "id": group.id,
-            "title": group.title,
-            "groupType": kwargs["type"],
-            "description": group.description,
-            "subscriptions": subs,
-            "permissions": permissions
-        }
-        return utils.json_response(response)
+        return utils.json_response(group.__json__(usergroup))
 
     def put(self, request, **kwargs):
         """modifiey a group"""

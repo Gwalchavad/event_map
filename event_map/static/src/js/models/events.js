@@ -28,12 +28,13 @@ define([
             content: "",
             location: "",
             location_point: "",
-            groups: ""
+            origin: []
         },
         initialize: function (options) {
             /*
              * Backbone Init
              */
+
             this.on("change:start_date", this.computeStartTimes);
             this.on("change:end_date", this.computeEndTimes);
             this.on("change:title", function () {
