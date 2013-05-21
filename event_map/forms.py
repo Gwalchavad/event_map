@@ -46,8 +46,6 @@ class EventForm(forms.ModelForm):
         model.author = self.user.usergroup
         model.published = datetime.now()
         model.save(create_sge=True)
-        import ipdb
-        ipdb.set_trace()
 
         group_id = self.cleaned_data['groups']
         if group_id != "False":
@@ -67,7 +65,6 @@ class GroupForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         model = super(GroupForm, self).save(commit=False)
-
         model.creator = self.usergroup
         model.save()
 

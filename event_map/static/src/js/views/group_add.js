@@ -39,22 +39,21 @@ define([
             e.preventDefault();
             //hide error messages
             $(".label").hide();
-            if (this.model.set(Utils.form2object("#group_add_form"))) {
-                var promise = this.model.save();
-                if (promise) {
-                    promise.error(function (response) {
-                        var errors = JSON.parse(response.responseText);
-                        _.each(errors.errors, function (error, key) {
-                                $("#" + key + "_error").show().html(error[0]);
-                            }
-                        );
+
+            var promise = this.model.save(Utils.form2object("#group_add_form"));
+            if (promise) {
+                promise.error(function (response) {
+                    var errors = JSON.parse(response.responseText);
+                    _.each(errors.errors, function (error, key) {
+                            $("#" + key + "_error").show().html(error[0]);
+                        }
+                    );
+                });
+                promise.success(function (response) {
+                    app.navigate('feed/' + self.model.id, {
+                        trigger: true
                     });
-                    promise.success(function (response) {
-                        app.navigate('feed/' + self.model.id, {
-                            trigger: true
-                        });
-                    });
-                }
+                });
             }
         },
         delete_group: function (e) {
