@@ -92,7 +92,7 @@ def import_ical(request, source):
                 request.user.usergroup.bfs_propagation(old_events)
             #raise ApiException("invalid file type", 415)
             all_events = created_events + old_events + all_events
-        return utils.json_response([event.to_JSON() for event in all_events])
+        return utils.json_response([event.__json__() for event in all_events])
     else:
         raise ApiException("invalid request type. only POST allowed", 405)
 

@@ -50,8 +50,9 @@ class EventForm(forms.ModelForm):
         ipdb.set_trace()
 
         group_id = self.cleaned_data['groups']
-        group = db.Group.objects.get(pk=group_id)
-        group.bfs_propagation(model, created=True)
+        if group_id != "False":
+            group = db.Group.objects.get(pk=group_id)
+            group.bfs_propagation(model, created=True)
         return model
 
 

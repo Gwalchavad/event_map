@@ -48,7 +48,10 @@ define([
             if(context.location_point){
                 context.location_point.lat = context.location_point.coordinates[1];
                 context.location_point.lng = context.location_point.coordinates[0];
+            }else{
+                context.location_point = {lat:0, lng:0};
             }
+
             if(context.start_date)
                 context.start_date = context.start_datetime.format("MM/DD/YYYY hh:mm a");
             if(context.end_date)

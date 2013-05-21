@@ -9,6 +9,7 @@ define(['jquery', 'backbone', 'utils', 'jade!../../templates/ical_upload'
         id: "event_view",
         initialize: function() {
             var self = this;
+            console.log("test");
             app.session.on("change", function(model) {
                 self.render();
             });

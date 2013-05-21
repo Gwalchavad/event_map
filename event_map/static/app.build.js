@@ -32,6 +32,10 @@
         {
             name: "views/event",
             exclude: ["main"]
+        },
+        {
+            name: "views/ical_upload",
+            exclude: ["main"]
         }
     ]
 })

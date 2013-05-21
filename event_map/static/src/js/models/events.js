@@ -27,8 +27,9 @@ define([
             city: "",
             content: "",
             location: "",
-            location_point: "",
-            origin: []
+            location_point: {lat: false, lng: false},
+            origin: [],
+            groups: false
         },
         initialize: function (options) {
             /*

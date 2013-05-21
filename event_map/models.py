@@ -149,8 +149,6 @@ class AbstractGroup(emObject):
         :subscription: the subscription the events are from
         """
         if events:
-            if type(events) != "list":
-                events = [events]
             if not created:
                 #if some of the events happen to be in a subscription,remove i
                 #Cuz now its going to be in the group
