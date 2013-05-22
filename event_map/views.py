@@ -207,13 +207,13 @@ class EventTimeLine(View):
         GET[group] gets all the events in a particular group
         GET[me] get all of the events in the usergroup of the current user
         """
-        sge = db.SubGroupEvent.objects.select_related('events')
+        sge = db.SubGroupEvent.objects.select_related('event')
 
         if request.GET.get('complete') and request.GET.get('complete').lower() == 'false':
-            sge  = sge.filter(event__complete=False)
+            sge = sge.filter(event__complete=False)
         else:
             sge = sge.filter(event__complete=True)
-        
+
         if request.GET.get('start'):
             #change to use actully date
             try:
@@ -242,7 +242,7 @@ class EventTimeLine(View):
             sge = sge.filter(group_id=request.GET.get('group'))
         else:
             #if aggergating accross multiple groups then select distint events
-            sge = sge.filter(subscription__isnull=True).distinct()
+            sge = sge.filter(subscription__isnull=True)
 
         if request.GET.get('offset'):
             offset = int(request.GET.get('offset'))
