@@ -11,7 +11,12 @@
     a.btn.btn-large.btn-block.btn-primary(href='#add/event?groups=#{title}&id=#{id}', type='button') Add Event
 
 #subscriptions
-  if subscriptions
+  if show_subscribed
+    if subscribed
+      button#subscribe.btn Unsubscribe
+    else
+      button#subscribe.btn Subscribe
+  if subscriptions && subscriptions.length > 0
     h1 Subscriptions
     for sub in subscriptions
       div
@@ -22,3 +27,13 @@
 #listOptionPanels
   div
     a(href='#{icalURL}', target='_blank') Export
+
+.modal.hide.fade#subscribeModel(tabindex='-1', role="dialog", aria-labelledby="myModalLabel", aria-hidden="true")
+  .modal-header
+    button(type="button", data-dismiss="modal").close x
+    h3  Subscribe
+  .modal-body
+    select(data-placeholder="My Events", multiple="true").chzn-select
+      option(selected="true") My Events
+  .modal-footer
+    button.btn.btn-primary Save Changes

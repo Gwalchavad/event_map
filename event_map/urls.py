@@ -21,7 +21,7 @@ urlpatterns = patterns(
     #ical uploader
     url(r'^upload$', views.upload_file),
     url(r'^import$', views.import_url),
-    url(r'^serverTime', views.getTime),
+    url(r'^serverTime', views.get_time),
     #hub
     url(r'^hub/', include('django_push.hub.urls'), name="subhub-hub"),
     #callback

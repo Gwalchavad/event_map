@@ -2,23 +2,21 @@
 API Views for Event Map
 Extecpt for index all of the classes are for the API.
 """
-from django.template import RequestContext
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.generic.base import View
 from django.contrib.auth import authenticate, logout, login as auth_login
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.utils.decorators import method_decorator
+from django.template import RequestContext
 from django.shortcuts import render_to_response
+from django.utils.decorators import method_decorator
 from django.utils import timezone as tz
-from datetime import datetime
-import dateutil.parser
-import itertools
-import json
+from django.views.generic.base import View
+from django.views.decorators.csrf import ensure_csrf_cookie
 from event_map import utils, forms, models as db
 from event_map.utils import json_api_errors, ApiException
 from feed_import import importers
-from guardian.shortcuts import assign_perm
-from guardian.shortcuts import get_perms
+from guardian.shortcuts import assign_perm, get_objects_for_user
+from datetime import datetime
+import dateutil.parser
+import json
 
 
 @ensure_csrf_cookie
@@ -27,23 +25,10 @@ def index(request):
     Generates the index. Loads the page with an initial list of event
     and get the initail session status for the user
     """
-    begin = datetime.now()
-    init_events = db.Event.objects.\
-        filter(start_date__gte=begin, complete=True).\
-        order_by('start_date', 'start_date_index')[:20]
-
-    response = [event.__json__() for event in init_events]
     description = db.Verbiage.get(name="description")
-    jsonevents = json.dumps(response, default=utils.clean_data)
-    init_session = {
-        'authenticated': request.user.is_authenticated(),
-        'username': request.user.username,
-        'id': request.user.id
-    }
-    jsonsession = json.dumps(init_session, default=utils.clean_data)
     init_group = {
         "title": "All Events",
-        "groupType": "All",
+        "type": "All",
         "description": description,
         "icalURL": "ical/all.ical",
         "subscriptions": None,
@@ -53,10 +38,10 @@ def index(request):
     return render_to_response(
         'base.html',
         {
-            'events': jsonevents,
-            'session': jsonsession,
+            'events': EventTimeLine.as_view()(request).content,
+            'session': Session.as_view()(request).content,
             'group': jsongroup,
-            'serverTimeTz': utils.cal_time(tz.now()),
+            'server_time_tz': get_time().content,
         },
         context_instance=RequestContext(request))
 
@@ -97,7 +82,7 @@ def import_ical(request, source):
         raise ApiException("invalid request type. only POST allowed", 405)
 
 
-def getTime(request):
+def get_time(request=None):
     """@todo: Docstring for getTime
 
     :request: @todo
@@ -107,20 +92,29 @@ def getTime(request):
     return utils.json_response({"datetime": tz.now()})
 
 
-class Session(View):
+class ApiView(View):
+    @method_decorator(json_api_errors)
+    def dispatch(self, *args, **kwargs):
+        return super(ApiView, self).dispatch(*args, **kwargs)
+
+
+class Session(ApiView):
     """
     Log In, Log out and check the session
     """
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(Session, self).dispatch(*args, **kwargs)
-
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
         """
         check the users status, and we need to send the csrf cookie.
         """
+        if request.user.is_authenticated():
+            admin_groups = get_objects_for_user(request.user, "event_map.group_admin")
+            admin_groups = [group.__json__() for group in admin_groups]
+        else:
+            admin_groups = "null"
+
         return utils.json_response({
+            'admin_groups': admin_groups,
             'authenticated': request.user.is_authenticated(),
             'username': request.user.username,
             'id': request.user.id})
@@ -138,10 +132,7 @@ class Session(View):
             if user.is_active:
                 #log user in
                 auth_login(request, user)
-                return utils.json_response({
-                    'authenticated': True,
-                    'username': username,
-                    'id': user.id})
+                return self.get(request)
             else:
                 # Return a 'disabled account' error message
                 raise ApiException("You have been banned. FOADUMF!", 401)
@@ -158,12 +149,8 @@ class Session(View):
         })
 
 
-class EventUser(View):
+class EventUser(ApiView):
     """API for user manpulation"""
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(EventUser, self).dispatch(*args, **kwargs)
-
     def post(self, request):
         """Create a new user"""
         json_post = json.loads(request.raw_post_data)
@@ -188,15 +175,11 @@ class EventUser(View):
             raise ApiException(utils.form_errors_to_json(form), 401)
 
 
-class EventTimeLine(View):
+class EventTimeLine(ApiView):
     """
     get events
     offset is the strating index
     """
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(EventTimeLine, self).dispatch(*args, **kwargs)
-
     def get(self, request):
         """
         Gets a list of events.
@@ -251,100 +234,87 @@ class EventTimeLine(View):
 
         if request.GET.get('n'):
             end = int(request.GET.get('n'))
-            #example end=1
-            if offset >= 0:
-                #3, 4 works
-                if end >= 0:
-                    sge = sge.\
-                        filter(event__start_date__gte=begin).\
-                        order_by('event__start_date', 'event__start_date_index')[offset: offset + end]
-                #3 -2 works
-                elif offset + end >= 0:
-                    sge = sge.\
-                        filter(event__start_date__gte=begin).\
-                        order_by('event__start_date', 'event__start_date_index')[offset + end: offset]
-                    sge = list(sge)
-                    sge.reverse()
-                #3 - 5 works
-                else:
-                    before_sge = sge.\
-                        filter(event__start_date__lte=begin).\
-                        order_by('-event__start_date', '-event__start_date_index')[:abs(offset + end)]
-                    sge = sge.\
-                        filter(event__start_date__gte=begin).\
-                        order_by('event__start_date', 'event__start_date_index')[:offset]
-                    sge = list(sge)
-                    sge.reverse()
-                    sge.extend(before_sge)
-            #-1,
-            else:
-                #-1 -5
-                if end <= 0:
-                    sge = sge.\
-                        filter(event__start_date__lte=begin).\
-                        order_by('-event__start_date', '-event__start_date_index')[abs(offset): abs(offset + end)]
-                #-1, 4
-                elif end + offset >= 0:
-                    after_sge = sge.\
-                        filter(event__start_date__gte=begin).\
-                        order_by('event__start_date', 'event__start_date_index')[:abs(end + offset)]
-                    sge = sge.\
-                        filter(event__start_date__lte=begin).\
-                        order_by('-event__start_date', '-event__start_date_index')[:abs(offset)]
-                    sge = list(sge)
-                    sge.reverse()
-                    sge.extend(sge)
-                #-10 6
-                else:
-                    sge = sge.\
-                        filter(event__start_date__lte=begin).\
-                        order_by('-event__start_date', '-event__start_date_index')[abs(offset + end): abs(offset)]
-                    sge = list(sge)
-                    sge.reverse()
         else:
-            #todo specify defaults
-            if offset < 0:
-                before_sge = sge.filter(event__start_date__lte=begin).order_by('-event__start_date', '-event__start_date_index')[:abs(offset)]
-                after_sge = sge.filter(event__start_date__gte=begin).order_by('event__start_date', 'event__start_date_index')
-                sge = list(itertools.chain(before_sge.reverse(), after_sge))
+            end = 20
+        #example end=1
+        if offset >= 0:
+            #3, 4 works
+            if end >= 0:
+                sge = sge.\
+                    filter(event__start_date__gte=begin).\
+                    order_by('event__start_date', 'event__start_date_index')[offset: offset + end]
+            #3 -2 works
+            elif offset + end >= 0:
+                sge = sge.\
+                    filter(event__start_date__gte=begin).\
+                    order_by('event__start_date', 'event__start_date_index')[offset + end: offset]
+                sge = list(sge)
+                sge.reverse()
+            #3 - 5 works
             else:
-                sge = sge.filter(event__start_date__gte=begin)[offset:]
+                before_sge = sge.\
+                    filter(event__start_date__lte=begin).\
+                    order_by('-event__start_date', '-event__start_date_index')[:abs(offset + end)]
+                sge = sge.\
+                    filter(event__start_date__gte=begin).\
+                    order_by('event__start_date', 'event__start_date_index')[:offset]
+                sge = list(sge)
+                sge.reverse()
+                sge.extend(before_sge)
+        #-1,
+        else:
+            #-1 -5
+            if end <= 0:
+                sge = sge.\
+                    filter(event__start_date__lte=begin).\
+                    order_by('-event__start_date', '-event__start_date_index')[abs(offset): abs(offset + end)]
+            #-1, 4
+            elif end + offset >= 0:
+                after_sge = sge.\
+                    filter(event__start_date__gte=begin).\
+                    order_by('event__start_date', 'event__start_date_index')[:abs(end + offset)]
+                sge = sge.\
+                    filter(event__start_date__lte=begin).\
+                    order_by('-event__start_date', '-event__start_date_index')[:abs(offset)]
+                sge = list(sge)
+                sge.reverse()
+                sge.extend(after_sge)
+            #-10 6
+            else:
+                sge = sge.\
+                    filter(event__start_date__lte=begin).\
+                    order_by('-event__start_date', '-event__start_date_index')[abs(offset + end): abs(offset)]
+                sge = list(sge)
+                sge.reverse()
         return utils.json_response([_sge.__json__() for _sge in sge])
 
 
 
-class Event(View):
+class Event(ApiView):
     """
     API for get, setting and deleting events
     """
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(Event, self).dispatch(*args, **kwargs)
+    def get_event(self, kwargs):
+        try:
+            if 'id' in kwargs:
+                return db.Event.objects.get(id=kwargs['id'])
+            else:
+                return db.Event.objects.get(slug=kwargs['slug'])
+        except ObjectDoesNotExist:
+            raise ApiException("Event Not Found", 404)
 
     def get(self, request, **kwargs):
         """
         Get An Events Details given its ID
         OR slug
         """
-        try:
-            if 'id' in kwargs:
-                event = db.Event.objects.get(id=kwargs['id'])
-            else:
-                event = db.Event.objects.get(slug=kwargs['slug'])
-        except ObjectDoesNotExist:
-            raise ApiException("Event Not Found", 404)
+        event = self.get_event(kwargs)
         return utils.json_response(event.__json__())
 
     def put(self, request, **kwargs):
         """Modify an Event via a post based on it id"""
         json_post = json.loads(request.raw_post_data)
-        try:
-            if 'id' in kwargs:
-                event = db.Event.objects.get(id=kwargs['id'])
-            else:
-                event = db.Event.objects.get(slug=kwargs['slug'])
-        except ObjectDoesNotExist:
-            raise ApiException("Event Not Found", 404)
+        event = self.get_event(kwargs)
         if event.author.user == request.user:
             form = forms.EventForm(request.user, json_post, instance=event)
             if form.is_valid():
@@ -384,12 +354,7 @@ class Event(View):
             raise ApiException("Event Not Found", 404)
 
 
-class Group(View):
-    """API For groups"""
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(Group, self).dispatch(*args, **kwargs)
-
+class Group(ApiView):
     def get(self, request, **kwargs):
         """Get info about a group"""
         def getGroup(groupType):
@@ -461,12 +426,8 @@ class Group(View):
         raise ApiException("NOT Implemented", 401)
 
 
-class FeedView(View):
+class FeedView(ApiView):
     """API For groups"""
-    #@method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(FeedView, self).dispatch(*args, **kwargs)
-
     def get(self, request, **kwargs):
         """Get info about a feed"""
         group = db.Group.objects.get(id=kwargs['id'])
@@ -502,12 +463,7 @@ class FeedView(View):
         raise ApiException("NOT Implemented", 401)
 
 
-class Subscription(View):
-
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(Subscription, self).dispatch(*args, **kwargs)
-
+class Subscription(ApiView):
     """Manage subscriptions to groups"""
     def get(self, request):
         """get a list of subscriptions"""
@@ -519,12 +475,7 @@ class Subscription(View):
         """delete a subscription"""
 
 
-class Notifications(View):
-
-    @method_decorator(json_api_errors)
-    def dispatch(self, *args, **kwargs):
-        return super(Notifications, self).dispatch(*args, **kwargs)
-
+class Notifications(ApiView):
     """Recieve and mark read Notifications"""
     def get(self, request):
         """get Notifications"""

@@ -13,7 +13,8 @@ define([
         className: "replace span3",
         id: "calender",
         events: {
-            "click #editProfile": "editProfile"
+            "click #editProfile": "editProfile",
+            "click #subscribe": "subscribe"
         },
         childrenEL: "#listOptionPanels",
         initialize: function (options) {
@@ -22,10 +23,16 @@ define([
         render: function () {
             var self = this;
             function _render() {
+                var groups = app.session.get("admin_groups");
                 var editable = null;
                 var title;
                 var permissions = self.model.get("permissions");
                 var true_array = [];
+                if(groups){
+                    for(var i=0; i < groups.length; i++){
+                        groups = i;
+                    }
+                }
                 for (var i = 0; i < permissions.length; i++) {
                     true_array[i] = true;
                 }
@@ -33,7 +40,7 @@ define([
                 if (permissions.group_admin) {
                     permissions.add_event = true;
                 }
-               
+
                 self.model.set("permissions", permissions);
                 //if any user, group or feed is being viewed
                 if (self.model) {
@@ -77,6 +84,10 @@ define([
             self.model.set("description", $("#description").val());
             self.model.save();
             self.closeEditor(e);
+        },
+        subscribe: function (e) {
+            $('#subscribeModel').modal();
+            $(".chzn-select").chosen();
         }
     });
     return ListInfoView;

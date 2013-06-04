@@ -1,4 +1,4 @@
-/*global define*/
+/*global define, app*/
 define([
     'underscore',
     'backbone'
@@ -15,10 +15,14 @@ define([
             description: "",
             visibility: "",
             posting_option: "",
+            subscribed: false,
+            show_subscribed: false,
             permissions: []
         },
         initialize: function (options) {
-
+            if(app.session.is_authenticated() && this.get("type") != "All"){
+                this.set("show_subscribed", true);
+            }
         },
         validate: function (attrs) {
             var errors = {};

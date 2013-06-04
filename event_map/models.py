@@ -1,13 +1,13 @@
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from autoslug import AutoSlugField
 import uuid
 import django_push.hub
 import feed_import.models as fi_db
-from guardian.shortcuts import get_perms
 
 
 def generate_uuid():
@@ -20,6 +20,15 @@ def has_changed(instance, field):
         return False
     old_value = instance.__class__._default_manager.filter(pk=instance.pk).values(field).get()[field]
     return not getattr(instance, field) == old_value
+
+
+def checkattr(obj, attr):
+    try:
+        returnVal = getattr(obj, attr)
+    except (ObjectDoesNotExist, AttributeError) as e:
+        returnVal = False
+
+    return returnVal
 
 
 class emObject(models.Model):
@@ -87,7 +96,7 @@ class AbstractGroup(emObject):
         return self.description
 
     def __json__(self, user=None):
-        """@todo: Docstring for to_JSON
+        """@todo: Docstring for __json__
 
         :arg1: @todo
         :returns: @todo
@@ -103,7 +112,7 @@ class AbstractGroup(emObject):
         #permissions = get_perms(user, self)
         #if self.posting_option == "open":
         #    permissions.append("add_event")
-        if self.visibility == 'public' or self.usergroup == user:
+        if self.visibility == 'public' or user and self.id == user.id:
             subscriptions = Subscription.objects.filter(subscriber=self)
             subs = [sub.__json__() for sub in subscriptions]
 
@@ -117,14 +126,16 @@ class AbstractGroup(emObject):
         }
 
     def get_title(self):
-        if hasattr(self, 'group'):
+        if checkattr(self, 'group'):
             return self.group.title
-        elif hasattr(self, 'usergroup'):
+        elif checkattr(self, 'usergroup'):
             return self.usergroup.title
-        elif hasattr(self, 'feedgroup'):
+        elif checkattr(self, 'feedgroup'):
             return self.feedgroup.title
-        else:
+        elif checkattr(self, 'title'):
             return self.title
+        else:
+            return None
 
     def get_type(self):
         if hasattr(self, 'group'):
