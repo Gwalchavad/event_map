@@ -102,9 +102,4 @@ class SignUpForm(forms.Form):
         password = self.cleaned_data.get('password')
         email = self.cleaned_data.get('email')
         user = User.objects.create_user(username, email, password)
-        #create an user group
-        userGroup = db.UserGroup(user=user, title=username)
-        userGroup.save()
-        #give user admin privelages to thier profile group
-        #assign_perm("group_admin", user, userGroup.abstractgroup_ptr)
         return user

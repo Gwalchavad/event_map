@@ -22,10 +22,6 @@ urlpatterns = patterns(
     url(r'^upload$', views.upload_file),
     url(r'^import$', views.import_url),
     url(r'^serverTime', views.get_time),
-    #hub
-    url(r'^hub/', include('django_push.hub.urls'), name="subhub-hub"),
-    #callback
-    url(r'^callback/', include('django_push.subscriber.urls'), name="subhub-hub"),
     #api
     url(r'^api/user$', views.EventUser.as_view()),
     url(r'^api/session$', views.Session.as_view()),
@@ -36,6 +32,5 @@ urlpatterns = patterns(
     url(r'^api/group$', views.Group.as_view()),
     url(r'^api/group/(?P<type>[-_\d\w]+)$', views.Group.as_view()),
     url(r'^api/group/(?P<type>[-_\d\w]+)/(?P<title>[-_\d\w]+)$', views.Group.as_view()),
-    url(r'^api/feed$', views.FeedView.as_view()),
     url(r'^api/notifications$', views.Notifications.as_view()),
 )

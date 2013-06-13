@@ -104,8 +104,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'event_map.urls'
@@ -113,11 +111,6 @@ ROOT_URLCONF = 'event_map.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'event_map.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -141,33 +134,13 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
     'django.contrib.admin',
     'django.contrib.gis',
-    'django.contrib.markup',
     'guardian',
-    'django_push.hub',
-    'django_push.subscriber',
     'event_map',
     'feed_import',
     'south'
 
 ]
 
-# Do you want to run celery? this controlls all of modules that pull data from extranal sources.
-ENABLE_CELERY = True
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-#CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-#CELERY_TASK_SERIALIZER = 'json'
-#CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ENABLE_UTC = True
-CELERY_TASK_RESULT_EXPIRES = 3600
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-if ENABLE_CELERY:
-    INSTALLED_APPS += ('djcelery',)
-    import djcelery
-    djcelery.setup_loader()
-
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 LOGGING = {
@@ -203,6 +176,3 @@ try:
     from settings_local import *
 except ImportError, e:
     pass
-
-#
-#./manage.py collectstatic

@@ -39,7 +39,7 @@
 		<script type="text/javascript">
             var init_events = {{events|safe|escape}},
             init_user = {{session|safe|escape}},
-            server_time_tz = "{{serverTimeTz}}",
+            server_time_tz = {{server_time_tz|safe|escape}},
             intro_text = "{{verbiage.description}}",
             init_group = {{group|safe|escape}};
 		</script>

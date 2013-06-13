@@ -445,7 +445,7 @@ define([
             },
             //creates the "now" line in the event list
             renderNow: function () {
-                var time = server_time_tz.substr(0, 19),
+                var time = server_time_tz.datetime.substr(0, 19),
                 index = this.model.binarySearch(moment(time), "start_datetime");
                 if (index > 0) {
                     this.colorEvents = true;

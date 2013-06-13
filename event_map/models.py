@@ -6,7 +6,6 @@ from django.contrib.sites.models import Site
 from django.db.models import Q
 from autoslug import AutoSlugField
 import uuid
-import django_push.hub
 import feed_import.models as fi_db
 
 
@@ -230,9 +229,11 @@ class Group(AbstractGroup):
     creator = models.ForeignKey(
         UserGroup)
     title = models.CharField(
-        unique=True,
         max_length=255,
         help_text=""" the name of the group""")
+    slug = AutoSlugField(
+        populate_from='title',
+        unique=True)
 
 
 class FeedGroup(AbstractGroup):
@@ -371,12 +372,6 @@ class Event(emObject):
         if 'create_sge' in kwargs and kwargs['create_sge']:
             sge = SubGroupEvent(event=self, group=self.author)
             sge.save()
-        django_push.hub.publish(
-            ['http://%s%s' % (Site.objects.get_current().domain,
-                              reverse("subhub-hub"))],
-            'http://%s%s' % (Site.objects.get_current().domain,
-                             self.get_absolute_url()),
-        )
 
 
 class Subscription(models.Model):

@@ -178,7 +178,7 @@ class EventUser(ApiView):
 class EventTimeLine(ApiView):
     """
     get events
-    offset is the strating index
+    offset is the starting index
     """
     def get(self, request):
         """
@@ -186,7 +186,7 @@ class EventTimeLine(ApiView):
         GET[n] specifies the number of events
         GET[start] Where to start getting the events from
         GET[offset] How many events to skip
-        GET[Author] selects events by the an authors username
+        GET[author] selects events by the an authors username
         GET[group] gets all the events in a particular group
         GET[me] get all of the events in the usergroup of the current user
         """
@@ -426,53 +426,19 @@ class Group(ApiView):
         raise ApiException("NOT Implemented", 401)
 
 
-class FeedView(ApiView):
-    """API For groups"""
-    def get(self, request, **kwargs):
-        """Get info about a feed"""
-        group = db.Group.objects.get(id=kwargs['id'])
-        permission = group.permission_set.all().get(user=request.user)
-        permission_json = {
-            "admin": permission.admin,
-            "read": permission.read,
-            "write": permission.write,
-            "banned": permission.banned,
-        }
-        response = {
-            "id": group.id,
-            "title": group.title,
-            "description": group.description,
-            "permissions": permission_json
-        }
-        return utils.json_response(response)
-
-    def put(self, request, **kwargs):
-        """modifiey a feed"""
-        raise ApiException("NOT Implemented", 401)
-
-    def post(self, request):
-        """create an a feed"""
-        from feed_import import importers
-        json_post = json.loads(request.raw_post_data)
-        imported_feed = importers.add_feed(json_post['url'], request.user)
-        if imported_feed:
-            return utils.json_response({'message': 'feed imported'})
-
-    def delete(self, request):
-        """delete a group"""
-        raise ApiException("NOT Implemented", 401)
-
-
 class Subscription(ApiView):
     """Manage subscriptions to groups"""
     def get(self, request):
         """get a list of subscriptions"""
+        raise ApiException("NOT Implemented", 401)
 
     def post(self, request):
         """create a new subscription"""
+        raise ApiException("NOT Implemented", 401)
 
     def delete(self, request):
         """delete a subscription"""
+        raise ApiException("NOT Implemented", 401)
 
 
 class Notifications(ApiView):
@@ -484,3 +450,5 @@ class Notifications(ApiView):
 
     def put(self, request):
         """Mark read Notifications"""
+        raise ApiException("NOT Implemented", 401)
+

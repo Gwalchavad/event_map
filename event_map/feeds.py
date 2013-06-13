@@ -7,7 +7,6 @@ from django.contrib.syndication.views import Feed
 from event_map import models as db
 from django.contrib.gis.geos import Polygon
 from django_ical.views import ICalFeed
-import django_push.publisher.feeds as HubFeed
 from datetime import datetime
 
 
@@ -56,7 +55,7 @@ class groupFeed(geoFeed):
             return events
 
 
-class atomAllFeed(groupFeed, HubFeed.Feed):
+class atomAllFeed(groupFeed):
     title_prefix = "event_Map's New Events"
     link = "/"
     description_template = "atom.html"
@@ -87,7 +86,7 @@ class atomAllFeed(groupFeed, HubFeed.Feed):
         return self.title_prefix + ((" At " + self.bounds) if self.bounds else "")
 
 
-class atomAllFeedHistorical(geoFeed, HubFeed.Feed):
+class atomAllFeedHistorical(geoFeed):
     def get_object(self, request, user):
         user = db.User.objects.get(username=user)
 
